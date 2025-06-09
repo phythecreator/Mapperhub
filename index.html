@@ -1,47 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>MapperHub</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mappers Hub</title>
   <style>
     body {
       margin: 0;
-      background-color: #0d1117;
-      color: #ffffff;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0e0e0e;
+      color: #fff;
+    }
+    header {
+      background: #1a73e8;
+      padding: 20px;
       text-align: center;
+      font-size: 2em;
+      font-weight: bold;
     }
-    h1 {
-      font-size: 3rem;
+    .search {
+      text-align: center;
+      padding: 10px;
     }
-    p {
-      font-size: 1.2rem;
+    .search input {
+      padding: 10px;
+      width: 300px;
+      font-size: 1em;
     }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 1rem;
-      background-color: #238636;
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 15px;
+      width: 220px;
+      text-align: center;
+      box-shadow: 0 0 10px #1a73e8;
+    }
+    .card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .follow-btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #1a73e8;
       border: none;
+      border-radius: 6px;
       color: white;
       cursor: pointer;
-      border-radius: 8px;
     }
-    button:hover {
-      background-color: #2ea043;
+    .section {
+      margin: 40px 0;
+      text-align: center;
+    }
+    .bio-generator select,
+    .bio-generator button {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 6px;
+    }
+    .quiz {
+      text-align: left;
+      max-width: 700px;
+      margin: auto;
+    }
+    .quiz label {
+      display: block;
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <div>
-    <h1>Welcome to MapperHub 🌍</h1>
-    <p>The ultimate hub for Instagram mapping creators.</p>
-    <button onclick="document.documentElement.requestFullscreen()">🔳 Enter Fullscreen</button>
+  <header>Mappers Hub</header>
+  <div class="search">
+    <input type="text" id="searchInput" placeholder="Search mappers...">
   </div>
+  <div class="container" id="mapperContainer"></div>
+
+  <div class="section">
+    <h2>Bio Generator 🧠</h2>
+    <div class="bio-generator">
+      <select id="style">
+        <option value="🧭 Map enthusiast">🧭 Map enthusiast</option>
+        <option value="🌍 Facts explorer">🌍 Facts explorer</option>
+        <option value="🗺️ Border enjoyer">🗺️ Border enjoyer</option>
+        <option value="🎥 Reels creator">🎥 Reels creator</option>
+        <option value="📊 Geo-data lover">📊 Geo-data lover</option>
+      </select>
+      <select id="region">
+        <option value="Europe">Europe</option>
+        <option value="Asia">Asia</option>
+        <option value="Middle East">Middle East</option>
+        <option value="Latin America">Latin America</option>
+        <option value="World">World</option>
+      </select>
+      <select id="special">
+        <option value="Making history visual">Making history visual</option>
+        <option value="Borders and vibes only">Borders and vibes only</option>
+        <option value="I color maps so you don't have to">I color maps so you don't have to</option>
+        <option value="The cartography chaos you need">The cartography chaos you need</option>
+        <option value="Geo-memes included">Geo-memes included</option>
+      </select>
+      <select id="emoji">
+        <option value="🧭">🧭</option>
+        <option value="🗺️">🗺️</option>
+        <option value="🌎">🌎</option>
+        <option value="🇺🇳">🇺🇳</option>
+        <option value="📌">📌</option>
+      </select>
+      <br>
+      <button onclick="generateBio()">Generate Bio</button>
+      <p id="bioOutput"></p>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Geo Quiz 🌏</h2>
+    <form class="quiz" onsubmit="return checkAnswers()">
+      <div id="quizContainer"></div>
+      <button type="submit">Submit Answers</button>
+    </form>
+    <p id="quizResult"></p>
+  </div>
+
+  <script>
+    const mappers = [
+      { username: "@czechiamapper", img: "https://i.imgur.com/BQSmYm7.jpeg" },
+      { username: "@tugamapper", img: "https://i.imgur.com/NRNdjJh.jpeg" },
+      { username: "@central_europe_mapper", img: "https://i.imgur.com/upCUXT3.jpeg" },
+      { username: "@mapping_brasilien", img: "https://i.imgur.com/neCO15z.jpeg" },
+      { username: "@syrianmapper1290", img: "https://i.imgur.com/UrYca0s.jpeg" },
+      { username: "@mapper_from_mus", img: "https://i.imgur.com/CB7XClv.jpeg" },
+      { username: "@srbinje.mapping47", img: "https://i.imgur.com/o0yRM4x.jpeg" },
+      { username: "@yescartography", img: "https://i.imgur.com/tuOgajQ.jpeg" },
+      { username: "@morocco.mapper.1028", img: "https://i.imgur.com/rlA5fs7.jpeg" },
+      { username: "@deutscher.kartograf", img: "https://i.imgur.com/6GltLVc.png" },
+      { username: "@trailz_mapper", img: "https://i.imgur.com/RSjU001.jpeg" },
+      { username: "@libya_maps_17", img: "https://i.imgur.com/JTTuuUc.jpeg" },
+      { username: "@castilian.mapper", img: "https://i.imgur.com/ULqoU7g.jpeg" }
+    ];
+
+    function renderMappers(filter = '') {
+      const container = document.getElementById("mapperContainer");
+      container.innerHTML = '';
+      mappers.filter(m => m.username.toLowerCase().includes(filter.toLowerCase())).forEach(m => {
+        container.innerHTML += `
+          <div class="card">
+            <img src="${m.img}" alt="${m.username}">
+            <p>${m.username}</p>
+            <a href="https://instagram.com/${m.username.replace('@', '')}" target="_blank">
+              <button class="follow-btn">Follow</button>
+            </a>
+          </div>`;
+      });
+    }
+
+    document.getElementById("searchInput").addEventListener("input", e => renderMappers(e.target.value));
+    renderMappers();
+
+    function generateBio() {
+      const style = document.getElementById("style").value;
+      const region = document.getElementById("region").value;
+      const special = document.getElementById("special").value;
+      const emoji = document.getElementById("emoji").value;
+      document.getElementById("bioOutput").innerText = `${emoji} ${style} | ${region} focus | ${special}`;
+    }
+
+    const questions = [
+      { q: "What is the largest country in Europe by area?", a: "Russia" },
+      { q: "Which Asian country has the most islands?", a: "Indonesia" },
+      { q: "What river flows through Budapest?", a: "Danube" },
+      { q: "Which European city is known as the 'Eternal City'?", a: "Rome" },
+      { q: "What mountain range separates Europe and Asia?", a: "Ural" },
+      { q: "Which country has the city of Tbilisi?", a: "Georgia" },
+      { q: "What is the smallest country in Europe?", a: "Vatican" },
+      { q: "Which sea lies between Europe and Africa?", a: "Mediterranean" },
+      { q: "Capital of Kazakhstan?", a: "Astana" },
+      { q: "Where is Mount Ararat located?", a: "Turkey" },
+      { q: "Which country has a red flag with a white cross?", a: "Switzerland" },
+      { q: "What country is known as the Land of the Rising Sun?", a: "Japan" },
+      { q: "Which country has the city of Kraków?", a: "Poland" },
+      { q: "Which river is longest in Asia?", a: "Yangtze" },
+      { q: "Which country has Baku as its capital?", a: "Azerbaijan" },
+    ];
+
+    const quizContainer = document.getElementById("quizContainer");
+    questions.forEach((q, i) => {
+      quizContainer.innerHTML += `<label>${i+1}. ${q.q}<br><input type="text" id="q${i}" /></label>`;
+    });
+
+    function checkAnswers() {
+      let score = 0;
+      questions.forEach((q, i) => {
+        const userAnswer = document.getElementById(`q${i}`).value.trim().toLowerCase();
+        if (userAnswer === q.a.toLowerCase()) score++;
+      });
+      document.getElementById("quizResult").innerText = `You scored ${score} out of ${questions.length}!`;
+      return false;
+    }
+  </script>
 </body>
 </html>
 
