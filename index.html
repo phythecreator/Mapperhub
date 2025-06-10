@@ -1,212 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mappers Hub</title>
+  <meta charset="UTF-8">
+  <title>Geo Quiz - Mapperhub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #0e0e0e;
-      color: #fff;
-    }
-    header {
-      background: #1a73e8;
-      padding: 20px;
-      text-align: center;
-      font-size: 2em;
-      font-weight: bold;
-    }
-    .search {
-      text-align: center;
-      padding: 10px;
-    }
-    .search input {
-      padding: 10px;
-      width: 300px;
-      font-size: 1em;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
     }
     .container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
     }
-    .card {
-      background: #1e1e1e;
-      border-radius: 12px;
-      padding: 15px;
-      width: 220px;
+    h1 {
       text-align: center;
-      box-shadow: 0 0 10px #1a73e8;
+      color: #0f172a;
     }
-    .card img {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      object-fit: cover;
+    .question {
+      background: #fff;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
     }
-    .follow-btn {
-      margin-top: 10px;
-      padding: 8px 16px;
-      background-color: #1a73e8;
-      border: none;
-      border-radius: 6px;
-      color: white;
+    .question h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
       cursor: pointer;
     }
-    .section {
-      margin: 40px 0;
-      text-align: center;
+    input[type="radio"] {
+      margin-right: 0.5rem;
     }
-    .bio-generator select,
-    .bio-generator button {
-      padding: 8px;
-      margin: 5px;
-      border-radius: 6px;
-    }
-    .quiz {
-      text-align: left;
-      max-width: 700px;
-      margin: auto;
-    }
-    .quiz label {
+    .submit-btn {
       display: block;
-      margin-bottom: 10px;
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.2rem;
+      background-color: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .result {
+      display: none;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-top: 2rem;
+    }
+    .show {
+      display: block;
     }
   </style>
 </head>
 <body>
-  <header>Mappers Hub</header>
-  <div class="search">
-    <input type="text" id="searchInput" placeholder="Search mappers...">
-  </div>
-  <div class="container" id="mapperContainer"></div>
+  <div class="container">
+    <h1>🌍 Geography Quiz</h1>
+    <form id="quizForm">
 
-  <div class="section">
-    <h2>Bio Generator 🧠</h2>
-    <div class="bio-generator">
-      <select id="style">
-        <option value="🧭 Map enthusiast">🧭 Map enthusiast</option>
-        <option value="🌍 Facts explorer">🌍 Facts explorer</option>
-        <option value="🗺️ Border enjoyer">🗺️ Border enjoyer</option>
-        <option value="🎥 Reels creator">🎥 Reels creator</option>
-        <option value="📊 Geo-data lover">📊 Geo-data lover</option>
-      </select>
-      <select id="region">
-        <option value="Europe">Europe</option>
-        <option value="Asia">Asia</option>
-        <option value="Middle East">Middle East</option>
-        <option value="Latin America">Latin America</option>
-        <option value="World">World</option>
-      </select>
-      <select id="special">
-        <option value="Making history visual">Making history visual</option>
-        <option value="Borders and vibes only">Borders and vibes only</option>
-        <option value="I color maps so you don't have to">I color maps so you don't have to</option>
-        <option value="The cartography chaos you need">The cartography chaos you need</option>
-        <option value="Geo-memes included">Geo-memes included</option>
-      </select>
-      <select id="emoji">
-        <option value="🧭">🧭</option>
-        <option value="🗺️">🗺️</option>
-        <option value="🌎">🌎</option>
-        <option value="🇺🇳">🇺🇳</option>
-        <option value="📌">📌</option>
-      </select>
-      <br>
-      <button onclick="generateBio()">Generate Bio</button>
-      <p id="bioOutput"></p>
-    </div>
-  </div>
+      <!-- Questions -->
+      <div class="question">
+        <h2>1. What is the capital of Argentina?</h2>
+        <label><input type="radio" name="q1" value="0" required> Santiago</label>
+        <label><input type="radio" name="q1" value="1"> Buenos Aires</label>
+        <label><input type="radio" name="q1" value="0"> Lima</label>
+        <label><input type="radio" name="q1" value="0"> Montevideo</label>
+      </div>
 
-  <div class="section">
-    <h2>Geo Quiz 🌏</h2>
-    <form class="quiz" onsubmit="return checkAnswers()">
-      <div id="quizContainer"></div>
-      <button type="submit">Submit Answers</button>
+      <div class="question">
+        <h2>2. Which country is not in the European Union?</h2>
+        <label><input type="radio" name="q2" value="0" required> Germany</label>
+        <label><input type="radio" name="q2" value="0"> Portugal</label>
+        <label><input type="radio" name="q2" value="1"> Norway</label>
+        <label><input type="radio" name="q2" value="0"> Austria</label>
+      </div>
+
+      <div class="question">
+        <h2>3. Mount Fuji is in which country?</h2>
+        <label><input type="radio" name="q3" value="0" required> China</label>
+        <label><input type="radio" name="q3" value="1"> Japan</label>
+        <label><input type="radio" name="q3" value="0"> South Korea</label>
+        <label><input type="radio" name="q3" value="0"> Thailand</label>
+      </div>
+
+      <div class="question">
+        <h2>4. Which river flows through Budapest?</h2>
+        <label><input type="radio" name="q4" value="0" required> Rhine</label>
+        <label><input type="radio" name="q4" value="1"> Danube</label>
+        <label><input type="radio" name="q4" value="0"> Volga</label>
+        <label><input type="radio" name="q4" value="0"> Seine</label>
+      </div>
+
+      <div class="question">
+        <h2>5. What is the largest country in Asia?</h2>
+        <label><input type="radio" name="q5" value="1" required> Russia</label>
+        <label><input type="radio" name="q5" value="0"> China</label>
+        <label><input type="radio" name="q5" value="0"> India</label>
+        <label><input type="radio" name="q5" value="0"> Kazakhstan</label>
+      </div>
+
+      <!-- Add more questions here up to 20 -->
+
+      <div style="text-align: center">
+        <button type="submit" class="submit-btn">Submit Quiz</button>
+      </div>
     </form>
-    <p id="quizResult"></p>
+
+    <div id="result" class="result"></div>
   </div>
 
   <script>
-    const mappers = [
-      { username: "@czechiamapper", img: "https://i.imgur.com/BQSmYm7.jpeg" },
-      { username: "@tugamapper", img: "https://i.imgur.com/NRNdjJh.jpeg" },
-      { username: "@central_europe_mapper", img: "https://i.imgur.com/upCUXT3.jpeg" },
-      { username: "@mapping_brasilien", img: "https://i.imgur.com/neCO15z.jpeg" },
-      { username: "@syrianmapper1290", img: "https://i.imgur.com/UrYca0s.jpeg" },
-      { username: "@mapper_from_mus", img: "https://i.imgur.com/CB7XClv.jpeg" },
-      { username: "@srbinje.mapping47", img: "https://i.imgur.com/o0yRM4x.jpeg" },
-      { username: "@yescartography", img: "https://i.imgur.com/tuOgajQ.jpeg" },
-      { username: "@morocco.mapper.1028", img: "https://i.imgur.com/rlA5fs7.jpeg" },
-      { username: "@deutscher.kartograf", img: "https://i.imgur.com/6GltLVc.png" },
-      { username: "@trailz_mapper", img: "https://i.imgur.com/RSjU001.jpeg" },
-      { username: "@libya_maps_17", img: "https://i.imgur.com/JTTuuUc.jpeg" },
-      { username: "@castilian.mapper", img: "https://i.imgur.com/ULqoU7g.jpeg" }
-    ];
+    const form = document.getElementById("quizForm");
+    const resultDiv = document.getElementById("result");
 
-    function renderMappers(filter = '') {
-      const container = document.getElementById("mapperContainer");
-      container.innerHTML = '';
-      mappers.filter(m => m.username.toLowerCase().includes(filter.toLowerCase())).forEach(m => {
-        container.innerHTML += `
-          <div class="card">
-            <img src="${m.img}" alt="${m.username}">
-            <p>${m.username}</p>
-            <a href="https://instagram.com/${m.username.replace('@', '')}" target="_blank">
-              <button class="follow-btn">Follow</button>
-            </a>
-          </div>`;
-      });
-    }
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
 
-    document.getElementById("searchInput").addEventListener("input", e => renderMappers(e.target.value));
-    renderMappers();
-
-    function generateBio() {
-      const style = document.getElementById("style").value;
-      const region = document.getElementById("region").value;
-      const special = document.getElementById("special").value;
-      const emoji = document.getElementById("emoji").value;
-      document.getElementById("bioOutput").innerText = `${emoji} ${style} | ${region} focus | ${special}`;
-    }
-
-    const questions = [
-      { q: "What is the largest country in Europe by area?", a: "Russia" },
-      { q: "Which Asian country has the most islands?", a: "Indonesia" },
-      { q: "What river flows through Budapest?", a: "Danube" },
-      { q: "Which European city is known as the 'Eternal City'?", a: "Rome" },
-      { q: "What mountain range separates Europe and Asia?", a: "Ural" },
-      { q: "Which country has the city of Tbilisi?", a: "Georgia" },
-      { q: "What is the smallest country in Europe?", a: "Vatican" },
-      { q: "Which sea lies between Europe and Africa?", a: "Mediterranean" },
-      { q: "Capital of Kazakhstan?", a: "Astana" },
-      { q: "Where is Mount Ararat located?", a: "Turkey" },
-      { q: "Which country has a red flag with a white cross?", a: "Switzerland" },
-      { q: "What country is known as the Land of the Rising Sun?", a: "Japan" },
-      { q: "Which country has the city of Kraków?", a: "Poland" },
-      { q: "Which river is longest in Asia?", a: "Yangtze" },
-      { q: "Which country has Baku as its capital?", a: "Azerbaijan" },
-    ];
-
-    const quizContainer = document.getElementById("quizContainer");
-    questions.forEach((q, i) => {
-      quizContainer.innerHTML += `<label>${i+1}. ${q.q}<br><input type="text" id="q${i}" /></label>`;
-    });
-
-    function checkAnswers() {
+      const answers = new FormData(form);
       let score = 0;
-      questions.forEach((q, i) => {
-        const userAnswer = document.getElementById(`q${i}`).value.trim().toLowerCase();
-        if (userAnswer === q.a.toLowerCase()) score++;
-      });
-      document.getElementById("quizResult").innerText = `You scored ${score} out of ${questions.length}!`;
-      return false;
-    }
+
+      for (let [key, value] of answers.entries()) {
+        score += parseInt(value);
+      }
+
+      resultDiv.classList.add("show");
+      resultDiv.textContent = `You scored ${score} out of 5.`; // Update max when you add more
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   </script>
 </body>
 </html>
+
 
