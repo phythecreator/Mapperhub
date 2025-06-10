@@ -1,205 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MAPPERS HUB</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
       font-family: 'Orbitron', sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
+      background: linear-gradient(135deg, #000428, #004e92);
+      color: white;
     }
     header {
-      background-color: #010409;
-      padding: 20px;
       text-align: center;
-      font-size: 2em;
-      color: #58a6ff;
-      letter-spacing: 2px;
-      border-bottom: 2px solid #58a6ff;
-    }
-    .container {
-      max-width: 1200px;
-      margin: auto;
-      padding: 20px;
+      padding: 2rem;
+      font-size: 3rem;
+      background: #00000055;
+      backdrop-filter: blur(8px);
+      border-bottom: 2px solid #00bfff;
     }
     .profile-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      padding: 2rem;
     }
     .profile-card {
-      background-color: #161b22;
-      border: 2px solid #30363d;
+      background: #101010;
+      border: 2px solid #00bfff;
       border-radius: 12px;
-      overflow: hidden;
       text-align: center;
-      padding: 15px;
-      transition: transform 0.3s;
-    }
-    .profile-card:hover {
-      transform: scale(1.05);
-      border-color: #58a6ff;
+      padding: 1rem;
     }
     .profile-card img {
       width: 100%;
-      height: auto;
+      height: 160px;
+      object-fit: cover;
       border-radius: 8px;
     }
     .profile-card a {
-      display: inline-block;
-      margin-top: 10px;
-      color: #58a6ff;
+      color: #00bfff;
       text-decoration: none;
-      font-weight: bold;
+      display: block;
+      margin-top: 0.5rem;
     }
     .section-title {
-      margin-top: 40px;
-      margin-bottom: 20px;
-      font-size: 1.5em;
-      color: #58a6ff;
       text-align: center;
-    }
-    .bio-generator, .quiz, .leaderboard {
-      background-color: #161b22;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 30px;
-    }
-    select, button {
-      background-color: #0d1117;
-      border: 1px solid #58a6ff;
-      color: #c9d1d9;
-      padding: 10px;
-      margin: 5px;
-      border-radius: 5px;
-    }
-    .quiz-question {
-      margin-bottom: 20px;
+      margin: 3rem 0 1rem;
+      font-size: 2rem;
     }
   </style>
 </head>
 <body>
   <header>MAPPERS HUB</header>
-  <div class="container">
-    <div class="section-title">🌍 Featured Mappers</div>
-    <div class="profile-grid">
-      <div class="profile-card">
-        <img src="https://i.imgur.com/BQSmYm7.jpeg" alt="@czechiamapper">
-        <a href="https://instagram.com/czechiamapper" target="_blank">@czechiamapper</a>
-      </div>
-      <div class="profile-card">
-        <img src="https://i.imgur.com/NRNdjJh.jpeg" alt="@tugamapper">
-        <a href="https://instagram.com/tugamapper" target="_blank">@tugamapper</a>
-      </div>
-      <!-- Adicione os outros 13 perfis aqui seguindo o mesmo modelo -->
-    </div>
 
-    <div class="section-title">🧠 Bio Generator</div>
-    <div class="bio-generator">
-      <select id="tone">
-        <option>🇧🇷 Funny 😂</option>
-        <option>📊 Informative</option>
-        <option>🎯 Minimalist</option>
-        <option>🗺️ Country Lover</option>
-        <option>🚀 Explorer</option>
-      </select>
-      <select id="style">
-        <option>🌐 Mapper since 2020</option>
-        <option>📌 Based in Europe</option>
-        <option>🇦🇸 I love Asia</option>
-        <option>📸 Reels daily</option>
-        <option>🧠 Facts enthusiast</option>
-      </select>
-      <select id="tag">
-        <option>🔥 Trending</option>
-        <option>📍 Geography Fan</option>
-        <option>🤓 Nerd Mode</option>
-        <option>🎬 Editing Obsessed</option>
-        <option>⚡ Fast Learner</option>
-      </select>
-      <select id="mood">
-        <option>😎 Cool Vibes</option>
-        <option>💥 Energetic</option>
-        <option>🧭 Adventurous</option>
-        <option>📚 Historian</option>
-        <option>🌏 Global Citizen</option>
-      </select>
-      <button onclick="generateBio()">Generate Bio</button>
-      <p id="bio-output"></p>
+  <div class="section-title">Featured Mappers</div>
+  <div class="profile-grid">
+    <div class="profile-card">
+      <img src="https://i.imgur.com/BQSmYm7.jpeg" alt="@czechiamapper">
+      <a href="https://instagram.com/czechiamapper" target="_blank">@czechiamapper</a>
     </div>
-
-    <div class="section-title">📊 World Regions Quiz</div>
-    <div class="quiz">
-      <div id="quiz-container"></div>
-      <button onclick="submitQuiz()">Submit Quiz</button>
-      <p id="quiz-result"></p>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/NRNdjJh.jpeg" alt="@tugamapper">
+      <a href="https://instagram.com/tugamapper" target="_blank">@tugamapper</a>
     </div>
-
-    <div class="section-title">🏆 Leaderboard</div>
-    <div class="leaderboard">
-      <ul id="leaderboard-list"></ul>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/upCUXT3.jpeg" alt="@central_europe_mapper">
+      <a href="https://instagram.com/central_europe_mapper" target="_blank">@central_europe_mapper</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/neCO15z.jpeg" alt="@mapping_brasilien">
+      <a href="https://instagram.com/mapping_brasilien" target="_blank">@mapping_brasilien</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/UrYca0s.jpeg" alt="@syrianmapper1290">
+      <a href="https://instagram.com/syrianmapper1290" target="_blank">@syrianmapper1290</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/CB7XClv.jpeg" alt="@mapper_from_mus">
+      <a href="https://instagram.com/mapper_from_mus" target="_blank">@mapper_from_mus</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/o0yRM4x.jpeg" alt="@srpska.mapping02">
+      <a href="https://instagram.com/srpska.mapping02" target="_blank">@srpska.mapping02</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/tuOgajQ.jpeg" alt="@yesilcamtografy">
+      <a href="https://instagram.com/yesilcamtografy" target="_blank">@yesilcamtografy</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/rlA5fs7.jpeg" alt="@morocco.mapper.1028">
+      <a href="https://instagram.com/morocco.mapper.1028" target="_blank">@morocco.mapper.1028</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/6GltLVc.png" alt="@deutscher.kartograf">
+      <a href="https://instagram.com/deutscher.kartograf" target="_blank">@deutscher.kartograf</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/RSjU001.jpeg" alt="@trailsmapper">
+      <a href="https://instagram.com/trailsmapper" target="_blank">@trailsmapper</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/JTTuuUc.jpeg" alt="@libya_maps_17">
+      <a href="https://instagram.com/libya_maps_17" target="_blank">@libya_maps_17</a>
+    </div>
+    <div class="profile-card">
+      <img src="https://i.imgur.com/ULqoU7g.jpeg" alt="@castilian.mapper">
+      <a href="https://instagram.com/castilian.mapper" target="_blank">@castilian.mapper</a>
     </div>
   </div>
-
-  <script>
-    const quizData = [
-      { q: "What is the capital of Kazakhstan?", a: "Astana" },
-      { q: "Which country borders both Asia and Europe?", a: "Turkey" },
-      { q: "What is the official language of Brazil?", a: "Portuguese" },
-      { q: "Which country has the most volcanoes?", a: "Indonesia" },
-      { q: "What is the capital of Slovakia?", a: "Bratislava" },
-      { q: "Which Latin American country is landlocked?", a: "Paraguay" },
-      { q: "Where is the Danube River located?", a: "Europe" },
-      { q: "Which Asian country is an archipelago?", a: "Philippines" },
-      { q: "What is the capital of Argentina?", a: "Buenos Aires" },
-      { q: "Which country is famous for Machu Picchu?", a: "Peru" },
-      { q: "Which country is part of the Baltic States?", a: "Estonia" },
-      { q: "What language is spoken in Iran?", a: "Persian" },
-      { q: "Where is the Gobi Desert?", a: "Asia" },
-      { q: "What is the capital of Chile?", a: "Santiago" },
-      { q: "Which country uses the won?", a: "South Korea" },
-      { q: "What is the largest country in South America?", a: "Brazil" },
-      { q: "Which country has the city of Tashkent?", a: "Uzbekistan" },
-      { q: "What is the currency of Japan?", a: "Yen" },
-      { q: "Which country has Budapest?", a: "Hungary" },
-      { q: "What country is Mount Fuji in?", a: "Japan" }
-    ];
-
-    const quizContainer = document.getElementById("quiz-container");
-    const leaderboard = document.getElementById("leaderboard-list");
-
-    quizData.forEach((q, i) => {
-      const div = document.createElement("div");
-      div.className = "quiz-question";
-      div.innerHTML = `<p>${i + 1}. ${q.q}</p><input id="q${i}" type="text">`;
-      quizContainer.appendChild(div);
-    });
-
-    function submitQuiz() {
-      let score = 0;
-      quizData.forEach((q, i) => {
-        const userAnswer = document.getElementById(`q${i}`).value.trim().toLowerCase();
-        if (userAnswer === q.a.toLowerCase()) score++;
-      });
-      document.getElementById("quiz-result").innerText = `You scored ${score}/20!`;
-      const li = document.createElement("li");
-      li.textContent = `Player: ${score}/20`;
-      leaderboard.appendChild(li);
-    }
-
-    function generateBio() {
-      const tone = document.getElementById("tone").value;
-      const style = document.getElementById("style").value;
-      const tag = document.getElementById("tag").value;
-      const mood = document.getElementById("mood").value;
-      document.getElementById("bio-output").innerText = `${tone} | ${style} | ${tag} | ${mood}`;
-    }
-  </script>
 </body>
 </html>
+
 
 
