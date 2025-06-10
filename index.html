@@ -4,110 +4,190 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MAPPERS HUB</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background: linear-gradient(135deg, #000428, #004e92);
-      color: white;
+      background: #0a0a0a;
+      color: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     header {
+      background: #101b3f;
+      padding: 1rem;
       text-align: center;
-      padding: 2rem;
-      font-size: 3rem;
-      background: #00000055;
-      backdrop-filter: blur(8px);
-      border-bottom: 2px solid #00bfff;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00aaff;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
     }
     .profile-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 1rem;
-      padding: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
     }
-    .profile-card {
-      background: #101010;
-      border: 2px solid #00bfff;
+    .profile {
+      background: #161b22;
+      padding: 1rem;
       border-radius: 12px;
       text-align: center;
-      padding: 1rem;
+      transition: 0.3s;
     }
-    .profile-card img {
+    .profile:hover {
+      background: #1e2738;
+    }
+    .profile img {
       width: 100%;
-      height: 160px;
+      height: 200px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
     }
-    .profile-card a {
-      color: #00bfff;
-      text-decoration: none;
-      display: block;
+    .username {
       margin-top: 0.5rem;
+      font-size: 1.1rem;
+      color: #00cfff;
+    }
+    .follow {
+      margin-top: 0.5rem;
+      background: #00aaff;
+      border: none;
+      color: white;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
     }
     .section-title {
-      text-align: center;
-      margin: 3rem 0 1rem;
-      font-size: 2rem;
+      margin-top: 3rem;
+      font-size: 1.8rem;
+      color: #00aaff;
+      border-bottom: 2px solid #00aaff;
+      padding-bottom: 0.5rem;
+    }
+    .quiz, .bio-generator, .leaderboard {
+      margin-top: 2rem;
+      background: #161b22;
+      padding: 1rem;
+      border-radius: 12px;
+    }
+    label, select, input, button {
+      margin-top: 0.5rem;
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background: #00aaff;
+      color: white;
+      cursor: pointer;
+    }
+    .question {
+      margin: 1rem 0;
+    }
+    .leaderboard ul {
+      list-style: none;
+      padding: 0;
+    }
+    .leaderboard li {
+      background: #101b3f;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      border-radius: 6px;
     }
   </style>
 </head>
 <body>
   <header>MAPPERS HUB</header>
 
-  <div class="section-title">Featured Mappers</div>
-  <div class="profile-grid">
-    <div class="profile-card">
-      <img src="https://i.imgur.com/BQSmYm7.jpeg" alt="@czechiamapper">
-      <a href="https://instagram.com/czechiamapper" target="_blank">@czechiamapper</a>
+  <div class="container">
+    <div class="section-title">Featured Mappers</div>
+    <div class="profile-grid">
+      <!-- Instagram Mappers -->
+      <div class="profile">
+        <img src="https://i.imgur.com/BQSmYm7.jpeg" alt="czechiamapper">
+        <div class="username">@czechiamapper</div>
+        <a href="https://instagram.com/czechiamapper" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/NRNdjJh.jpeg" alt="tugamapper">
+        <div class="username">@tugamapper</div>
+        <a href="https://instagram.com/tugamapper" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/upCUXT3.jpeg" alt="central_europe_mapper">
+        <div class="username">@central_europe_mapper</div>
+        <a href="https://instagram.com/central_europe_mapper" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/neCO15z.jpeg" alt="mapping_brasilien">
+        <div class="username">@mapping_brasilien</div>
+        <a href="https://instagram.com/mapping_brasilien" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/UrYca0s.jpeg" alt="syrianmapper1290">
+        <div class="username">@syrianmapper1290</div>
+        <a href="https://instagram.com/syrianmapper1290" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/CB7XClv.jpeg" alt="mapper_from_mus">
+        <div class="username">@mapper_from_mus</div>
+        <a href="https://instagram.com/mapper_from_mus" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/o0yRM4x.jpeg" alt="srpska.mapping02">
+        <div class="username">@srpska.mapping02</div>
+        <a href="https://instagram.com/srpska.mapping02" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/tuOgajQ.jpeg" alt="yesilcamtografy">
+        <div class="username">@yesilcamtografy</div>
+        <a href="https://instagram.com/yesilcamtografy" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/rlA5fs7.jpeg" alt="morocco.mapper.1028">
+        <div class="username">@morocco.mapper.1028</div>
+        <a href="https://instagram.com/morocco.mapper.1028" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/6GltLVc.png" alt="deutscher.kartograf">
+        <div class="username">@deutscher.kartograf</div>
+        <a href="https://instagram.com/deutscher.kartograf" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/RSjU001.jpeg" alt="trailzmapper">
+        <div class="username">@trailzmapper</div>
+        <a href="https://instagram.com/trailzmapper" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/JTTuuUc.jpeg" alt="libya_maps_17">
+        <div class="username">@libya_maps_17</div>
+        <a href="https://instagram.com/libya_maps_17" target="_blank"><button class="follow">Follow</button></a>
+      </div>
+      <div class="profile">
+        <img src="https://i.imgur.com/ULqoU7g.jpeg" alt="castilian.mapper">
+        <div class="username">@castilian.mapper</div>
+        <a href="https://instagram.com/castilian.mapper" target="_blank"><button class="follow">Follow</button></a>
+      </div>
     </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/NRNdjJh.jpeg" alt="@tugamapper">
-      <a href="https://instagram.com/tugamapper" target="_blank">@tugamapper</a>
+
+    <!-- QUIZ, BIO GENERATOR, LEADERBOARD sections below -->
+    <div class="section-title">Quiz</div>
+    <div class="quiz">
+      <p>Coming soon... (20 questions about Europe, Latin America, and Asia)</p>
     </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/upCUXT3.jpeg" alt="@central_europe_mapper">
-      <a href="https://instagram.com/central_europe_mapper" target="_blank">@central_europe_mapper</a>
+
+    <div class="section-title">Bio Generator</div>
+    <div class="bio-generator">
+      <p>Coming soon... (Improved with 4 categories & emojis)</p>
     </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/neCO15z.jpeg" alt="@mapping_brasilien">
-      <a href="https://instagram.com/mapping_brasilien" target="_blank">@mapping_brasilien</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/UrYca0s.jpeg" alt="@syrianmapper1290">
-      <a href="https://instagram.com/syrianmapper1290" target="_blank">@syrianmapper1290</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/CB7XClv.jpeg" alt="@mapper_from_mus">
-      <a href="https://instagram.com/mapper_from_mus" target="_blank">@mapper_from_mus</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/o0yRM4x.jpeg" alt="@srpska.mapping02">
-      <a href="https://instagram.com/srpska.mapping02" target="_blank">@srpska.mapping02</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/tuOgajQ.jpeg" alt="@yesilcamtografy">
-      <a href="https://instagram.com/yesilcamtografy" target="_blank">@yesilcamtografy</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/rlA5fs7.jpeg" alt="@morocco.mapper.1028">
-      <a href="https://instagram.com/morocco.mapper.1028" target="_blank">@morocco.mapper.1028</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/6GltLVc.png" alt="@deutscher.kartograf">
-      <a href="https://instagram.com/deutscher.kartograf" target="_blank">@deutscher.kartograf</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/RSjU001.jpeg" alt="@trailsmapper">
-      <a href="https://instagram.com/trailsmapper" target="_blank">@trailsmapper</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/JTTuuUc.jpeg" alt="@libya_maps_17">
-      <a href="https://instagram.com/libya_maps_17" target="_blank">@libya_maps_17</a>
-    </div>
-    <div class="profile-card">
-      <img src="https://i.imgur.com/ULqoU7g.jpeg" alt="@castilian.mapper">
-      <a href="https://instagram.com/castilian.mapper" target="_blank">@castilian.mapper</a>
+
+    <div class="section-title">Leaderboard</div>
+    <div class="leaderboard">
+      <p>Coming soon... (Scores from quiz)</p>
     </div>
   </div>
 </body>
