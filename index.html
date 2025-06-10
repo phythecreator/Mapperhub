@@ -1,195 +1,513 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MAPPERS HUB</title>
-  <style>
-    body {
-      margin: 0;
-      background: #0a0a0a;
-      color: #f0f0f0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    header {
-      background: #101b3f;
-      padding: 1rem;
-      text-align: center;
-      font-size: 2rem;
-      font-weight: bold;
-      color: #00aaff;
-    }
-    .container {
-      max-width: 1000px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .profile-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-    }
-    .profile {
-      background: #161b22;
-      padding: 1rem;
-      border-radius: 12px;
-      text-align: center;
-      transition: 0.3s;
-    }
-    .profile:hover {
-      background: #1e2738;
-    }
-    .profile img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-    .username {
-      margin-top: 0.5rem;
-      font-size: 1.1rem;
-      color: #00cfff;
-    }
-    .follow {
-      margin-top: 0.5rem;
-      background: #00aaff;
-      border: none;
-      color: white;
-      padding: 0.4rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .section-title {
-      margin-top: 3rem;
-      font-size: 1.8rem;
-      color: #00aaff;
-      border-bottom: 2px solid #00aaff;
-      padding-bottom: 0.5rem;
-    }
-    .quiz, .bio-generator, .leaderboard {
-      margin-top: 2rem;
-      background: #161b22;
-      padding: 1rem;
-      border-radius: 12px;
-    }
-    label, select, input, button {
-      margin-top: 0.5rem;
-      display: block;
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 6px;
-      border: none;
-    }
-    button {
-      background: #00aaff;
-      color: white;
-      cursor: pointer;
-    }
-    .question {
-      margin: 1rem 0;
-    }
-    .leaderboard ul {
-      list-style: none;
-      padding: 0;
-    }
-    .leaderboard li {
-      background: #101b3f;
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-      border-radius: 6px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MAPPERS HUB</title>
+<style>
+  /* --- General Styles --- */
+  body {
+    margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #0f0f0f; color: #e0e0e0;
+  }
+  header {
+    background: #10172a; color: #00aaff;
+    text-align: center; padding: 1.5rem 0;
+    font-size: 2.5rem; font-weight: 900;
+    letter-spacing: 3px;
+    user-select: none;
+  }
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 1rem;
+  }
+
+  /* --- Profiles Grid --- */
+  .profiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  .profile {
+    background: #1a1a2e;
+    padding: 1rem;
+    border-radius: 15px;
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+  .profile:hover {
+    transform: scale(1.05);
+  }
+  .profile img {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #00aaff;
+  }
+  .profile p {
+    margin: 0.8rem 0 0.3rem;
+    font-weight: 600;
+  }
+  .follow-btn {
+    background: #00aaff;
+    border: none;
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  .follow-btn:hover {
+    background: #0077cc;
+  }
+
+  /* --- Sections --- */
+  .section {
+    background: #111827;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 3rem;
+  }
+  .section h2 {
+    color: #00aaff;
+    margin-bottom: 1rem;
+    user-select: none;
+  }
+
+  /* --- Bio Generator --- */
+  #bioOutput {
+    width: 100%;
+    height: 120px;
+    background: #1f2937;
+    border: none;
+    border-radius: 12px;
+    padding: 1rem;
+    color: #e0e0e0;
+    font-size: 1rem;
+    resize: none;
+  }
+  button.generate-bio {
+    margin-top: 0.8rem;
+    background: #00aaff;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+  }
+  button.generate-bio:hover {
+    background: #0077cc;
+  }
+
+  /* --- Quiz --- */
+  #quizForm {
+    font-size: 1rem;
+  }
+  .question {
+    margin-bottom: 1rem;
+  }
+  .question h3 {
+    margin-bottom: 0.5rem;
+  }
+  .answers label {
+    display: block;
+    margin-bottom: 0.3rem;
+    cursor: pointer;
+  }
+  .answers input[type="radio"] {
+    margin-right: 0.5rem;
+  }
+  button#submitQuiz {
+    background: #00aaff;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 15px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  button#submitQuiz:hover {
+    background: #0077cc;
+  }
+  #quizResult {
+    margin-top: 1rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #00ffea;
+    user-select: none;
+  }
+
+  /* --- Leaderboard --- */
+  #leaderboardList {
+    list-style: none;
+    padding-left: 0;
+  }
+  #leaderboardList li {
+    background: #22283f;
+    margin-bottom: 0.6rem;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    user-select: none;
+  }
+</style>
 </head>
 <body>
-  <header>MAPPERS HUB</header>
 
-  <div class="container">
-    <div class="section-title">Featured Mappers</div>
-    <div class="profile-grid">
-      <!-- Instagram Mappers -->
-      <div class="profile">
-        <img src="https://i.imgur.com/BQSmYm7.jpeg" alt="czechiamapper">
-        <div class="username">@czechiamapper</div>
-        <a href="https://instagram.com/czechiamapper" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/NRNdjJh.jpeg" alt="tugamapper">
-        <div class="username">@tugamapper</div>
-        <a href="https://instagram.com/tugamapper" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/upCUXT3.jpeg" alt="central_europe_mapper">
-        <div class="username">@central_europe_mapper</div>
-        <a href="https://instagram.com/central_europe_mapper" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/neCO15z.jpeg" alt="mapping_brasilien">
-        <div class="username">@mapping_brasilien</div>
-        <a href="https://instagram.com/mapping_brasilien" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/UrYca0s.jpeg" alt="syrianmapper1290">
-        <div class="username">@syrianmapper1290</div>
-        <a href="https://instagram.com/syrianmapper1290" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/CB7XClv.jpeg" alt="mapper_from_mus">
-        <div class="username">@mapper_from_mus</div>
-        <a href="https://instagram.com/mapper_from_mus" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/o0yRM4x.jpeg" alt="srpska.mapping02">
-        <div class="username">@srpska.mapping02</div>
-        <a href="https://instagram.com/srpska.mapping02" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/tuOgajQ.jpeg" alt="yesilcamtografy">
-        <div class="username">@yesilcamtografy</div>
-        <a href="https://instagram.com/yesilcamtografy" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/rlA5fs7.jpeg" alt="morocco.mapper.1028">
-        <div class="username">@morocco.mapper.1028</div>
-        <a href="https://instagram.com/morocco.mapper.1028" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/6GltLVc.png" alt="deutscher.kartograf">
-        <div class="username">@deutscher.kartograf</div>
-        <a href="https://instagram.com/deutscher.kartograf" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/RSjU001.jpeg" alt="trailzmapper">
-        <div class="username">@trailzmapper</div>
-        <a href="https://instagram.com/trailzmapper" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/JTTuuUc.jpeg" alt="libya_maps_17">
-        <div class="username">@libya_maps_17</div>
-        <a href="https://instagram.com/libya_maps_17" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-      <div class="profile">
-        <img src="https://i.imgur.com/ULqoU7g.jpeg" alt="castilian.mapper">
-        <div class="username">@castilian.mapper</div>
-        <a href="https://instagram.com/castilian.mapper" target="_blank"><button class="follow">Follow</button></a>
-      </div>
-    </div>
+<header>MAPPERS HUB</header>
 
-    <!-- QUIZ, BIO GENERATOR, LEADERBOARD sections below -->
-    <div class="section-title">Quiz</div>
-    <div class="quiz">
-      <p>Coming soon... (20 questions about Europe, Latin America, and Asia)</p>
-    </div>
+<div class="container">
 
-    <div class="section-title">Bio Generator</div>
-    <div class="bio-generator">
-      <p>Coming soon... (Improved with 4 categories & emojis)</p>
+  <!-- Profiles Section -->
+  <section class="profiles" aria-label="Mapper Profiles">
+    <div class="profile">
+      <img src="https://i.imgur.com/BQSmYm7.jpeg" alt="@czechiamapper" />
+      <p>@czechiamapper</p>
+      <a href="https://instagram.com/czechiamapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
     </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/NRNdjJh.jpeg" alt="@tugamapper" />
+      <p>@tugamapper</p>
+      <a href="https://instagram.com/tugamapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/upCUXT3.jpeg" alt="@central_europe_mapper" />
+      <p>@central_europe_mapper</p>
+      <a href="https://instagram.com/central_europe_mapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/neCO15z.jpeg" alt="@mapping_brasilien" />
+      <p>@mapping_brasilien</p>
+      <a href="https://instagram.com/mapping_brasilien" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/UrYca0s.jpeg" alt="@syrianmapper1290" />
+      <p>@syrianmapper1290</p>
+      <a href="https://instagram.com/syrianmapper1290" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/CB7XClv.jpeg" alt="@mapper_from_mus" />
+      <p>@mapper_from_mus</p>
+      <a href="https://instagram.com/mapper_from_mus" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/o0yRM4x.jpeg" alt="@srbinje.mapping47" />
+      <p>@srbinje.mapping47</p>
+      <a href="https://instagram.com/srbinje.mapping47" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/tuOgajQ.jpeg" alt="@yescartography" />
+      <p>@yescartography</p>
+      <a href="https://instagram.com/yescartography" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/rlA5fs7.jpeg" alt="@morocco.mapper.1028" />
+      <p>@morocco.mapper.1028</p>
+      <a href="https://instagram.com/morocco.mapper.1028" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/6GltLVc.png" alt="@deutscher.kartograf" />
+      <p>@deutscher.kartograf</p>
+      <a href="https://instagram.com/deutscher.kartograf" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/RSjU001.jpeg" alt="@trailsmapper" />
+      <p>@trailsmapper</p>
+      <a href="https://instagram.com/trailsmapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/JTTuuUc.jpeg" alt="@libya_maps_17" />
+      <p>@libya_maps_17</p>
+      <a href="https://instagram.com/libya_maps_17" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+    <div class="profile">
+      <img src="https://i.imgur.com/ULqoU7g.jpeg" alt="@castilian.mapper" />
+      <p>@castilian.mapper</p>
+      <a href="https://instagram.com/castilian.mapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
+    </div>
+  </section>
 
-    <div class="section-title">Leaderboard</div>
-    <div class="leaderboard">
-      <p>Coming soon... (Scores from quiz)</p>
-    </div>
-  </div>
+  <!-- Bio Generator -->
+  <section class="section" id="bio-generator">
+    <h2>📍 Mapper Bio Generator</h2>
+    <textarea id="bioOutput" readonly></textarea>
+    <button class="generate-bio" onclick="generateBio()">Generate Bio</button>
+  </section>
+
+  <!-- Quiz Section -->
+  <section class="section" id="quiz">
+    <h2>🌍 World Regions Quiz</h2>
+    <form id="quizForm">
+      <!-- Questions will be generated by JS -->
+    </form>
+    <button id="submitQuiz">Submit Quiz</button>
+    <div id="quizResult"></div>
+  </section>
+
+  <!-- Leaderboard Section -->
+  <section class="section" id="leaderboard">
+    <h2>🏆 Leaderboard</h2>
+    <ol id="leaderboardList"></ol>
+  </section>
+</div>
+
+<script>
+  // ==== BIO GENERATOR ====
+
+  const bioOptions = {
+    emojis: ["🗺️","📌","🌍","📷","🔥","✨","🌐","🧭","📡","🎥"],
+    styles: [
+      "Sharing facts from the heart of Europe",
+      "Geo lover & cartographer in training",
+      "Mapping culture, history & vibes",
+      "Turning maps into stories",
+      "From city borders to country lines"
+    ],
+    focus: [
+      "Asia & the Middle East",
+      "Latin America",
+      "Slavic World",
+      "Africa & heritage",
+      "Global Fun Facts"
+    ],
+    identity: [
+      "Proud mapper from 🇨🇿",
+      "Young explorer from 🇵🇹",
+      "History nerd & design freak",
+      "Reel editor with a global vision",
+      "Mini docs in every post 🎥"
+    ],
+    motto: [
+      "Every line tells a story",
+      "Borders are just lines",
+      "Mapping peace 🕊️",
+      "From pixels to perception",
+      "Know the world, change the world"
+    ]
+  };
+
+  function pick(arr) {
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
+
+  function generateBio() {
+    const bio = `${pick(bioOptions.emojis)} ${pick(bioOptions.styles)}.\n` +
+                `${pick(bioOptions.identity)}.\n` +
+                `Focus: ${pick(bioOptions.focus)}.\n` +
+                `Motto: "${pick(bioOptions.motto)}"`;
+    document.getElementById('bioOutput').value = bio;
+  }
+
+
+  // ==== QUIZ DATA & LOGIC ====
+
+  const quizData = [
+    {
+      question: "Which country is known as the Land of the Rising Sun?",
+      options: ["China", "Japan", "South Korea", "Thailand"],
+      answer: 1
+    },
+    {
+      question: "What is the capital of Brazil?",
+      options: ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"],
+      answer: 2
+    },
+    {
+      question: "Which river runs through the city of Paris?",
+      options: ["Seine", "Thames", "Danube", "Rhine"],
+      answer: 0
+    },
+    {
+      question: "Which mountain range separates Europe and Asia?",
+      options: ["Alps", "Ural Mountains", "Carpathians", "Caucasus"],
+      answer: 1
+    },
+    {
+      question: "Which country has the largest population in the world?",
+      options: ["India", "USA", "China", "Russia"],
+      answer: 2
+    },
+    {
+      question: "What is the official language of Argentina?",
+      options: ["Spanish", "Portuguese", "English", "French"],
+      answer: 0
+    },
+    {
+      question: "Which desert is the largest hot desert in the world?",
+      options: ["Sahara", "Gobi", "Kalahari", "Mojave"],
+      answer: 0
+    },
+    {
+      question: "Which European city is famous for its canals and gondolas?",
+      options: ["Venice", "Amsterdam", "Stockholm", "Hamburg"],
+      answer: 0
+    },
+    {
+      question: "What is the capital of Kazakhstan?",
+      options: ["Almaty", "Nur-Sultan", "Tashkent", "Bishkek"],
+      answer: 1
+    },
+    {
+      question: "Which Latin American country is famous for Machu Picchu?",
+      options: ["Peru", "Colombia", "Ecuador", "Chile"],
+      answer: 0
+    },
+    {
+      question: "Which sea borders the east coast of Italy?",
+      options: ["Adriatic Sea", "Mediterranean Sea", "Black Sea", "Baltic Sea"],
+      answer: 0
+    },
+    {
+      question: "What is the capital of Syria?",
+      options: ["Damascus", "Aleppo", "Homs", "Latakia"],
+      answer: 0
+    },
+    {
+      question: "Which country is known for its fjords?",
+      options: ["Iceland", "Norway", "Sweden", "Finland"],
+      answer: 1
+    },
+    {
+      question: "What is the currency of Mexico?",
+      options: ["Peso", "Dollar", "Real", "Euro"],
+      answer: 0
+    },
+    {
+      question: "Which country is home to the ancient city of Petra?",
+      options: ["Jordan", "Egypt", "Lebanon", "Syria"],
+      answer: 0
+    },
+    {
+      question: "Which mountain is the highest in Europe?",
+      options: ["Mont Blanc", "Mount Elbrus", "Matterhorn", "Zugspitze"],
+      answer: 1
+    },
+    {
+      question: "What is the capital of Cuba?",
+      options: ["Havana", "Santiago", "Varadero", "Camagüey"],
+      answer: 0
+    },
+    {
+      question: "Which country has the Amazon rainforest?",
+      options: ["Brazil", "Colombia", "Venezuela", "Peru"],
+      answer: 0
+    },
+    {
+      question: "Which city is known as the 'City of Canals' in Europe?",
+      options: ["Venice", "Amsterdam", "Bruges", "Ghent"],
+      answer: 1
+    },
+    {
+      question: "Which country is famous for its tango dance?",
+      options: ["Argentina", "Chile", "Uruguay", "Brazil"],
+      answer: 0
+    }
+  ];
+
+  // Generate quiz questions dynamically
+  const quizForm = document.getElementById('quizForm');
+
+  function createQuiz() {
+    quizData.forEach((q, i) => {
+      const div = document.createElement('div');
+      div.className = 'question';
+      div.innerHTML = `<h3>Q${i+1}. ${q.question}</h3>`;
+      const answersDiv = document.createElement('div');
+      answersDiv.className = 'answers';
+
+      q.options.forEach((opt, idx) => {
+        const id = `q${i}_opt${idx}`;
+        const label = document.createElement('label');
+        label.htmlFor = id;
+        label.innerHTML = `<input type="radio" name="q${i}" id="${id}" value="${idx}" /> ${opt}`;
+        answersDiv.appendChild(label);
+      });
+
+      div.appendChild(answersDiv);
+      quizForm.appendChild(div);
+    });
+  }
+
+  createQuiz();
+
+  // Quiz submission & scoring
+  document.getElementById('submitQuiz').addEventListener('click', () => {
+    let score = 0;
+    let unanswered = 0;
+    for(let i=0; i<quizData.length; i++) {
+      const selected = document.querySelector(`input[name="q${i}"]:checked`);
+      if(!selected) {
+        unanswered++;
+        continue;
+      }
+      if(parseInt(selected.value) === quizData[i].answer) score++;
+    }
+
+    const quizResult = document.getElementById('quizResult');
+    if(unanswered > 0) {
+      quizResult.style.color = '#ff3333';
+      quizResult.textContent = `Please answer all questions! (${unanswered} unanswered)`;
+      return;
+    }
+    quizResult.style.color = '#00ffea';
+    quizResult.textContent = `You scored ${score} out of ${quizData.length}`;
+
+    saveScore(score);
+    renderLeaderboard();
+  });
+
+
+  // ==== LEADERBOARD (localStorage) ====
+
+  const leaderboardKey = 'mappersHubLeaderboard';
+
+  function saveScore(score) {
+    let leaderboard = JSON.parse(localStorage.getItem(leaderboardKey)) || [];
+    // Prompt for username
+    let username = prompt("Enter your name for the leaderboard:","");
+    if(!username) username = "Anonymous";
+
+    leaderboard.push({name: username.trim(), score: score, date: new Date().toISOString()});
+    // Sort descending and keep top 10
+    leaderboard.sort((a,b) => b.score - a.score);
+    if(leaderboard.length > 10) leaderboard = leaderboard.slice(0,10);
+
+    localStorage.setItem(leaderboardKey, JSON.stringify(leaderboard));
+  }
+
+  function renderLeaderboard() {
+    const leaderboardList = document.getElementById('leaderboardList');
+    const leaderboard = JSON.parse(localStorage.getItem(leaderboardKey)) || [];
+
+    leaderboardList.innerHTML = '';
+    if(leaderboard.length === 0) {
+      leaderboardList.innerHTML = '<li>No scores yet. Take the quiz!</li>';
+      return;
+    }
+
+    leaderboard.forEach(entry => {
+      const li = document.createElement('li');
+      const date = new Date(entry.date);
+      li.textContent = `${entry.name} - ${entry.score} pts (${date.toLocaleDateString()})`;
+      leaderboardList.appendChild(li);
+    });
+  }
+
+  // Show leaderboard on page load
+  renderLeaderboard();
+
+</script>
+
 </body>
 </html>
 
