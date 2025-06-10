@@ -1,192 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mapperhub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAPPERS HUB</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Orbitron', sans-serif;
       background-color: #0d1117;
       color: #c9d1d9;
     }
-    header, section, footer {
+    header {
+      background-color: #010409;
       padding: 20px;
-      max-width: 900px;
+      text-align: center;
+      font-size: 2em;
+      color: #58a6ff;
+      letter-spacing: 2px;
+      border-bottom: 2px solid #58a6ff;
+    }
+    .container {
+      max-width: 1200px;
       margin: auto;
+      padding: 20px;
     }
-    h1, h2 {
-      text-align: center;
-    }
-    .profile {
+    .profile-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
-      margin-top: 20px;
     }
-    .card {
+    .profile-card {
       background-color: #161b22;
+      border: 2px solid #30363d;
       border-radius: 12px;
-      padding: 10px;
+      overflow: hidden;
       text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      padding: 15px;
+      transition: transform 0.3s;
     }
-    .card img {
+    .profile-card:hover {
+      transform: scale(1.05);
+      border-color: #58a6ff;
+    }
+    .profile-card img {
       width: 100%;
-      border-radius: 12px;
-    }
-    button {
-      background: #238636;
-      color: white;
-      border: none;
-      padding: 8px 16px;
+      height: auto;
       border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
     }
-    input, select {
-      padding: 8px;
-      border-radius: 6px;
-      border: 1px solid #30363d;
+    .profile-card a {
+      display: inline-block;
+      margin-top: 10px;
+      color: #58a6ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .section-title {
+      margin-top: 40px;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      color: #58a6ff;
+      text-align: center;
+    }
+    .bio-generator, .quiz, .leaderboard {
+      background-color: #161b22;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+    select, button {
       background-color: #0d1117;
-      color: white;
+      border: 1px solid #58a6ff;
+      color: #c9d1d9;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
     }
     .quiz-question {
       margin-bottom: 20px;
     }
-    .quiz-options label {
-      display: block;
-      margin-top: 5px;
-    }
-    .bio-output {
-      margin-top: 10px;
-      font-style: italic;
-    }
-    #leaderboard {
-      background-color: #1e1e1e;
-      padding: 10px;
-      border-radius: 12px;
-      margin-top: 20px;
-    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Mapperhub</h1>
-    <p>Explore top mapping creators from Instagram!</p>
-  </header>
-
-  <section>
-    <h2>Featured Mappers</h2>
-    <div class="profile">
-      <div class="card">
-        <img src="https://i.imgur.com/0Z8YcTO.jpeg" alt="@czechiamapper">
-        <p>@czechiamapper</p>
-        <button onclick="window.open('https://instagram.com/czechiamapper')">Follow</button>
+  <header>MAPPERS HUB</header>
+  <div class="container">
+    <div class="section-title">🌍 Featured Mappers</div>
+    <div class="profile-grid">
+      <div class="profile-card">
+        <img src="https://i.imgur.com/BQSmYm7.jpeg" alt="@czechiamapper">
+        <a href="https://instagram.com/czechiamapper" target="_blank">@czechiamapper</a>
       </div>
-      <div class="card">
-        <img src="https://i.imgur.com/8XvNdRw.jpeg" alt="@central_europe_mapper">
-        <p>@central_europe_mapper</p>
-        <button onclick="window.open('https://instagram.com/central_europe_mapper')">Follow</button>
+      <div class="profile-card">
+        <img src="https://i.imgur.com/NRNdjJh.jpeg" alt="@tugamapper">
+        <a href="https://instagram.com/tugamapper" target="_blank">@tugamapper</a>
       </div>
-      <div class="card">
-        <img src="https://i.imgur.com/HUQ0601.jpeg" alt="@mapping_brasilien">
-        <p>@mapping_brasilien</p>
-        <button onclick="window.open('https://instagram.com/mapping_brasilien')">Follow</button>
-      </div>
-      <div class="card">
-        <img src="https://i.imgur.com/0o364Bp.jpeg" alt="@syrianmapper1290">
-        <p>@syrianmapper1290</p>
-        <button onclick="window.open('https://instagram.com/syrianmapper1290')">Follow</button>
-      </div>
-      <div class="card">
-        <img src="https://i.imgur.com/zQOmZC7.jpeg" alt="@mapper_from_mus">
-        <p>@mapper_from_mus</p>
-        <button onclick="window.open('https://instagram.com/mapper_from_mus')">Follow</button>
-      </div>
+      <!-- Adicione os outros 13 perfis aqui seguindo o mesmo modelo -->
     </div>
-  </section>
 
-  <section>
-    <h2>Bio Generator</h2>
-    <label for="style">Choose a style:</label>
-    <select id="style">
-      <option value="funny">Funny</option>
-      <option value="historical">Historical</option>
-      <option value="professional">Professional</option>
-    </select>
-    <input type="text" id="username" placeholder="Your IG username" />
-    <button onclick="generateBio()">Generate Bio</button>
-    <p class="bio-output" id="bioOutput"></p>
-  </section>
-
-  <section>
-    <h2>Quiz - Europe, Asia, Latin America</h2>
-    <form id="quizForm">
-      <div id="quizQuestions"></div>
-      <button type="submit">Submit Quiz</button>
-    </form>
-    <div id="quizResult"></div>
-  </section>
-
-  <section>
-    <h2>Leaderboard</h2>
-    <div id="leaderboard">
-      <p>Top scores will appear here soon!</p>
+    <div class="section-title">🧠 Bio Generator</div>
+    <div class="bio-generator">
+      <select id="tone">
+        <option>🇧🇷 Funny 😂</option>
+        <option>📊 Informative</option>
+        <option>🎯 Minimalist</option>
+        <option>🗺️ Country Lover</option>
+        <option>🚀 Explorer</option>
+      </select>
+      <select id="style">
+        <option>🌐 Mapper since 2020</option>
+        <option>📌 Based in Europe</option>
+        <option>🇦🇸 I love Asia</option>
+        <option>📸 Reels daily</option>
+        <option>🧠 Facts enthusiast</option>
+      </select>
+      <select id="tag">
+        <option>🔥 Trending</option>
+        <option>📍 Geography Fan</option>
+        <option>🤓 Nerd Mode</option>
+        <option>🎬 Editing Obsessed</option>
+        <option>⚡ Fast Learner</option>
+      </select>
+      <select id="mood">
+        <option>😎 Cool Vibes</option>
+        <option>💥 Energetic</option>
+        <option>🧭 Adventurous</option>
+        <option>📚 Historian</option>
+        <option>🌏 Global Citizen</option>
+      </select>
+      <button onclick="generateBio()">Generate Bio</button>
+      <p id="bio-output"></p>
     </div>
-  </section>
 
-  <footer>
-    <p>&copy; 2025 Mapperhub</p>
-  </footer>
+    <div class="section-title">📊 World Regions Quiz</div>
+    <div class="quiz">
+      <div id="quiz-container"></div>
+      <button onclick="submitQuiz()">Submit Quiz</button>
+      <p id="quiz-result"></p>
+    </div>
+
+    <div class="section-title">🏆 Leaderboard</div>
+    <div class="leaderboard">
+      <ul id="leaderboard-list"></ul>
+    </div>
+  </div>
 
   <script>
-    function generateBio() {
-      const style = document.getElementById("style").value;
-      const username = document.getElementById("username").value;
-      let bio = "";
-      if (style === "funny") bio = `${username} - Cartographer by day, meme lord by night.`;
-      if (style === "historical") bio = `${username} - Mapping civilizations, one border at a time.`;
-      if (style === "professional") bio = `${username} | Geo-content creator | Sharing facts & maps.`;
-      document.getElementById("bioOutput").textContent = bio;
-    }
-
-    const questions = [
-      { q: "What is the capital of Portugal?", o: ["Lisbon", "Madrid", "Barcelona", "Porto"], a: 0 },
-      { q: "Which Asian country has the highest population?", o: ["India", "Indonesia", "China", "Pakistan"], a: 2 },
-      { q: "In which country is Machu Picchu located?", o: ["Peru", "Mexico", "Chile", "Brazil"], a: 0 },
-      { q: "Which sea separates Europe and Asia?", o: ["Black Sea", "Baltic Sea", "Red Sea", "Caspian Sea"], a: 0 },
-      { q: "Which is the largest country in South America?", o: ["Argentina", "Colombia", "Brazil", "Venezuela"], a: 2 },
-      { q: "Which European country has the most volcanoes?", o: ["Italy", "Iceland", "Greece", "Turkey"], a: 1 },
-      { q: "What is the longest river in Asia?", o: ["Yangtze", "Mekong", "Ganges", "Indus"], a: 0 },
-      { q: "Which Latin American country is landlocked?", o: ["Bolivia", "Chile", "Ecuador", "Peru"], a: 0 },
-      { q: "Which Asian island nation is east of China?", o: ["Taiwan", "Philippines", "Japan", "Indonesia"], a: 2 },
-      { q: "Where is Mount Elbrus located?", o: ["Russia", "Georgia", "Turkey", "Ukraine"], a: 0 }
+    const quizData = [
+      { q: "What is the capital of Kazakhstan?", a: "Astana" },
+      { q: "Which country borders both Asia and Europe?", a: "Turkey" },
+      { q: "What is the official language of Brazil?", a: "Portuguese" },
+      { q: "Which country has the most volcanoes?", a: "Indonesia" },
+      { q: "What is the capital of Slovakia?", a: "Bratislava" },
+      { q: "Which Latin American country is landlocked?", a: "Paraguay" },
+      { q: "Where is the Danube River located?", a: "Europe" },
+      { q: "Which Asian country is an archipelago?", a: "Philippines" },
+      { q: "What is the capital of Argentina?", a: "Buenos Aires" },
+      { q: "Which country is famous for Machu Picchu?", a: "Peru" },
+      { q: "Which country is part of the Baltic States?", a: "Estonia" },
+      { q: "What language is spoken in Iran?", a: "Persian" },
+      { q: "Where is the Gobi Desert?", a: "Asia" },
+      { q: "What is the capital of Chile?", a: "Santiago" },
+      { q: "Which country uses the won?", a: "South Korea" },
+      { q: "What is the largest country in South America?", a: "Brazil" },
+      { q: "Which country has the city of Tashkent?", a: "Uzbekistan" },
+      { q: "What is the currency of Japan?", a: "Yen" },
+      { q: "Which country has Budapest?", a: "Hungary" },
+      { q: "What country is Mount Fuji in?", a: "Japan" }
     ];
 
-    const quizContainer = document.getElementById("quizQuestions");
-    questions.forEach((q, i) => {
+    const quizContainer = document.getElementById("quiz-container");
+    const leaderboard = document.getElementById("leaderboard-list");
+
+    quizData.forEach((q, i) => {
       const div = document.createElement("div");
       div.className = "quiz-question";
-      div.innerHTML = `<p>${i + 1}. ${q.q}</p>` +
-        q.o.map((opt, j) => `<label><input type="radio" name="q${i}" value="${j}" /> ${opt}</label>`).join("");
+      div.innerHTML = `<p>${i + 1}. ${q.q}</p><input id="q${i}" type="text">`;
       quizContainer.appendChild(div);
     });
 
-    document.getElementById("quizForm").addEventListener("submit", function(e) {
-      e.preventDefault();
+    function submitQuiz() {
       let score = 0;
-      questions.forEach((q, i) => {
-        const selected = document.querySelector(`input[name=q${i}]:checked`);
-        if (selected && parseInt(selected.value) === q.a) score++;
+      quizData.forEach((q, i) => {
+        const userAnswer = document.getElementById(`q${i}`).value.trim().toLowerCase();
+        if (userAnswer === q.a.toLowerCase()) score++;
       });
-      document.getElementById("quizResult").textContent = `You scored ${score} / ${questions.length}`;
-    });
+      document.getElementById("quiz-result").innerText = `You scored ${score}/20!`;
+      const li = document.createElement("li");
+      li.textContent = `Player: ${score}/20`;
+      leaderboard.appendChild(li);
+    }
+
+    function generateBio() {
+      const tone = document.getElementById("tone").value;
+      const style = document.getElementById("style").value;
+      const tag = document.getElementById("tag").value;
+      const mood = document.getElementById("mood").value;
+      document.getElementById("bio-output").innerText = `${tone} | ${style} | ${tag} | ${mood}`;
+    }
   </script>
 </body>
 </html>
-
 
 
