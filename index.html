@@ -1,468 +1,569 @@
 import React, { useState, useEffect, useRef } from "react";
 
-// ---- MOCK MAP DATA (Replace with your real SVG path data for continents & countries) ----
-const MAPS = [
-  { id: "world", name: "World Map" },
-  { id: "africa", name: "Africa" },
-  { id: "europe", name: "Europe" },
-  { id: "asia", name: "Asia" },
-  { id: "usa", name: "USA" },
-  { id: "brazil", name: "Brazil" },
-];
-
-// Dummy region data structure per map for demonstration
-const MAP_DATA = {
-  world: {
-    regions: [
-      { id: "na", name: "North America", path: "M10,10 L100,10 L100,100 L10,100 Z" },
-      { id: "sa", name: "South America", path: "M110,110 L200,110 L200,200 L110,200 Z" },
-      { id: "eu", name: "Europe", path: "M210,10 L300,10 L300,100 L210,100 Z" },
-      // Add more regions
-    ],
-  },
-  africa: {
-    regions: [
-      { id: "af", name: "Africa Region", path: "M10,10 L100,10 L100,100 L10,100 Z" },
-      // More regions
-    ],
-  },
-  // Add others similarly
+// Sample map data - these are simplified SVG path placeholders
+const MAPS = {
+  continents: [
+    { id: "africa", name: "Africa", path: "M10 80 L90 80 L90 90 L10 90 Z" },
+    { id: "asia", name: "Asia", path: "M20 10 L80 10 L80 70 L20 70 Z" },
+    { id: "europe", name: "Europe", path: "M40 20 L60 20 L60 50 L40 50 Z" },
+  ],
+  countries: [
+    { id: "brazil", name: "Brazil", path: "M30 60 L70 60 L70 80 L30 80 Z" },
+    { id: "usa", name: "USA", path: "M10 10 L30 10 L30 40 L10 40 Z" },
+    { id: "china", name: "China", path: "M50 30 L70 30 L70 50 L50 50 Z" },
+  ],
 };
 
-// Expanded colors array
 const COLORS = [
-  "#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5",
-  "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50",
-  "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800",
-  "#ff5722", "#795548", "#607d8b", "#000000", "#ffffff",
-  "#b71c1c", "#880e4f", "#4a148c", "#311b92", "#1a237e",
-  "#0d47a1", "#01579b", "#006064", "#004d40", "#1b5e20"
+  "#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4",
+  "#46f0f0", "#f032e6", "#bcf60c", "#fabebe", "#008080", "#e6beff",
+  "#9a6324", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1",
+  "#000075", "#808080", "#ffffff", "#000000",
 ];
 
-// Constants for SVG canvas size
-const WIDTH = 800;
-const HEIGHT = 600;
+export default function MapApp() {
+  // --- AUTH STATES ---
+  const [users, setUsers] = useState([]); // simple in-memory user store
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authPage, setAuthPage] = useState("welcome"); // welcome, login, signup
 
-function Geomarkr() {
-  // State for navigation
-  const [page, setPage] = useState("home"); // home, register, chooseMap, editor, about
+  // --- FORM STATES ---
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
 
-  // For map selection
-  const [selectedMapId, setSelectedMapId] = useState(null);
+  // --- MAP SELECTION ---
+  const [mapType, setMapType] = useState("continents"); // continents or countries
+  const [search, setSearch] = useState("");
 
-  // Editor states
-  const [mapData, setMapData] = useState(null);
-  const [regionColors, setRegionColors] = useState({});
-  const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+  // --- MAP COLOR & STYLE ---
+  const [regionColors, setRegionColors] = useState({}); // { regionId: color }
+  const [borderColor, setBorderColor] = useState("#000000");
+  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+  const [legendEnabled, setLegendEnabled] = useState(false);
 
-  // Search term for filtering regions
-  const [searchTerm, setSearchTerm] = useState("");
-
-  // Zoom and pan states
+  // --- ZOOM & PAN ---
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
+  const isPanning = useRef(false);
+  const panStart = useRef({ x: 0, y: 0 });
   const offsetStart = useRef({ x: 0, y: 0 });
 
-  // SVG ref for export
+  // --- BACKGROUND IMAGE ---
+  const [bgImage, setBgImage] = useState(null);
+
+  // --- REF TO SVG FOR EXPORT ---
   const svgRef = useRef(null);
 
-  // Loading state
-  const [loading, setLoading] = useState(false);
+  // -------------- AUTH HANDLERS -----------------
 
-  // When map changes, load new map data
-  useEffect(() => {
-    if (!selectedMapId) return;
-    setLoading(true);
-    // Simulate fetch with timeout
-    setTimeout(() => {
-      setMapData(MAP_DATA[selectedMapId]);
-      setRegionColors({});
-      setZoom(1);
-      setOffset({ x: 0, y: 0 });
-      setLoading(false);
-    }, 300);
-  }, [selectedMapId]);
+  function handleSignup() {
+    if (!username || !password) {
+      setAuthError("Please enter username and password");
+      return;
+    }
+    if (users.find(u => u.username === username)) {
+      setAuthError("Username already taken");
+      return;
+    }
+    const newUser = { username, password };
+    setUsers(prev => [...prev, newUser]);
+    setCurrentUser(newUser);
+    setAuthPage("map");
+    setAuthError("");
+  }
 
-  // Mouse event handlers for panning
-  function onMouseDown(e) {
-    setDragging(true);
-    dragStart.current = { x: e.clientX, y: e.clientY };
+  function handleLogin() {
+    const user = users.find(u => u.username === username && u.password === password);
+    if (!user) {
+      setAuthError("Invalid username or password");
+      return;
+    }
+    setCurrentUser(user);
+    setAuthPage("map");
+    setAuthError("");
+  }
+
+  function logout() {
+    setCurrentUser(null);
+    setAuthPage("welcome");
+    setUsername("");
+    setPassword("");
+    setRegionColors({});
+    setBorderColor("#000000");
+    setBackgroundColor("#ffffff");
+    setLegendEnabled(false);
+    setZoom(1);
+    setOffset({ x: 0, y: 0 });
+    setBgImage(null);
+  }
+
+  // ----------- MAP INTERACTION -------------------
+
+  const mapRegions = MAPS[mapType].filter(region =>
+    region.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  function handleRegionClick(id) {
+    // Cycle color or set to first color
+    const current = regionColors[id];
+    const currentIndex = COLORS.indexOf(current);
+    const nextIndex = currentIndex === -1 || currentIndex === COLORS.length - 1 ? 0 : currentIndex + 1;
+    setRegionColors(prev => ({ ...prev, [id]: COLORS[nextIndex] }));
+  }
+
+  // ----------- ZOOM AND PAN -----------------------
+
+  function handleWheel(e) {
+    e.preventDefault();
+    const delta = e.deltaY;
+    setZoom(z => {
+      let nextZoom = z - delta * 0.001;
+      if (nextZoom < 0.5) nextZoom = 0.5;
+      if (nextZoom > 5) nextZoom = 5;
+      return nextZoom;
+    });
+  }
+
+  function handleMouseDown(e) {
+    isPanning.current = true;
+    panStart.current = { x: e.clientX, y: e.clientY };
     offsetStart.current = { ...offset };
   }
-  function onMouseMove(e) {
-    if (!dragging) return;
-    const dx = e.clientX - dragStart.current.x;
-    const dy = e.clientY - dragStart.current.y;
+
+  function handleMouseMove(e) {
+    if (!isPanning.current) return;
+    const dx = e.clientX - panStart.current.x;
+    const dy = e.clientY - panStart.current.y;
     setOffset({ x: offsetStart.current.x + dx, y: offsetStart.current.y + dy });
   }
-  function onMouseUp() {
-    setDragging(false);
+
+  function handleMouseUp() {
+    isPanning.current = false;
   }
 
-  // Handle region click to paint color
-  function onRegionClick(regionId) {
-    setRegionColors((prev) => ({
-      ...prev,
-      [regionId]: selectedColor,
-    }));
-  }
+  // ------------ EXPORT TO PNG -------------------
 
-  // Filter regions based on search
-  const filteredRegions = mapData?.regions.filter(r =>
-    r.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
-
-  // Export functions
-  function exportPNG() {
+  async function saveAsPNG() {
     if (!svgRef.current) return;
-    const svg = svgRef.current;
-    const serializer = new XMLSerializer();
-    const source = serializer.serializeToString(svg);
 
-    // Convert SVG to PNG using canvas
-    const img = new Image();
-    const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+    const svgElement = svgRef.current;
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
     const url = URL.createObjectURL(svgBlob);
 
-    img.onload = () => {
+    const image = new Image();
+    image.onload = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = WIDTH;
-      canvas.height = HEIGHT;
+      canvas.width = image.width * 2;
+      canvas.height = image.height * 2;
       const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#222"; // background fill
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
-      ctx.drawImage(img, 0, 0, WIDTH, HEIGHT);
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      if (legendEnabled) {
+        // Draw legend
+        const legendX = 20;
+        const legendY = 20;
+        ctx.font = "16px Arial";
+        ctx.fillStyle = "#000";
+        ctx.fillText("Legend:", legendX, legendY);
+
+        Object.entries(regionColors).forEach(([regionId, color], i) => {
+          ctx.fillStyle = color;
+          ctx.fillRect(legendX, legendY + 10 + 20 * (i + 1), 18, 18);
+          ctx.fillStyle = "#000";
+          ctx.fillText(regionId, legendX + 25, legendY + 25 + 20 * i);
+        });
+      }
+
+      const pngUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = pngUrl;
+      a.download = "map.png";
+      a.click();
+
       URL.revokeObjectURL(url);
-
-      canvas.toBlob(blob => {
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `${selectedMapId || "map"}-geomarkr.png`;
-        a.click();
-      });
     };
-    img.src = url;
+    image.onerror = () => alert("Error exporting image");
+    image.src = url;
   }
 
-  function exportSVG() {
-    if (!svgRef.current) return;
-    const svg = svgRef.current;
-    const serializer = new XMLSerializer();
-    let source = serializer.serializeToString(svg);
+  // ------------ BACKGROUND IMAGE UPLOAD --------------
 
-    // Add XML declaration and namespace if missing
-    if (!source.match(/^<\?xml/)) {
-      source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-    }
-    if (!source.includes('xmlns="http://www.w3.org/2000/svg"')) {
-      source = source.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
-    }
-
-    const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${selectedMapId || "map"}-geomarkr.svg`;
-    a.click();
-    URL.revokeObjectURL(url);
+  function handleBgImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setBgImage(reader.result);
+    reader.readAsDataURL(file);
   }
 
-  // UI COMPONENTS:
+  // ----------------- JSX -------------------------------------
 
-  // Color palette with more colors
-  function ColorPalette({ colors, selected, onSelect }) {
+  if (authPage !== "map") {
+    // AUTH UI
     return (
-      <div className="flex flex-wrap gap-2 max-w-md justify-center">
-        {colors.map((color, i) => (
-          <button
-            key={i}
-            className="w-8 h-8 rounded-full border-2 focus:outline-none transition-transform hover:scale-110"
-            style={{
-              backgroundColor: color,
-              borderColor: selected === color ? "#fff" : "transparent",
-              boxShadow: selected === color ? "0 0 6px white" : "none",
-            }}
-            aria-label={`Select color ${color}`}
-            onClick={() => onSelect(color)}
-          />
-        ))}
-      </div>
-    );
-  }
+      <div style={styles.app}>
+        <h1 style={styles.title}>Welcome to Map Designer</h1>
 
-  // Map selection list component
-  function MapSelector({ maps, selectedId, onSelect }) {
-    return (
-      <div className="flex flex-wrap gap-3 max-w-xl justify-center">
-        {maps.map(m => (
-          <button
-            key={m.id}
-            onClick={() => onSelect(m.id)}
-            className={`px-4 py-2 rounded-md font-semibold transition-colors ${
-              selectedId === m.id
-                ? "bg-indigo-600 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-indigo-500 hover:text-white"
-            }`}
-            aria-label={`Select map ${m.name}`}
-          >
-            {m.name}
-          </button>
-        ))}
-      </div>
-    );
-  }
-
-  // ------------------ PAGE RENDERS --------------------
-
-  if (page === "home") {
-    return (
-      <main className="flex flex-col items-center justify-center min-h-screen p-6 gap-12 bg-gradient-to-tr from-indigo-900 via-purple-900 to-indigo-900 text-white">
-        <h1 className="text-6xl font-extrabold select-none">Geomarkr</h1>
-        <p className="max-w-xl text-center text-xl font-light">
-          Welcome to Geomarkr! Create and customize maps of continents and countries with ease.
-          No login required to start editing your maps instantly.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-6">
-          <button
-            className="px-10 py-4 bg-indigo-600 rounded-lg font-semibold hover:bg-indigo-700 transition"
-            onClick={() => setPage("register")}
-            aria-label="Create an account"
-          >
-            Create Account
-          </button>
-          <button
-            className="px-10 py-4 border border-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white font-semibold transition"
-            onClick={() => setPage("chooseMap")}
-            aria-label="Choose a map to edit"
-          >
-            Choose Map
-          </button>
-        </div>
-        <footer className="mt-20 text-sm text-gray-400 select-none">
-          &copy; 2025 Geomarkr. All rights reserved.
-        </footer>
-      </main>
-    );
-  }
-
-  if (page === "register") {
-    return (
-      <main className="flex flex-col items-center justify-center min-h-screen p-6 gap-8 bg-gray-900 text-white">
-        <h2 className="text-5xl font-bold select-none">Create Your Account</h2>
-        <p className="max-w-lg text-center mb-6">
-          For now, this is just a placeholder. No account is needed to create and edit maps.
-          You can start immediately without registering.
-        </p>
-        <button
-          className="px-8 py-3 bg-indigo-600 rounded hover:bg-indigo-700 font-semibold transition"
-          onClick={() => setPage("home")}
-          aria-label="Back to home"
-        >
-          Back to Home
-        </button>
-      </main>
-    );
-  }
-
-  if (page === "chooseMap") {
-    return (
-      <main className="flex flex-col items-center min-h-screen p-6 gap-6 bg-gray-900 text-white">
-        <h2 className="text-4xl font-extrabold select-none mb-4">Choose Your Map</h2>
-        <MapSelector maps={MAPS} selectedId={selectedMapId} onSelect={setSelectedMapId} />
-        <div className="flex gap-6 mt-6">
-          <button
-            onClick={() => selectedMapId && setPage("editor")}
-            disabled={!selectedMapId}
-            className={`px-10 py-3 rounded-lg font-semibold transition ${
-              selectedMapId
-                ? "bg-indigo-600 hover:bg-indigo-700"
-                : "bg-gray-700 cursor-not-allowed"
-            }`}
-            aria-label="Open editor with selected map"
-          >
-            Open Editor
-          </button>
-          <button
-            onClick={() => setPage("home")}
-            className="px-10 py-3 border border-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white font-semibold transition"
-            aria-label="Back to home"
-          >
-            Cancel
-          </button>
-        </div>
-      </main>
-    );
-  }
-
-  if (page === "editor") {
-    return (
-      <main
-        className="flex flex-col items-center p-4 bg-gray-900 min-h-screen gap-4 relative select-none"
-        onMouseMove={onMouseMove}
-        onMouseUp={onMouseUp}
-        onMouseLeave={onMouseUp}
-      >
-        <header className="flex flex-wrap justify-between items-center w-full max-w-7xl mb-4 gap-4">
-          <h2 className="text-3xl font-bold select-none">
-            Editing Map:{" "}
-            <span className="text-indigo-400">
-              {MAPS.find((m) => m.id === selectedMapId)?.name || "Unknown"}
-            </span>
-          </h2>
-
-          <div className="flex gap-3 flex-wrap justify-center">
+        {authPage === "welcome" && (
+          <>
             <button
-              onClick={() => setPage("chooseMap")}
-              className="px-4 py-2 border border-gray-500 rounded hover:bg-gray-600 hover:text-white transition"
-              aria-label="Back to map selection"
+              style={styles.button}
+              onClick={() => setAuthPage("login")}
             >
-              Back to Maps
+              Login
             </button>
             <button
-              onClick={() => {
-                setRegionColors({});
-                setZoom(1);
-                setOffset({ x: 0, y: 0 });
-                setSearchTerm("");
-              }}
-              className="px-4 py-2 border border-indigo-600 rounded hover:bg-indigo-600 hover:text-white transition"
-              aria-label="Reset all changes"
+              style={{ ...styles.button, marginLeft: 20 }}
+              onClick={() => setAuthPage("signup")}
             >
-              Reset
+              Create Account
             </button>
-            <button
-              onClick={exportPNG}
-              className="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 transition"
-              aria-label="Export map as PNG"
-            >
-              Export PNG
-            </button>
-            <button
-              onClick={exportSVG}
-              className="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 transition"
-              aria-label="Export map as SVG"
-            >
-              Export SVG
-            </button>
-          </div>
-        </header>
-
-        {/* Controls */}
-        <section className="flex flex-wrap gap-6 justify-center max-w-7xl w-full mb-4">
-          <div className="flex flex-col gap-2 items-center">
-            <label htmlFor="colorPalette" className="font-semibold mb-1 text-gray-200 select-none">
-              Select Color
-            </label>
-            <ColorPalette colors={COLORS} selected={selectedColor} onSelect={setSelectedColor} />
-          </div>
-
-          <div className="flex flex-col gap-1 max-w-sm w-full">
-            <label htmlFor="searchBox" className="font-semibold text-gray-200 select-none">
-              Search Country/Region
-            </label>
-            <input
-              id="searchBox"
-              type="search"
-              className="rounded-md px-3 py-2 text-black w-full focus:outline-indigo-500"
-              placeholder="Type to filter countries"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Search countries or regions"
-            />
-          </div>
-
-          <div className="flex flex-col items-center gap-2 select-none">
-            <label className="font-semibold text-gray-200">Zoom</label>
-            <div className="flex items-center gap-2">
-              <button
-                aria-label="Zoom out"
-                className="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 transition"
-                onClick={() => setZoom((z) => Math.max(0.3, z - 0.2))}
-              >
-                −
-              </button>
-              <span
-                aria-live="polite"
-                aria-atomic="true"
-                className="w-12 text-center select-text"
-              >
-                {zoom.toFixed(2)}×
-              </span>
-              <button
-                aria-label="Zoom in"
-                className="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 transition"
-                onClick={() => setZoom((z) => Math.min(10, z + 0.2))}
-              >
-                +
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Loading message */}
-        {loading && (
-          <div className="text-lg text-indigo-400 my-12 select-none">Loading map data...</div>
+          </>
         )}
 
-        {/* Map SVG container */}
-        {!loading && (
-          <div
-            className={`overflow-hidden rounded-lg shadow-lg bg-gray-800 border border-gray-700 select-none`}
-            style={{ width: WIDTH, height: HEIGHT, cursor: dragging ? "grabbing" : "grab" }}
-            onMouseDown={onMouseDown}
-          >
-            <svg
-              ref={svgRef}
-              width={WIDTH}
-              height={HEIGHT}
-              style={{
-                transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
-                transformOrigin: "0 0",
-                userSelect: "none",
-                touchAction: "none",
-                display: "block",
-              }}
-              aria-label="Editable map"
-              role="img"
-              onClick={(e) => {
-                // Only allow clicks on paths to color them
-                if (e.target.tagName === "path" && e.target.dataset.regionId) {
-                  const id = e.target.dataset.regionId;
-                  onRegionClick(id);
-                }
-              }}
+        {(authPage === "login" || authPage === "signup") && (
+          <div style={styles.form}>
+            <input
+              style={styles.input}
+              placeholder="Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+            />
+            <input
+              style={styles.input}
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+            />
+            {authError && <p style={styles.error}>{authError}</p>}
+
+            {authPage === "login" && (
+              <>
+                <button style={styles.button} onClick={handleLogin}>Login</button>
+                <button style={styles.linkButton} onClick={() => setAuthPage("welcome")}>Back</button>
+              </>
+            )}
+
+            {authPage === "signup" && (
+              <>
+                <button style={styles.button} onClick={handleSignup}>Create Account</button>
+                <button style={styles.linkButton} onClick={() => setAuthPage("welcome")}>Back</button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // MAP DESIGNER UI
+  return (
+    <div style={styles.app}>
+      <header style={styles.header}>
+        <h2>Welcome, {currentUser.username}!</h2>
+        <button style={styles.logoutBtn} onClick={logout}>Logout</button>
+      </header>
+
+      {/* Map Type Selector */}
+      <section style={styles.controlsSection}>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="mapType"
+              checked={mapType === "continents"}
+              onChange={() => setMapType("continents")}
+            />
+            Continents
+          </label>
+          <label style={{ marginLeft: 20 }}>
+            <input
+              type="radio"
+              name="mapType"
+              checked={mapType === "countries"}
+              onChange={() => setMapType("countries")}
+            />
+            Countries
+          </label>
+        </div>
+
+        {/* Search */}
+        <input
+          type="text"
+          placeholder="Search region..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={styles.searchInput}
+        />
+      </section>
+
+      {/* Map SVG Container */}
+      <section
+        style={{
+          ...styles.mapContainer,
+          backgroundColor,
+          backgroundImage: bgImage ? `url(${bgImage})` : "none",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
+        <svg
+          ref={svgRef}
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 100 100"
+          style={{
+            cursor: isPanning.current ? "grabbing" : "grab",
+            transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+            transition: "transform 0.1s",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          {mapRegions.map(region => (
+            <path
+              key={region.id}
+              d={region.path}
+              fill={regionColors[region.id] || "#ccc"}
+              stroke={borderColor}
+              strokeWidth="1"
+              onClick={() => handleRegionClick(region.id)}
+              style={{ cursor: "pointer", transition: "fill 0.3s" }}
+              title={region.name}
+            />
+          ))}
+        </svg>
+      </section>
+
+      {/* Controls Panel */}
+      <section style={styles.controlsSection}>
+        <div>
+          <label>Border Color:</label>
+          <input
+            type="color"
+            value={borderColor}
+            onChange={e => setBorderColor(e.target.value)}
+            style={{ marginLeft: 10 }}
+          />
+        </div>
+
+        <div>
+          <label>Background Color:</label>
+          <input
+            type="color"
+            value={backgroundColor}
+            onChange={e => setBackgroundColor(e.target.value)}
+            style={{ marginLeft: 10 }}
+          />
+        </div>
+
+        <div>
+          <label>Add Background Image:</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleBgImageUpload}
+            style={{ marginLeft: 10 }}
+          />
+          {bgImage && (
+            <button
+              style={{ marginLeft: 10 }}
+              onClick={() => setBgImage(null)}
+              title="Remove background image"
             >
-              {filteredRegions.map((region) => (
-                <path
-                  key={region.id}
-                  data-region-id={region.id}
-                  d={region.path}
-                  fill={regionColors[region.id] || "#444"}
-                  stroke="#222"
-                  strokeWidth="0.5"
-                  className="transition-colors duration-200 cursor-pointer"
-                  aria-label={`Region ${region.name}`}
-                  tabIndex={0}
-                  onKeyDown={(ev) => {
-                    // Allow coloring regions with keyboard (Enter or Space)
-                    if ((ev.key === "Enter" || ev.key === " ") && region.id) {
-                      ev.preventDefault();
-                      onRegionClick(region.id);
-                    }
+              Remove Image
+            </button>
+          )}
+        </div>
+
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={legendEnabled}
+              onChange={e => setLegendEnabled(e.target.checked)}
+            />
+            Show Legend
+          </label>
+        </div>
+
+        {/* Color palette for regions */}
+        <div style={{ marginTop: 10 }}>
+          <label>Click region on map to cycle colors. Palette:</label>
+          <div style={styles.palette}>
+            {COLORS.map(c => (
+              <div
+                key={c}
+                style={{
+                  backgroundColor: c,
+                  width: 24,
+                  height: 24,
+                  borderRadius: 4,
+                  marginRight: 8,
+                  border: "1px solid #ccc",
+                  display: "inline-block",
+                }}
+                title={c}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Zoom controls */}
+        <div style={{ marginTop: 10 }}>
+          <button onClick={() => setZoom(z => Math.min(5, z + 0.2))}>Zoom In +</button>
+          <button onClick={() => setZoom(z => Math.max(0.5, z - 0.2))} style={{ marginLeft: 10 }}>Zoom Out -</button>
+          <button onClick={() => { setZoom(1); setOffset({ x: 0, y: 0 }); }} style={{ marginLeft: 10 }}>
+            Reset View
+          </button>
+        </div>
+
+        {/* Save button */}
+        <div style={{ marginTop: 20 }}>
+          <button onClick={saveAsPNG} style={styles.saveButton}>Save Map as PNG</button>
+        </div>
+      </section>
+
+      {/* Legend Display */}
+      {legendEnabled && (
+        <section style={styles.legend}>
+          <h4>Legend</h4>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {Object.entries(regionColors).map(([regionId, color]) => (
+              <li key={regionId} style={{ marginBottom: 6 }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: 18,
+                    height: 18,
+                    backgroundColor: color,
+                    marginRight: 10,
+                    border: "1px solid #000",
                   }}
                 />
-              ))}
-            </svg>
-          </div>
-        )}
-      </main>
-    );
-  }
-
-  return null;
+                {regionId}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
 }
 
-export default Geomarkr;
+const styles = {
+  app: {
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+    maxWidth: 1200,
+    margin: "auto",
+    padding: 20,
+  },
+  title: {
+    fontSize: 36,
+    marginBottom: 30,
+    textAlign: "center",
+  },
+  button: {
+    backgroundColor: "#4363d8",
+    color: "white",
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer",
+    fontSize: 16,
+  },
+  logoutBtn: {
+    backgroundColor: "#d9534f",
+    border: "none",
+    borderRadius: 6,
+    padding: "6px 14px",
+    cursor: "pointer",
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  linkButton: {
+    background: "none",
+    border: "none",
+    color: "#4363d8",
+    cursor: "pointer",
+    marginLeft: 10,
+    fontSize: 14,
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    maxWidth: 320,
+    margin: "auto",
+  },
+  input: {
+    fontSize: 16,
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 6,
+    border: "1px solid #ccc",
+  },
+  error: {
+    color: "red",
+    marginBottom: 10,
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  controlsSection: {
+    marginBottom: 20,
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 20,
+  },
+  searchInput: {
+    padding: 8,
+    fontSize: 16,
+    borderRadius: 6,
+    border: "1px solid #ccc",
+    minWidth: 220,
+  },
+  mapContainer: {
+    border: "2px solid #ddd",
+    borderRadius: 12,
+    height: 400,
+    overflow: "hidden",
+    marginBottom: 20,
+    userSelect: "none",
+  },
+  palette: {
+    display: "flex",
+    flexWrap: "wrap",
+    maxWidth: 360,
+    marginTop: 8,
+  },
+  saveButton: {
+    backgroundColor: "#28a745",
+    color: "white",
+    border: "none",
+    padding: "10px 24px",
+    borderRadius: 6,
+    fontSize: 16,
+    cursor: "pointer",
+  },
+  legend: {
+    backgroundColor: "#f9f9f9",
+    border: "1px solid #ccc",
+    borderRadius: 6,
+    padding: 16,
+    maxWidth: 300,
+  },
+};
+
