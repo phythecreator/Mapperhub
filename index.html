@@ -3,154 +3,614 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Geomarkr - Map Editor</title>
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson@3"></script>
+<title>Geomarkr — Advanced Map Editor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/d3@7/dist/d3.min.js"></script>
 <style>
-  body { margin:0; font-family: Arial, sans-serif; background:#111; color:#eee;}
-  #map { width: 100%; height: 600px; }
-  .country {
-    stroke: #333;
-    stroke-width: 0.5;
-    cursor: pointer;
-  }
-  .country:hover {
-    stroke: #fff;
-    stroke-width: 1.5;
-  }
-  #color-palette button {
-    width: 30px; height: 30px; margin: 3px; border: none; cursor: pointer;
-  }
-  #controls {
-    padding: 10px;
-    background: #222;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-  #search {
-    padding: 6px;
-    font-size: 16px;
-    border-radius: 4px;
-    border: none;
-    flex-grow: 1;
-  }
-  button {
-    background: #06f;
-    border: none;
-    padding: 8px 14px;
+  body,html,#root {
+    margin:0; padding:0; height:100%;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
     color: white;
-    border-radius: 4px;
-    cursor: pointer;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
   }
-  button:hover {
-    background: #0053ba;
+  a {
+    text-decoration: none;
+  }
+  svg {
+    user-select:none;
+  }
+  .region {
+    cursor: pointer;
+    transition: fill 0.3s, stroke 0.3s;
+    stroke: #222;
+    stroke-width: 0.3px;
+  }
+  .region:hover {
+    stroke: #eee;
+    stroke-width: 1.2px;
+    filter: drop-shadow(0 0 4px rgba(255 255 255 / 0.4));
+  }
+  #tooltip {
+    position: absolute;
+    background: #111827cc;
+    padding: 8px 16px;
+    border-radius: 8px;
+    pointer-events:none;
+    font-size: 1rem;
+    display:none;
+    white-space: nowrap;
+    z-index: 100;
+    user-select:none;
+  }
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 </style>
 </head>
 <body>
+<div id="root"></div>
+<div id="tooltip"></div>
 
-<div id="controls">
-  <input id="search" placeholder="Search countries..." />
-  <div id="color-palette"></div>
-  <button id="export-btn">Export PNG</button>
-</div>
-<div id="map"></div>
+<script type="text/babel">
 
-<script>
-(async function(){
-  const width = document.getElementById('map').clientWidth;
-  const height = 600;
+const { useState, useEffect, useRef, useMemo } = React;
 
-  const svg = d3.select('#map').append('svg')
-    .attr('width', width)
-    .attr('height', height);
+// ------------- CONSTANTS -------------
 
-  // Color palette
-  const colors = [
-    "#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b",
-    "#a6d96a","#66bd63","#1a9850","#006837","#004529",
-    "#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494",
-    "#081d58","#ffffb2","#fecc5c","#fd8d3c","#f03b20"
-  ];
+// Map datasets URLs (geojson)
+const MAPS = [
+  { id: "world", name: "World", url: "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson" },
+  { id: "africa", name: "Africa", url: "https://raw.githubusercontent.com/nytimes/drone-protests/master/data/geojson/africa.geojson" },
+  { id: "asia", name: "Asia", url: "https://raw.githubusercontent.com/datasets/geo-admin1-us/master/data/asia.geojson" },
+  { id: "europe", name: "Europe", url: "https://raw.githubusercontent.com/datasets/geo-admin1-us/master/data/europe.geojson" },
+  { id: "north-america", name: "North America", url: "https://raw.githubusercontent.com/datasets/geo-admin1-us/master/data/north-america.geojson" },
+  { id: "south-america", name: "South America", url: "https://raw.githubusercontent.com/datasets/geo-admin1-us/master/data/south-america.geojson" },
+  { id: "oceania", name: "Oceania", url: "https://raw.githubusercontent.com/datasets/geo-admin1-us/master/data/oceania.geojson" },
+];
 
-  // Add buttons for colors
-  const palette = d3.select('#color-palette');
-  let selectedColor = colors[0];
+// 70+ harmonious colors palette
+const COLORS = [
+  "#FF6633", "#FFB399", "#FF33FF", "#FFFF99", "#00B3E6",
+  "#E6B333", "#3366E6", "#999966", "#99FF99", "#B34D4D",
+  "#80B300", "#809900", "#E6B3B3", "#6680B3", "#66991A",
+  "#FF99E6", "#CCFF1A", "#FF1A66", "#E6331A", "#33FFCC",
+  "#66994D", "#B366CC", "#4D8000", "#B33300", "#CC80CC",
+  "#66664D", "#991AFF", "#E666FF", "#4DB3FF", "#1AB399",
+  "#E666B3", "#33991A", "#CC9999", "#B3B31A", "#00E680",
+  "#4D8066", "#809980", "#E6FF80", "#1AFF33", "#999933",
+  "#FF3380", "#CCCC00", "#66E64D", "#4D80CC", "#9900B3",
+  "#E64D66", "#4DB380", "#FF4D4D", "#99E6E6", "#6666FF",
+  "#C0C0C0", "#FFA500", "#6A5ACD", "#008080", "#FF69B4",
+  "#F0E68C", "#2E8B57", "#FF6347", "#4682B4", "#D2B48C",
+  "#5F9EA0", "#8B0000", "#556B2F", "#FF4500", "#DA70D6",
+  "#EEE8AA", "#7FFF00", "#B22222", "#FF7F50", "#6495ED",
+];
 
-  colors.forEach(c => {
-    palette.append('button')
-      .style('background-color', c)
-      .on('click', () => {
-        selectedColor = c;
+// Width and height for SVG canvas
+const WIDTH = 900;
+const HEIGHT = 600;
+
+// ------------- COMPONENT -------------
+
+function App() {
+  // Page states: intro, chooseMap, editor
+  const [page, setPage] = useState("intro");
+
+  // Selected map id
+  const [selectedMapId, setSelectedMapId] = useState("world");
+
+  // Loaded geojson for current map
+  const [geojson, setGeojson] = useState(null);
+
+  // Paths array from geojson after projection
+  const [paths, setPaths] = useState([]);
+
+  // Colors assigned to regions: key = region id, value = color string
+  const [regionColors, setRegionColors] = useState({});
+
+  // Selected color for painting
+  const [selectedColor, setSelectedColor] = useState(COLORS[0]);
+
+  // Search term for filtering countries
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Zoom and pan states
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const dragRef = useRef({ dragging: false, lastX: 0, lastY: 0 });
+
+  // Tooltip ref
+  const tooltipRef = useRef();
+
+  // SVG ref for exporting
+  const svgRef = useRef();
+
+  // Loading state for map data
+  const [loading, setLoading] = useState(false);
+
+  // ----- LOAD GEOJSON WHEN MAP CHANGES -----
+  useEffect(() => {
+    setLoading(true);
+    const map = MAPS.find(m => m.id === selectedMapId);
+    if (!map) {
+      alert("Map not found");
+      setLoading(false);
+      return;
+    }
+    fetch(map.url)
+      .then(res => res.json())
+      .then(data => {
+        setGeojson(data);
+        setRegionColors({});
+        setZoom(1);
+        setOffset({x: 0, y: 0});
+        setLoading(false);
+      })
+      .catch(() => {
+        alert("Failed to load map data");
+        setLoading(false);
       });
-  });
+  }, [selectedMapId]);
 
-  // Projection and path
-  const projection = d3.geoMercator()
-    .scale(150)
-    .translate([width / 2, height / 1.5]);
-  const path = d3.geoPath().projection(projection);
+  // ----- PROJECT GEOJSON TO SVG PATHS -----
+  useEffect(() => {
+    if (!geojson) {
+      setPaths([]);
+      return;
+    }
+    // D3 Mercator projection that fits to WIDTH x HEIGHT
+    const projection = d3.geoMercator()
+      .fitSize([WIDTH, HEIGHT], geojson);
 
-  // Load world topojson
-  const worldData = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
-
-  const countries = topojson.feature(worldData, worldData.objects.countries).features;
-
-  // Draw countries
-  const countryPaths = svg.selectAll('path')
-    .data(countries)
-    .join('path')
-    .attr('class', 'country')
-    .attr('d', path)
-    .attr('fill', '#444')
-    .on('click', (event, d) => {
-      const currentColor = d3.select(event.currentTarget).attr('fill');
-      d3.select(event.currentTarget).attr('fill', currentColor === selectedColor ? '#444' : selectedColor);
+    const geoPath = d3.geoPath(projection);
+    const newPaths = geojson.features.map(feature => {
+      const id = feature.properties.ISO_A3 || feature.properties.ADM0_A3 || feature.properties.ADMIN || feature.properties.name || Math.random().toString(36).slice(2);
+      const name = feature.properties.ADMIN || feature.properties.name || "Unknown";
+      const d = geoPath(feature);
+      return { id, name, path: d };
     });
 
-  // Search functionality
-  const searchInput = document.getElementById('search');
-  searchInput.addEventListener('input', () => {
-    const val = searchInput.value.toLowerCase();
-    countryPaths.attr('opacity', d => {
-      const name = d.properties ? d.properties.name : '';
-      return name && name.toLowerCase().includes(val) ? 1 : 0.2;
-    });
-  });
+    setPaths(newPaths);
+  }, [geojson]);
 
-  // Export PNG
-  document.getElementById('export-btn').addEventListener('click', () => {
-    const svgElement = svg.node();
+  // ----- HANDLE REGION CLICK TO COLOR -----
+  function onRegionClick(id) {
+    setRegionColors(prev => {
+      const newColors = { ...prev };
+      if (newColors[id] === selectedColor) {
+        // Remove color if same clicked again (toggle)
+        delete newColors[id];
+      } else {
+        newColors[id] = selectedColor;
+      }
+      return newColors;
+    });
+  }
+
+  // ----- HANDLE TOOLTIP -----
+  function onMouseEnterRegion(e, name) {
+    const tooltip = tooltipRef.current;
+    if (!tooltip) return;
+    tooltip.style.display = "block";
+    tooltip.textContent = name;
+  }
+  function onMouseMoveRegion(e) {
+    const tooltip = tooltipRef.current;
+    if (!tooltip) return;
+    // Position tooltip near mouse but inside viewport
+    let x = e.pageX + 15;
+    let y = e.pageY + 15;
+    const tooltipRect = tooltip.getBoundingClientRect();
+    if (x + tooltipRect.width > window.innerWidth) {
+      x = e.pageX - tooltipRect.width - 15;
+    }
+    if (y + tooltipRect.height > window.innerHeight) {
+      y = e.pageY - tooltipRect.height - 15;
+    }
+    tooltip.style.left = x + "px";
+    tooltip.style.top = y + "px";
+  }
+  function onMouseLeaveRegion() {
+    const tooltip = tooltipRef.current;
+    if (!tooltip) return;
+    tooltip.style.display = "none";
+  }
+
+  // ----- SEARCH FILTER -----
+  const filteredPaths = useMemo(() => {
+    if (searchTerm.trim() === "") return paths;
+    const lower = searchTerm.toLowerCase();
+    return paths.filter(p => p.name.toLowerCase().includes(lower));
+  }, [searchTerm, paths]);
+
+  // ----- ZOOM & PAN HANDLERS -----
+  function onMouseDown(e) {
+    dragRef.current = { dragging: true, lastX: e.clientX, lastY: e.clientY };
+  }
+  function onMouseUp() {
+    dragRef.current.dragging = false;
+  }
+  function onMouseMove(e) {
+    if (!dragRef.current.dragging) return;
+    const dx = e.clientX - dragRef.current.lastX;
+    const dy = e.clientY - dragRef.current.lastY;
+    setOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+    dragRef.current.lastX = e.clientX;
+    dragRef.current.lastY = e.clientY;
+  }
+  function onWheel(e) {
+    e.preventDefault();
+    const scaleAmount = -e.deltaY * 0.0015;
+    setZoom(prev => {
+      let next = prev + scaleAmount;
+      if (next < 0.3) next = 0.3;
+      if (next > 10) next = 10;
+      return next;
+    });
+  }
+
+  // ----- EXPORT FUNCTIONALITIES -----
+  function exportSVG() {
+    if (!svgRef.current) return;
+    const svgEl = svgRef.current;
     const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svgElement);
+    let source = serializer.serializeToString(svgEl);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d');
+    // Add namespaces if missing
+    if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+      source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
+      source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+    }
 
-    const img = new Image();
-    const svgBlob = new Blob([svgString], {type:"image/svg+xml;charset=utf-8"});
+    // Add xml declaration
+    source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+    const url = "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(source);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "geomarkr-map.svg";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function exportPNG() {
+    if (!svgRef.current) return;
+    const svgEl = svgRef.current;
+
+    const serializer = new XMLSerializer();
+    let source = serializer.serializeToString(svgEl);
+
+    // Add namespaces if missing
+    if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+      source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+    }
+    if(!source.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)){
+      source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+    }
+
+    const svgBlob = new Blob([source], {type:"image/svg+xml;charset=utf-8"});
     const url = URL.createObjectURL(svgBlob);
 
-    img.onload = function(){
-      ctx.drawImage(img,0,0);
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = WIDTH;
+      canvas.height = HEIGHT;
+      const ctx = canvas.getContext("2d");
+
+      // Fill background
+      ctx.fillStyle = "#1e293b";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.drawImage(img, 0, 0);
+
       URL.revokeObjectURL(url);
-      const pngUrl = canvas.toDataURL("image/png");
-      const link = document.createElement('a');
-      link.href = pngUrl;
-      link.download = 'map.png';
-      link.click();
+
+      // Create PNG download
+      canvas.toBlob(blob => {
+        const url2 = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url2;
+        a.download = "geomarkr-map.png";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url2);
+      }, "image/png");
     };
-
+    img.onerror = () => {
+      alert("Error exporting PNG");
+    }
     img.src = url;
-  });
+  }
 
-})();
-</script>
+  // ----- COLOR PALETTE COMPONENT -----
+  function ColorPalette({ colors, selectedColor, onSelect }) {
+    return (
+      <div className="flex flex-wrap gap-2 max-w-xl">
+        {colors.map((color, i) => (
+          <button
+            key={i}
+            className={`w-8 h-8 rounded-full border-2 focus:outline-none transition-transform hover:scale-110`}
+            style={{
+              backgroundColor: color,
+              borderColor: selectedColor === color ? "#fff" : "transparent",
+              boxShadow: selectedColor === color ? "0 0 6px white" : "none",
+            }}
+            aria-label={`Select color ${color}`}
+            onClick={() => onSelect(color)}
+          />
+        ))}
+      </div>
+    );
+  }
 
-</body>
-</html>
+  // ----- MAP SELECTOR COMPONENT -----
+  function MapSelector({ maps, selectedId, onSelect }) {
+    return (
+      <div className="flex flex-wrap gap-3 max-w-xl justify-center">
+        {maps.map(m => (
+          <button
+            key={m.id}
+            onClick={() => onSelect(m.id)}
+            className={`px-4 py-2 rounded-md font-semibold transition-colors 
+            ${selectedId === m.id ? "bg-indigo-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-indigo-500 hover:text-white"}`}
+          >
+            {m.name}
+          </button>
+        ))}
+      </div>
+    );
+  }
 
+  // ----- MAIN RENDER -----
+
+  if (page === "intro") {
+    return (
+      <main className="flex flex-col items-center justify-center min-h-screen p-6 gap-10">
+        <h1 className="text-6xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-600 select-none">Geomarkr</h1>
+        <p className="text-xl max-w-xl text-center text-gray-300 select-none">
+          Advanced map editor for customizing, coloring, and exporting country and continent maps.
+          No login required. Choose your map and start editing instantly.
+        </p>
+        <div className="flex gap-6">
+          <button
+            onClick={() => setPage("chooseMap")}
+            className="px-8 py-4 bg-indigo-600 rounded-lg hover:bg-indigo-700 text-white font-semibold transition"
+            aria-label="Create new map"
+          >
+            Create New Map
+          </button>
+          <button
+            onClick={() => setPage("about")}
+            className="px-8 py-4 border border-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white text-indigo-600 font-semibold transition"
+            aria-label="About Geomarkr"
+          >
+            About
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (page === "about") {
+    return (
+      <main className="flex flex-col items-center justify-center min-h-screen p-6 gap-6 max-w-3xl mx-auto">
+        <h2 className="text-4xl font-bold mb-6 select-none">About Geomarkr</h2>
+        <p className="text-lg text-gray-300 leading-relaxed mb-4">
+          Geomarkr is a powerful interactive map editor allowing users to select continent or country maps,
+          paint regions with a variety of colors, zoom, pan, search countries, and export their customized maps as PNG or SVG images.
+        </p>
+        <p className="text-lg text-gray-300 leading-relaxed mb-4">
+          No account is needed to create and edit maps — just pick a map and start painting!
+        </p>
+        <button
+          onClick={() => setPage("intro")}
+          className="px-6 py-3 mt-8 bg-indigo-600 rounded-lg hover:bg-indigo-700 text-white font-semibold transition"
+          aria-label="Go back to home"
+        >
+          Back to Home
+        </button>
+      </main>
+    );
+  }
+
+  if (page === "chooseMap") {
+    return (
+      <main className="flex flex-col items-center p-6 min-h-screen gap-6">
+        <h2 className="text-4xl font-extrabold select-none mb-2">Choose Your Map</h2>
+        <MapSelector
+          maps={MAPS}
+          selectedId={selectedMapId}
+          onSelect={setSelectedMapId}
+        />
+        <button
+          onClick={() => setPage("editor")}
+          className="mt-8 px-8 py-4 bg-indigo-600 rounded-lg hover:bg-indigo-700 text-white font-semibold transition"
+          aria-label="Open map editor"
+        >
+          Open Editor
+        </button>
+        <button
+          onClick={() => setPage("intro")}
+          className="mt-2 px-8 py-2 border border-indigo-600 rounded-lg hover:bg-indigo-600 hover:text-white text-indigo-600 font-semibold transition"
+          aria-label="Back to home"
+        >
+          Cancel
+        </button>
+      </main>
+    );
+  }
+
+  if (page === "editor") {
+    return (
+      <main
+        className="flex flex-col items-center p-4 bg-gray-900 min-h-screen gap-4 relative select-none"
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+      >
+        <h2 className="text-3xl font-bold mb-4 select-none">Editing Map: <span className="text-indigo-400">{MAPS.find(m => m.id === selectedMapId)?.name || "Unknown"}</span></h2>
+
+        {/* Controls */}
+        <div className="flex flex-wrap items-center gap-4 mb-4 max-w-7xl justify-center">
+          {/* Color palette */}
+          <div className="flex flex-col gap-2 items-center">
+            <label htmlFor="colorPalette" className="font-semibold mb-1 text-gray-200 select-none">Select Color</label>
+            <ColorPalette
+              colors={COLORS}
+              selectedColor={selectedColor}
+              onSelect={setSelectedColor}
+            />
+          </div>
+
+          {/* Search box */}
+          <div className="flex flex-col gap-1">
+            <label htmlFor="searchBox" className="font-semibold text-gray-200 select-none">Search Country/Region</label>
+            <input
+              id="searchBox"
+              type="search"
+              className="rounded-md px-3 py-2 text-black w-64 focus:outline-indigo-500"
+              placeholder="Type to filter countries"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              aria-label="Search countries or regions"
+            />
+          </div>
+
+          {/* Zoom controls */}
+          <div className="flex flex-col items-center gap-2 select-none">
+            <label className="font-semibold text-gray-200">Zoom</label>
+            <div className="flex items-center gap-2">
+              <button
+                aria-label="Zoom out"
+                className="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 transition"
+                onClick={() => setZoom(z => Math.max(0.3, z - 0.2))}
+              >−</button>
+              <span aria-live="polite" aria-atomic="true" className="w-12 text-center">{zoom.toFixed(2)}×</span>
+              <button
+                aria-label="Zoom in"
+                className="bg-gray-700 px-3 py-1 rounded hover:bg-gray-600 transition"
+                onClick={() => setZoom(z => Math.min(10, z + 0.2))}
+              >+</button>
+            </div>
+          </div>
+
+          {/* Export buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={exportPNG}
+              className="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 transition"
+              aria-label="Export map as PNG"
+            >
+              Export PNG
+            </button>
+            <button
+              onClick={exportSVG}
+              className="px-4 py-2 bg-indigo-600 rounded hover:bg-indigo-700 transition"
+              aria-label="Export map as SVG"
+            >
+              Export SVG
+            </button>
+          </div>
+
+          {/* Reset button */}
+          <button
+            onClick={() => {
+              setRegionColors({});
+              setZoom(1);
+              setOffset({x: 0, y: 0});
+              setSearchTerm("");
+            }}
+            className="px-4 py-2 border border-indigo-600 rounded hover:bg-indigo-600 hover:text-white transition"
+            aria-label="Reset all changes"
+          >
+            Reset
+          </button>
+
+          {/* Back button */}
+          <button
+            onClick={() => setPage("chooseMap")}
+            className="px-4 py-2 border border-gray-500 rounded hover:bg-gray-600 hover:text-white transition"
+            aria-label="Back to map selection"
+          >
+            Back to Maps
+          </button>
+        </div>
+
+        {/* Loading spinner */}
+        {loading && (
+          <div className="text-lg text-indigo-400 my-12 select-none">Loading map data...</div>
+        )}
+
+        {/* SVG MAP */}
+        {!loading && (
+          <div
+            className="overflow-hidden rounded-lg shadow-lg bg-gray-800 border border-gray-700"
+            style={{width: WIDTH, height: HEIGHT, cursor: "grab"}}
+            onMouseDown={onMouseDown}
+          >
+            <svg
+              ref={svgRef}
+              width={WIDTH}
+              height={HEIGHT}
+              style={{
+                transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+                transformOrigin: "0 0",
+                userSelect: "none",
+                touchAction: "none",
+                display: "block",
+              }}
+              onClick={e => {
+                if (e.target.tagName === "path" && e.target.dataset.regionId) {
+                  const regionId = e.target.dataset.regionId;
+                  setRegionColors(prev => ({
+                    ...prev,
+                    [regionId]: selectedColor,
+                  }));
+                }
+              }}
+              aria-label="Editable map"
+              role="img"
+            >
+              {mapData && mapData.regions.map(region => (
+                <path
+                  key={region.id}
+                  data-region-id={region.id}
+                  d={region.path}
+                  fill={regionColors[region.id] || "#444"}
+                  stroke="#222"
+                  strokeWidth="0.5"
+                  className="transition-colors duration-200 cursor-pointer"
+                  aria-label={`Region ${region.name}`}
+                />
+              ))}
+            </svg>
+          </div>
+        )}
+      </main>
+    );
+  }
+
+  return null;
+}
+
+export default Geomarkr;
