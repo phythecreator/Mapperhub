@@ -1,562 +1,156 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Geomarkr - Map Customizer</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-
-  <!-- D3 Geo & TopoJSON -->
-  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/topojson@3/dist/topojson.min.js"></script>
-
-  <!-- Tailwind CSS dev CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    /* Tooltip styling */
-    #tooltip {
-      position: absolute;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 5px;
-      pointer-events: none;
-      font-size: 14px;
-      display: none;
-      z-index: 10000;
-      user-select: none;
-    }
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-      width: 8px; height: 8px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background-color: #818cf8;
-      border-radius: 8px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Geomarkr - Map Editor</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson@3"></script>
+<style>
+  body { margin:0; font-family: Arial, sans-serif; background:#111; color:#eee;}
+  #map { width: 100%; height: 600px; }
+  .country {
+    stroke: #333;
+    stroke-width: 0.5;
+    cursor: pointer;
+  }
+  .country:hover {
+    stroke: #fff;
+    stroke-width: 1.5;
+  }
+  #color-palette button {
+    width: 30px; height: 30px; margin: 3px; border: none; cursor: pointer;
+  }
+  #controls {
+    padding: 10px;
+    background: #222;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  #search {
+    padding: 6px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: none;
+    flex-grow: 1;
+  }
+  button {
+    background: #06f;
+    border: none;
+    padding: 8px 14px;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button:hover {
+    background: #0053ba;
+  }
+</style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+<body>
 
-<div id="root" class="flex-grow"></div>
-<div id="tooltip"></div>
+<div id="controls">
+  <input id="search" placeholder="Search countries..." />
+  <div id="color-palette"></div>
+  <button id="export-btn">Export PNG</button>
+</div>
+<div id="map"></div>
 
-<script type="text/javascript">
-// SHORTCUTS TO React APIs
-const { useState, useEffect, useRef } = React;
+<script>
+(async function(){
+  const width = document.getElementById('map').clientWidth;
+  const height = 600;
 
-// --- Constants ---
-const COLORS = [
-  "#E63946","#F1FAEE","#A8DADC","#457B9D","#1D3557","#FFBE0B","#FB5607","#FF006E","#8338EC",
-  "#3A86FF","#06D6A0","#118AB2","#073B4C","#F94144","#F3722C","#F8961E","#F9C74F","#90BE6D",
-  "#43AA8B","#577590","#B56576","#955251","#6B4226","#D9BF77","#A0C1B8","#6B4226","#BC6C25",
-  "#F4D35E","#EE964B","#F95738","#D90368","#5F0F40","#9A031E","#FB8B24","#E36414","#0F4C5C",
-  "#4895EF","#560BAD","#720026","#CE4257","#E8AA42","#9DC08B","#5B9279","#274C77","#6096BA",
-  "#FE6D73","#FED7C3","#FFB997","#F67280","#C06C84","#6C567B","#355C7D","#6C5B7B","#C06C84",
-  "#92A8D1","#034F84","#F7786B","#D7263D","#077B8A","#5C3C92","#AB83A1","#F0D9FF","#C2B9B0",
-  "#4B4453","#4B3F72","#D3C0CD","#CDC0B0","#CC333F","#4A90E2","#50E3C2","#B8E986","#F8E71C",
-  "#FFF44F","#FFBA08","#FAA307","#F48C06","#E85D04","#DC2F02","#D00000","#9D0208","#6A040F"
-];
+  const svg = d3.select('#map').append('svg')
+    .attr('width', width)
+    .attr('height', height);
 
-// --- Components ---
-
-// Intro Screen
-function Intro({ onCreateMap, onCreateAccount, onLogin }) {
-  return (
-    <main className="flex flex-col justify-center items-center gap-10 px-6 text-center max-w-xl mx-auto my-20">
-      {/* Logo */}
-      <h1 className="text-5xl font-extrabold text-indigo-400 tracking-wide select-none">
-        Geomarkr
-      </h1>
-      {/* Subtitle */}
-      <p className="text-gray-300 text-lg max-w-md leading-relaxed">
-        Customize detailed world maps with thousands of countries and regions. Color, annotate and export high quality maps — no account needed to start.
-      </p>
-      {/* Buttons */}
-      <div className="flex gap-6 flex-wrap justify-center">
-        <button
-          onClick={onCreateMap}
-          className="bg-indigo-600 hover:bg-indigo-700 px-10 py-4 rounded-md text-white font-bold transition"
-          aria-label="Create a new map"
-        >
-          Create Map
-        </button>
-        <button
-          onClick={onCreateAccount}
-          className="border border-indigo-600 hover:bg-indigo-600 hover:text-white px-10 py-4 rounded-md text-indigo-400 font-bold transition"
-          aria-label="Create an account"
-        >
-          Create Account
-        </button>
-        <button
-          onClick={onLogin}
-          className="underline text-indigo-400 text-sm mt-2"
-          aria-label="Login"
-        >
-          Already have an account? Log in
-        </button>
-      </div>
-      <footer className="mt-20 text-gray-500 text-xs">
-        Inspired by <a href="https://periphern.com" target="_blank" rel="noreferrer" className="underline">Periphern</a> and <a href="https://mapchart.net" target="_blank" rel="noreferrer" className="underline">MapChart</a>.
-      </footer>
-    </main>
-  );
-}
-
-// Register Form
-function RegisterForm({ onRegister, onSwitchToLogin }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    if (username.trim().length < 3) {
-      setError("Username must be at least 3 characters.");
-      return;
-    }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-    // Save user to localStorage (fake database)
-    const users = JSON.parse(localStorage.getItem("geomarkr-users") || "{}");
-    if (users[username]) {
-      setError("Username already exists.");
-      return;
-    }
-    users[username] = { password };
-    localStorage.setItem("geomarkr-users", JSON.stringify(users));
-    onRegister({ username });
-  }
-
-  return (
-    <main className="max-w-md mx-auto mt-20 p-6 bg-gray-800 rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold mb-6 text-indigo-400">Create Account</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col text-gray-300 font-semibold" htmlFor="reg-username">
-          Username
-          <input
-            id="reg-username"
-            type="text"
-            autoComplete="username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            className="mt-1 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            required
-            minLength={3}
-          />
-        </label>
-        <label className="flex flex-col text-gray-300 font-semibold" htmlFor="reg-password">
-          Password
-          <input
-            id="reg-password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="mt-1 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            required
-            minLength={6}
-          />
-        </label>
-        {error && <p className="text-red-500">{error}</p>}
-        <button
-          type="submit"
-          className="bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-bold mt-2"
-          aria-label="Register account"
-        >
-          Register
-        </button>
-      </form>
-      <button
-        onClick={onSwitchToLogin}
-        className="mt-4 underline text-indigo-400 text-sm"
-        aria-label="Switch to login"
-      >
-        Already have an account? Login
-      </button>
-    </main>
-  );
-}
-
-// Login Form
-function LoginForm({ onLogin, onSwitchToRegister }) {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    setError("");
-    const users = JSON.parse(localStorage.getItem("geomarkr-users") || "{}");
-    if (!users[username]) {
-      setError("User not found.");
-      return;
-    }
-    if (users[username].password !== password) {
-      setError("Incorrect password.");
-      return;
-    }
-    onLogin({ username });
-  }
-
-  return (
-    <main className="max-w-md mx-auto mt-20 p-6 bg-gray-800 rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold mb-6 text-indigo-400">Login</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col text-gray-300 font-semibold" htmlFor="login-username">
-          Username
-          <input
-            id="login-username"
-            type="text"
-            autoComplete="username"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            className="mt-1 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            required
-          />
-        </label>
-        <label className="flex flex-col text-gray-300 font-semibold" htmlFor="login-password">
-          Password
-          <input
-            id="login-password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="mt-1 p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            required
-          />
-        </label>
-        {error && <p className="text-red-500">{error}</p>}
-        <button
-          type="submit"
-          className="bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-bold mt-2"
-          aria-label="Login"
-        >
-          Login
-        </button>
-      </form>
-      <button
-        onClick={onSwitchToRegister}
-        className="mt-4 underline text-indigo-400 text-sm"
-        aria-label="Switch to register"
-      >
-        Create an account
-      </button>
-    </main>
-  );
-}
-
-// Choose Map Screen
-function ChooseMap({ onStartEditing, onBack }) {
-  // Simplified continent and map list based on world-atlas data sets and additional maps
-  const MAPS = [
-    { id: "world", name: "World", topojsonUrl: "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json", objectKey: "countries" },
-    { id: "europe", name: "Europe", topojsonUrl: "https://raw.githubusercontent.com/deldersveld/topojson/master/continents/europe.json", objectKey: "continent_Europe" },
-    { id: "asia", name: "Asia", topojsonUrl: "https://raw.githubusercontent.com/deldersveld/topojson/master/continents/asia.json", objectKey: "continent_Asia" },
-    { id: "africa", name: "Africa", topojsonUrl: "https://raw.githubusercontent.com/deldersveld/topojson/master/continents/africa.json", objectKey: "continent_Africa" },
-    { id: "northAmerica", name: "North America", topojsonUrl: "https://raw.githubusercontent.com/deldersveld/topojson/master/continents/north-america.json", objectKey: "continent_North_America" },
-    { id: "southAmerica", name: "South America", topojsonUrl: "https://raw.githubusercontent.com/deldersveld/topojson/master/continents/south-america.json", objectKey: "continent_South_America" },
-    { id: "usa", name: "United States", topojsonUrl: "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json", objectKey: "states" }
+  // Color palette
+  const colors = [
+    "#d73027","#f46d43","#fdae61","#fee08b","#d9ef8b",
+    "#a6d96a","#66bd63","#1a9850","#006837","#004529",
+    "#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494",
+    "#081d58","#ffffb2","#fecc5c","#fd8d3c","#f03b20"
   ];
-  const [searchTerm, setSearchTerm] = useState("");
-  const filtered = MAPS.filter(m => m.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  return (
-    <main className="max-w-4xl mx-auto p-6 mt-10">
-      <button onClick={onBack} className="text-indigo-400 hover:underline mb-6">&larr; Back</button>
-      <h2 className="text-4xl font-bold mb-6 text-indigo-400">Choose a map</h2>
-      <input
-        type="search"
-        placeholder="Search maps..."
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        className="mb-6 px-4 py-3 rounded w-full max-w-md text-gray-900"
-        aria-label="Search maps"
-      />
-      <ul className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {filtered.length === 0 && <li className="text-gray-400 col-span-full text-center">No maps found.</li>}
-        {filtered.map(m => (
-          <li key={m.id}>
-            <button
-              onClick={() => onStartEditing(m)}
-              className="block bg-gray-800 hover:bg-indigo-700 transition rounded p-4 w-full text-left font-semibold"
-              aria-label={`Start editing ${m.name} map`}
-            >
-              {m.name}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </main>
-  );
-}
+  // Add buttons for colors
+  const palette = d3.select('#color-palette');
+  let selectedColor = colors[0];
 
-// Map Editor
-function MapEditor({ user, onLogout }) {
-  const [mapData, setMapData] = useState(null);
-  const [mapInfo, setMapInfo] = useState(null); // {topojsonUrl, objectKey, name}
-  const [selectedColor, setSelectedColor] = useState(COLORS[0]);
-  const [countryColors, setCountryColors] = useState({});
-  const [searchTerm, setSearchTerm] = useState("");
-  const svgRef = useRef(null);
-  const tooltip = document.getElementById("tooltip");
+  colors.forEach(c => {
+    palette.append('button')
+      .style('background-color', c)
+      .on('click', () => {
+        selectedColor = c;
+      });
+  });
 
-  // Load topojson when mapInfo changes
-  useEffect(() => {
-    if (!mapInfo) return;
-    setMapData(null);
-    fetch(mapInfo.topojsonUrl).then(r => r.json()).then(topojsonData => {
-      // Extract features
-      const features = topojson.feature(topojsonData, topojsonData.objects[mapInfo.objectKey]).features;
-      setMapData(features);
-    }).catch(() => alert("Failed to load map data."));
-  }, [mapInfo]);
+  // Projection and path
+  const projection = d3.geoMercator()
+    .scale(150)
+    .translate([width / 2, height / 1.5]);
+  const path = d3.geoPath().projection(projection);
 
-  // Draw map on svg when mapData or countryColors changes
-  useEffect(() => {
-    if (!mapData || !svgRef.current) return;
-    const svg = d3.select(svgRef.current);
-    svg.selectAll("*").remove();
+  // Load world topojson
+  const worldData = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
 
-    const width = svgRef.current.clientWidth || 900;
-    const height = svgRef.current.clientHeight || 600;
+  const countries = topojson.feature(worldData, worldData.objects.countries).features;
 
-    const projection = d3.geoMercator()
-      .fitSize([width, height], { type: "FeatureCollection", features: mapData });
-    const path = d3.geoPath(projection);
-
-    // Filter by search term
-    const filteredData = mapData.filter(d => {
-      if (!searchTerm) return true;
-      return d.properties.name.toLowerCase().includes(searchTerm.toLowerCase());
+  // Draw countries
+  const countryPaths = svg.selectAll('path')
+    .data(countries)
+    .join('path')
+    .attr('class', 'country')
+    .attr('d', path)
+    .attr('fill', '#444')
+    .on('click', (event, d) => {
+      const currentColor = d3.select(event.currentTarget).attr('fill');
+      d3.select(event.currentTarget).attr('fill', currentColor === selectedColor ? '#444' : selectedColor);
     });
 
-    svg.selectAll("path")
-      .data(filteredData)
-      .join("path")
-      .attr("d", path)
-      .attr("fill", d => countryColors[d.properties.name] || "#555")
-      .attr("stroke", "#222")
-      .attr("stroke-width", 0.8)
-      .style("cursor", "pointer")
-      .on("mouseenter", (event, d) => {
-        if (!tooltip) return;
-        tooltip.style.display = "block";
-        tooltip.textContent = d.properties.name;
-      })
-      .on("mousemove", (event) => {
-        if (!tooltip) return;
-        tooltip.style.top = event.pageY + 15 + "px";
-        tooltip.style.left = event.pageX + 15 + "px";
-      })
-      .on("mouseleave", () => {
-        if (!tooltip) return;
-        tooltip.style.display = "none";
-      })
-      .on("click", (event, d) => {
-        setCountryColors(prev => ({
-          ...prev,
-          [d.properties.name]: selectedColor
-        }));
-      });
+  // Search functionality
+  const searchInput = document.getElementById('search');
+  searchInput.addEventListener('input', () => {
+    const val = searchInput.value.toLowerCase();
+    countryPaths.attr('opacity', d => {
+      const name = d.properties ? d.properties.name : '';
+      return name && name.toLowerCase().includes(val) ? 1 : 0.2;
+    });
+  });
 
-    // Zoom behavior
-    const zoom = d3.zoom()
-      .scaleExtent([1, 10])
-      .on("zoom", (event) => {
-        svg.selectAll("g").attr("transform", event.transform);
-        svg.selectAll("path").attr("transform", event.transform);
-      });
-
-    svg.call(zoom);
-
-  }, [mapData, countryColors, selectedColor, searchTerm]);
-
-  function exportPNG() {
-    if (!svgRef.current) return alert("Map not loaded.");
-    const svgNode = svgRef.current;
+  // Export PNG
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const svgElement = svg.node();
     const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svgNode);
-    const canvas = document.createElement("canvas");
-    const rect = svgNode.getBoundingClientRect();
-    canvas.width = rect.width * 2;
-    canvas.height = rect.height * 2;
-    const ctx = canvas.getContext("2d");
-    const DOMURL = window.URL || window.webkitURL || window;
+    const svgString = serializer.serializeToString(svgElement);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+
     const img = new Image();
     const svgBlob = new Blob([svgString], {type:"image/svg+xml;charset=utf-8"});
-    const url = DOMURL.createObjectURL(svgBlob);
-    img.onload = () => {
-      ctx.scale(2, 2); // scale for better resolution
-      ctx.drawImage(img, 0, 0);
-      DOMURL.revokeObjectURL(url);
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = function(){
+      ctx.drawImage(img,0,0);
+      URL.revokeObjectURL(url);
       const pngUrl = canvas.toDataURL("image/png");
-      const link = document.createElement("a");
-      link.download = "geomarkr-map.png";
+      const link = document.createElement('a');
       link.href = pngUrl;
+      link.download = 'map.png';
       link.click();
     };
+
     img.src = url;
-  }
+  });
 
-  return (
-    <main className="max-w-7xl mx-auto p-4 mt-4 flex flex-col h-full">
-      <header className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold text-indigo-400">
-          Geomarkr - {mapInfo ? mapInfo.name : "Select a map"}
-        </h1>
-        <div className="flex items-center gap-4">
-          <span className="text-gray-300">Hello, {user.username}</span>
-          <button
-            onClick={onLogout}
-            className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-white font-semibold"
-            aria-label="Logout"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
-
-      {!mapInfo ? (
-        <ChooseMap
-          onStartEditing={setMapInfo}
-          onBack={() => {}}
-        />
-      ) : (
-        <>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex flex-col gap-3 w-full md:w-72 bg-gray-800 p-4 rounded-lg shadow-md h-[600px] overflow-y-auto">
-              <input
-                type="search"
-                placeholder="Search countries..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-                className="mb-3 px-3 py-2 rounded text-gray-900"
-                aria-label="Search countries"
-              />
-
-              <h2 className="text-lg font-semibold mb-2 text-indigo-400">Select color</h2>
-              <div className="grid grid-cols-5 gap-2">
-                {COLORS.map(c => (
-                  <button
-                    key={c}
-                    style={{ backgroundColor: c }}
-                    className={`w-10 h-10 rounded cursor-pointer border-4 ${selectedColor === c ? "border-white" : "border-transparent"}`}
-                    onClick={() => setSelectedColor(c)}
-                    aria-label={`Select color ${c}`}
-                  />
-                ))}
-              </div>
-
-              <button
-                onClick={exportPNG}
-                className="mt-6 bg-indigo-600 hover:bg-indigo-700 py-3 rounded font-bold text-white"
-                aria-label="Export map as PNG"
-              >
-                Export as PNG
-              </button>
-
-              <button
-                onClick={() => setMapInfo(null)}
-                className="mt-4 text-indigo-400 hover:underline"
-                aria-label="Back to map selection"
-              >
-                &larr; Choose another map
-              </button>
-            </div>
-
-            <div className="flex-grow border border-gray-700 rounded-lg overflow-hidden shadow-md">
-              <svg
-                ref={svgRef}
-                style={{ width: "100%", height: "600px", display: "block" }}
-                role="img"
-                aria-label="Map editor"
-                tabIndex={0}
-              >
-                {/* Map paths will be drawn here */}
-              </svg>
-            </div>
-          </div>
-        </>
-      )}
-    </main>
-  );
-}
-
-// Main App
-function App() {
-  const [page, setPage] = useState("intro"); // intro, register, login, editor
-  const [user, setUser] = useState(null);
-
-  // Login user and switch to editor
-  function handleLogin(u) {
-    setUser(u);
-    setPage("editor");
-  }
-  // Register user and auto login
-  function handleRegister(u) {
-    setUser(u);
-    setPage("editor");
-  }
-  // Logout user
-  function handleLogout() {
-    setUser(null);
-    setPage("intro");
-  }
-
-  // Navigation handlers
-  function goToRegister() { setPage("register"); }
-  function goToLogin() { setPage("login"); }
-  function goToIntro() { setPage("intro"); }
-  function goToCreateMap() {
-    if (user) setPage("editor");
-    else setPage("login");
-  }
-
-  // Page render
-  if (page === "intro") {
-    return <Intro
-      onCreateMap={goToCreateMap}
-      onCreateAccount={goToRegister}
-      onLogin={goToLogin}
-    />;
-  }
-  if (page === "register") {
-    return <RegisterForm
-      onRegister={handleRegister}
-      onSwitchToLogin={goToLogin}
-    />;
-  }
-  if (page === "login") {
-    return <LoginForm
-      onLogin={handleLogin}
-      onSwitchToRegister={goToRegister}
-    />;
-  }
-  if (page === "editor" && user) {
-    return <MapEditor
-      user={user}
-      onLogout={handleLogout}
-    />;
-  }
-
-  // fallback
-  return <Intro
-    onCreateMap={goToCreateMap}
-    onCreateAccount={goToRegister}
-    onLogin={goToLogin}
-  />;
-}
-
-// Render App
-ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+})();
 </script>
+
 </body>
 </html>
 
