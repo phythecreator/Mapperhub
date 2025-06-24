@@ -1,251 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Geomarkr - Interactive Map Customizer</title>
-  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-simple-maps@3.0.0/dist/react-simple-maps.umd.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    html, body, #root {
-      height: 100%;
-      margin: 0;
-      background-color: #1f2937;
-      color: #f9fafb;
-      font-family: system-ui, sans-serif;
-    }
-    svg {
-      user-select:none;
-      touch-action: none;
-    }
-    button, select, input {
-      font-family: inherit;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Geomarkr Test</title>
+<script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-simple-maps@3.0.0/dist/react-simple-maps.umd.production.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { margin:0; font-family: sans-serif; background:#1f2937; color:#f9fafb; }
+  #root { height: 100vh; display: flex; flex-direction: column; }
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/javascript">
-    (function () {
-      const React = window.React;
-      const ReactDOM = window.ReactDOM;
-      const { useState, useEffect, useRef } = React;
-      const { ComposableMap, Geographies, Geography, ZoomableGroup } = window['react-simple-maps'];
-      const topojson = window.topojson;
-      const saveAs = window.saveAs;
+<div id="root"></div>
+<script>
+  (function(){
+    const React = window.React;
+    const ReactDOM = window.ReactDOM;
+    const { useState, useEffect } = React;
+    const { ComposableMap, Geographies, Geography, ZoomableGroup } = window['react-simple-maps'];
+    const topojson = window.topojson;
 
-      const MAPS = {
-        World: "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json",
-        Africa: "https://cdn.jsdelivr.net/npm/world-atlas@2/continent/africa.json",
-        Asia: "https://cdn.jsdelivr.net/npm/world-atlas@2/continent/asia.json",
-        Europe: "https://cdn.jsdelivr.net/npm/world-atlas@2/continent/europe.json",
-        Americas: "https://cdn.jsdelivr.net/npm/world-atlas@2/continent/americas.json",
-        Oceania: "https://cdn.jsdelivr.net/npm/world-atlas@2/continent/oceania.json"
-      };
+    async function loadWorld() {
+      const res = await fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
+      const topo = await res.json();
+      const objName = Object.keys(topo.objects)[0];
+      return topojson.feature(topo, topo.objects[objName]);
+    }
 
-      async function loadGeoJSON(url) {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Network error loading map");
-        const topo = await res.json();
-        const objName = Object.keys(topo.objects)[0];
-        return topojson.feature(topo, topo.objects[objName]);
-      }
+    function App() {
+      const [geoData, setGeoData] = useState(null);
+      const [zoom, setZoom] = useState(1);
+      const [center, setCenter] = useState([0,20]);
 
-      function Logo() {
-        return React.createElement("svg", { width: 36, height: 36, viewBox: "0 0 64 64", fill: "none", xmlns: "http://www.w3.org/2000/svg" },
-          React.createElement("circle", { cx: 32, cy: 32, r: 30, stroke: "#3b82f6", strokeWidth: 4, fill: "#1e40af" }),
-          React.createElement("path", {
-            d: "M16 32 L48 32 M32 16 L32 48",
-            stroke: "#60a5fa",
-            strokeWidth: 4,
-            strokeLinecap: "round"
-          }),
-          React.createElement("circle", { cx: 32, cy: 32, r: 6, fill: "#93c5fd" })
-        );
-      }
+      useEffect(() => {
+        loadWorld().then(setGeoData).catch(e => alert("Load error: "+e.message));
+      }, []);
 
-      function App() {
-        const [continent, setContinent] = useState("World");
-        const [geoData, setGeoData] = useState(null);
-        const [painted, setPainted] = useState({});
-        const [color, setColor] = useState("#3b82f6");
-        const [bgImage, setBgImage] = useState(null);
-        const [zoom, setZoom] = useState(1);
-        const [center, setCenter] = useState([0, 20]);
-        const svgWrapperRef = useRef();
+      if (!geoData) return React.createElement("p", null, "Loading map...");
 
-        useEffect(() => {
-          setGeoData(null);
-          loadGeoJSON(MAPS[continent]).then(data => {
-            setGeoData(data);
-            setPainted({});
-            setZoom(1);
-            setCenter([0, 20]);
-          }).catch(e => alert("Error loading map data: " + e.message));
-        }, [continent]);
-
-        function onRegionClick(geo) {
-          const id = geo.id || geo.properties.iso_a3 || geo.properties.name;
-          setPainted(prev => {
-            const newPainted = { ...prev };
-            if (newPainted[id] === color) delete newPainted[id];
-            else newPainted[id] = color;
-            return newPainted;
-          });
-        }
-
-        function onBgUpload(e) {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => setBgImage(reader.result);
-          reader.readAsDataURL(file);
-        }
-
-        function clearPainting() {
-          setPainted({});
-        }
-
-        function resetView() {
-          setZoom(1);
-          setCenter([0, 20]);
-        }
-
-        function exportSVG() {
-          if (!svgWrapperRef.current) return;
-          const svg = svgWrapperRef.current.querySelector("svg");
-          if (!svg) return;
-          const clone = svg.cloneNode(true);
-          const serializer = new XMLSerializer();
-          const source = serializer.serializeToString(clone);
-          const blob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-          saveAs(blob, "geomarkr-map.svg");
-        }
-
-        function exportPNG() {
-          if (!svgWrapperRef.current) return;
-          const svg = svgWrapperRef.current.querySelector("svg");
-          if (!svg) return;
-
-          const xml = new XMLSerializer().serializeToString(svg);
-          const svg64 = btoa(unescape(encodeURIComponent(xml)));
-          const image64 = 'data:image/svg+xml;base64,' + svg64;
-
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = svg.clientWidth * 3;
-            canvas.height = svg.clientHeight * 3;
-            const ctx = canvas.getContext("2d");
-            ctx.scale(3, 3);
-            ctx.drawImage(img, 0, 0);
-            canvas.toBlob(blob => saveAs(blob, "geomarkr-map.png"));
-          };
-          img.onerror = () => alert("Could not export PNG.");
-          img.src = image64;
-        }
-
-        return React.createElement("div", { className: "flex flex-col h-full" },
-          React.createElement("header", { className: "flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-blue-900 text-white" },
-            React.createElement("div", { className: "flex items-center gap-3 mb-3 sm:mb-0" },
-              React.createElement(Logo),
-              React.createElement("h1", { className: "text-3xl font-extrabold tracking-wide" }, "Geomarkr")
-            ),
-            React.createElement("p", { className: "max-w-xl text-blue-200" },
-              "Customize interactive maps easily. Paint regions, add backgrounds, zoom & pan, and export high-quality images — all in your browser."
-            )
-          ),
-          React.createElement("section", { className: "p-4 bg-blue-800 flex flex-wrap gap-2 justify-center" },
-            React.createElement("select", {
-              value: continent,
-              onChange: e => setContinent(e.target.value),
-              className: "text-black rounded px-3 py-2",
-              title: "Select Continent"
-            }, Object.keys(MAPS).map(c =>
-              React.createElement("option", { key: c, value: c }, c)
-            )),
-            React.createElement("input", {
-              type: "color",
-              value: color,
-              onChange: e => setColor(e.target.value),
-              title: "Select color",
-              className: "w-10 h-10 p-0 border-0 cursor-pointer rounded"
-            }),
-            React.createElement("label", { className: "cursor-pointer bg-white text-black rounded px-4 py-2 select-none font-semibold" },
-              "Upload Background",
-              React.createElement("input", {
-                type: "file",
-                accept: "image/*",
-                onChange: onBgUpload,
-                className: "hidden"
-              })
-            ),
-            React.createElement("button", { onClick: exportSVG, className: "bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold" }, "Export SVG"),
-            React.createElement("button", { onClick: exportPNG, className: "bg-green-600 hover:bg-green-700 px-4 py-2 rounded font-semibold" }, "Export PNG"),
-            React.createElement("button", { onClick: clearPainting, className: "bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-semibold" }, "Clear Painting"),
-            React.createElement("button", { onClick: () => setZoom(z => Math.min(8, z + 0.5)), className: "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-semibold" }, "Zoom +"),
-            React.createElement("button", { onClick: () => setZoom(z => Math.max(1, z - 0.5)), className: "bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-semibold" }, "Zoom -"),
-            React.createElement("button", { onClick: resetView, className: "bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded font-semibold" }, "Reset View")
-          ),
-          React.createElement("main", {
-            ref: svgWrapperRef,
-            className: "flex-grow flex justify-center items-center relative overflow-hidden bg-gray-900"
+      return React.createElement("div", { style: { flex: 1, display: "flex", flexDirection: "column" } },
+        React.createElement("h1", { style: { textAlign: "center", margin: "1rem" } }, "Geomarkr Basic Map"),
+        React.createElement(ComposableMap, { projectionConfig: { scale: 150 }, style: { flex: 1 } },
+          React.createElement(ZoomableGroup, {
+            zoom,
+            center,
+            onMoveEnd: ({ zoom: z, coordinates }) => {
+              setZoom(z);
+              setCenter(coordinates);
+            },
+            maxZoom: 8,
+            minZoom: 1
           },
-            bgImage && React.createElement("img", {
-              src: bgImage,
-              alt: "Background",
-              className: "absolute inset-0 w-full h-full object-cover opacity-30 pointer-events-none select-none"
-            }),
-            geoData
-              ? React.createElement(ComposableMap, {
-                width: 1000,
-                height: 600,
-                projectionConfig: { scale: 150 },
-                style: { width: "100%", height: "100%", maxWidth: "1000px", maxHeight: "600px" }
-              },
-                React.createElement(ZoomableGroup, {
-                  zoom: zoom,
-                  center: center,
-                  onMoveEnd: ({ zoom: z, coordinates }) => {
-                    setZoom(z);
-                    setCenter(coordinates);
-                  },
-                  maxZoom: 8,
-                  minZoom: 1
-                },
-                  React.createElement(Geographies, { geography: geoData }, ({ geographies }) =>
-                    geographies.map(geo => {
-                      const id = geo.id || geo.properties.iso_a3 || geo.properties.name;
-                      const fillColor = painted[id] || "#555555";
-                      return React.createElement(Geography, {
-                        key: id,
-                        geography: geo,
-                        onClick: () => onRegionClick(geo),
-                        style: {
-                          default: { fill: fillColor, stroke: "#222", strokeWidth: 0.5, cursor: "pointer", transition: "fill 0.3s" },
-                          hover: { fill: "#f59e0b", stroke: "#fff", strokeWidth: 1 },
-                          pressed: { fill: "#b45309", stroke: "#000", strokeWidth: 1 }
-                        }
-                      });
-                    })
-                  )
-                )
-              )
-              : React.createElement("p", { className: "text-white" }, "Loading map data...")
-          ),
-          React.createElement("footer", { className: "text-center p-3 bg-blue-900 text-blue-300 select-none" },
-            "Geomarkr — Interactive Map Customizer"
+            React.createElement(Geographies, { geography: geoData },
+              ({ geographies }) => geographies.map(geo => React.createElement(Geography, {
+                key: geo.rsmKey,
+                geography: geo,
+                style: {
+                  default: { fill: "#555", stroke: "#222", strokeWidth: 0.5 },
+                  hover: { fill: "#f59e0b", stroke: "#fff", strokeWidth: 1 },
+                  pressed: { fill: "#b45309", stroke: "#000", strokeWidth: 1 }
+                }
+              }))
+            )
           )
-        );
-      }
+        ),
+        React.createElement("div", { style: { padding: "0.5rem", textAlign: "center" } },
+          React.createElement("button", { onClick: () => setZoom(z => Math.min(8, z + 0.5)), style: { marginRight: 10 } }, "Zoom +"),
+          React.createElement("button", { onClick: () => setZoom(z => Math.max(1, z - 0.5)) }, "Zoom -")
+        )
+      );
+    }
 
-      ReactDOM.render(React.createElement(App), document.getElementById("root"));
-    })();
-  </script>
+    ReactDOM.render(React.createElement(App), document.getElementById("root"));
+  })();
+</script>
 </body>
 </html>
+
