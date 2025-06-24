@@ -3,386 +3,260 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MAPPERS HUB</title>
+<title>Geomarkr - Create Custom Interactive Maps</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
-  /* --- General Styles --- */
-  body {
-    margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #0f0f0f; color: #e0e0e0;
-  }
-  header {
-    background: #10172a; color: #00aaff;
-    text-align: center; padding: 1.5rem 0;
-    font-size: 2.5rem; font-weight: 900;
-    letter-spacing: 3px;
-    user-select: none;
-  }
-  .container {
-    max-width: 1200px;
-    margin: auto;
-    padding: 1rem;
-  }
-
-  /* --- Profiles Grid --- */
-  .profiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-  }
-  .profile {
-    background: #1a1a2e;
-    padding: 1rem;
-    border-radius: 15px;
-    text-align: center;
-    transition: transform 0.2s ease;
-  }
-  .profile:hover {
-    transform: scale(1.05);
-  }
-  .profile img {
-    width: 100px; height: 100px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #00aaff;
-  }
-  .profile p {
-    margin: 0.8rem 0 0.3rem;
-    font-weight: 600;
-  }
-  .follow-btn {
-    background: #00aaff;
-    border: none;
-    color: white;
-    padding: 0.4rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-    user-select: none;
-  }
-  .follow-btn:hover {
-    background: #0077cc;
-  }
-
-  /* --- Sections --- */
-  .section {
-    background: #111827;
-    padding: 2rem;
-    border-radius: 15px;
-    margin-bottom: 3rem;
-  }
-  .section h2 {
-    color: #00aaff;
-    margin-bottom: 1rem;
-    user-select: none;
-  }
-
-  /* --- Bio Generator --- */
-  #bioOutput {
-    width: 100%;
-    height: 120px;
-    background: #1f2937;
-    border: none;
-    border-radius: 12px;
-    padding: 1rem;
-    color: #e0e0e0;
-    font-size: 1rem;
-    resize: none;
-  }
-  button.generate-bio {
-    margin-top: 0.8rem;
-    background: #00aaff;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 12px;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    transition: background-color 0.3s ease;
-  }
-  button.generate-bio:hover {
-    background: #0077cc;
-  }
-
-  /* --- Quiz --- */
-  #quizForm {
-    font-size: 1rem;
-  }
-  .question {
-    margin-bottom: 1rem;
-  }
-  .question h3 {
-    margin-bottom: 0.5rem;
-  }
-  .answers label {
-    display: block;
-    margin-bottom: 0.3rem;
-    cursor: pointer;
-  }
-  .answers input[type="radio"] {
-    margin-right: 0.5rem;
-  }
-  button#submitQuiz {
-    background: #00aaff;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 15px;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    margin-top: 1rem;
-    transition: background-color 0.3s ease;
-  }
-  button#submitQuiz:hover {
-    background: #0077cc;
-  }
-  #quizResult {
-    margin-top: 1rem;
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: #00ffea;
-    user-select: none;
-  }
-
-  /* --- Leaderboard --- */
-  #leaderboardList {
-    list-style: none;
-    padding-left: 0;
-  }
-  #leaderboardList li {
-    background: #22283f;
-    margin-bottom: 0.6rem;
-    padding: 0.8rem 1rem;
-    border-radius: 10px;
-    font-weight: 600;
-    user-select: none;
-  }
+  body { transition: background-color 0.3s ease, color 0.3s ease; }
+  .area:hover { opacity: 0.8; cursor: pointer; transition: opacity 0.2s; }
+  #svgMap { touch-action: none; user-select: none; }
 </style>
 </head>
-<body>
+<body class="bg-white text-gray-900 dark:bg-gray-900 dark:text-white font-sans min-h-screen flex flex-col">
 
-<header>MAPPERS HUB</header>
+<!-- INTRO / HERO -->
+<header class="flex flex-col items-center justify-center py-20 px-6 text-center gap-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+  <div class="flex items-center space-x-3">
+    <!-- LOGO SVG -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 64 64" class="drop-shadow-lg">
+      <circle cx="32" cy="32" r="30" stroke="white" stroke-width="3" />
+      <path d="M32 14 L42 32 L32 50 L22 32 Z" fill="white" />
+      <text x="32" y="37" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="18" fill="#4F46E5" >GM</text>
+    </svg>
+    <h1 class="text-4xl font-extrabold select-none">Geomarkr</h1>
+  </div>
+  <p class="max-w-xl text-lg">Create custom interactive maps. Paint regions, add legends, zoom, and export in high quality.</p>
+  <button onclick="document.getElementById('editor').scrollIntoView({behavior:'smooth'})"
+    class="mt-6 bg-white text-indigo-700 font-semibold px-6 py-3 rounded-xl hover:bg-indigo-100 transition">
+    Get Started
+  </button>
+</header>
 
-<div class="container">
+<!-- CONTROLS & MAP -->
+<section id="editor" class="flex-grow bg-gray-100 dark:bg-gray-800 p-8">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
 
-  <!-- Profiles Section -->
-  <section class="profiles" aria-label="Mapper Profiles">
-    <div class="profile">
-      <img src="https://i.imgur.com/BQSmYm7.jpeg" alt="@czechiamapper" />
-      <p>@czechiamapper</p>
-      <a href="https://instagram.com/czechiamapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/NRNdjJh.jpeg" alt="@tugamapper" />
-      <p>@tugamapper</p>
-      <a href="https://instagram.com/tugamapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/upCUXT3.jpeg" alt="@central_europe_mapper" />
-      <p>@central_europe_mapper</p>
-      <a href="https://instagram.com/central_europe_mapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/neCO15z.jpeg" alt="@mapping_brasilien" />
-      <p>@mapping_brasilien</p>
-      <a href="https://instagram.com/mapping_brasilien" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/UrYca0s.jpeg" alt="@syrianmapper1290" />
-      <p>@syrianmapper1290</p>
-      <a href="https://instagram.com/syrianmapper1290" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/CB7XClv.jpeg" alt="@mapper_from_mus" />
-      <p>@mapper_from_mus</p>
-      <a href="https://instagram.com/mapper_from_mus" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/o0yRM4x.jpeg" alt="@srbinje.mapping47" />
-      <p>@srbinje.mapping47</p>
-      <a href="https://instagram.com/srbinje.mapping47" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/tuOgajQ.jpeg" alt="@yescartography" />
-      <p>@yescartography</p>
-      <a href="https://instagram.com/yescartography" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/rlA5fs7.jpeg" alt="@morocco.mapper.1028" />
-      <p>@morocco.mapper.1028</p>
-      <a href="https://instagram.com/morocco.mapper.1028" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/6GltLVc.png" alt="@deutscher.kartograf" />
-      <p>@deutscher.kartograf</p>
-      <a href="https://instagram.com/deutscher.kartograf" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-    <div class="profile">
-      <img src="https://i.imgur.com/NwO9V8m.jpeg" alt="@trailsmapper" />
-      <p>@trailsmapper</p>
-      <a href="https://instagram.com/trailsmapper" target="_blank" rel="noopener"><button class="follow-btn">Follow</button></a>
-    </div>
-  </section>
+    <!-- Controls Panel -->
+    <aside class="w-full md:w-80 bg-white dark:bg-gray-900 rounded-lg shadow-lg p-6 flex flex-col gap-4 sticky top-6 h-max">
 
-  <!-- Bio Generator -->
-  <section class="section" aria-label="Bio Generator">
-    <h2>Mapper Bio Generator</h2>
-    <textarea id="bioOutput" readonly placeholder="Your mapper bio will appear here..."></textarea>
-    <br />
-    <button class="generate-bio" id="generateBioBtn" aria-label="Generate mapper bio">Generate Bio</button>
-  </section>
+      <h2 class="text-2xl font-bold mb-4">Map Controls</h2>
 
-  <!-- Quiz Section -->
-  <section class="section" aria-label="Geography Quiz">
-    <h2>Geography Quiz (27 Questions)</h2>
-    <form id="quizForm" aria-describedby="quizResult">
-      <!-- Quiz questions inserted by JS -->
-    </form>
-    <button id="submitQuiz" aria-label="Submit quiz answers">Submit Quiz</button>
-    <p id="quizResult" role="alert" aria-live="polite"></p>
-  </section>
+      <label class="flex flex-col gap-1 font-medium">
+        Current Color:
+        <input type="color" id="colorPicker" value="#3b82f6" class="w-full h-10 rounded border" />
+      </label>
 
-  <!-- Leaderboard Section -->
-  <section class="section" aria-label="Quiz Leaderboard">
-    <h2>Quiz Leaderboard</h2>
-    <ul id="leaderboardList" aria-live="polite"></ul>
-  </section>
+      <button id="resetBtn" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded transition">Reset Colors</button>
 
-</div>
+      <button id="saveBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded transition">Save Map (JSON)</button>
+
+      <button id="loadBtn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded transition">Load Map (JSON)</button>
+
+      <input type="file" id="loadFileInput" accept="application/json" class="hidden" />
+
+      <button id="exportPngBtn" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded transition">Export PNG</button>
+
+      <button id="exportSvgBtn" class="w-full bg-green-800 hover:bg-green-900 text-white py-2 rounded transition">Export SVG</button>
+
+      <button id="toggleThemeBtn" class="w-full bg-gray-700 hover:bg-gray-800 text-white py-2 rounded transition">Toggle Dark / Light Mode</button>
+
+      <h3 class="mt-6 font-semibold text-lg">Legend</h3>
+      <ul id="legendList" class="max-h-64 overflow-auto divide-y divide-gray-300 dark:divide-gray-700"></ul>
+    </aside>
+
+    <!-- Map Container -->
+    <main class="flex-grow bg-white dark:bg-gray-900 rounded-lg shadow-lg p-4 relative select-none">
+
+      <div id="mapWrapper" class="overflow-hidden touch-pan-y" style="width:100%; height:600px; position: relative;">
+
+        <!-- SVG Map with zoom and drag -->
+        <svg id="svgMap" viewBox="0 0 800 600" class="w-full h-full" style="user-select:none; touch-action:none;">
+          <!-- Simplified Europe countries with ISO IDs -->
+          <path id="PT" class="area" d="M100,300 L120,280 L140,300 L120,320 Z" fill="#ccc" />
+          <path id="ES" class="area" d="M140,300 L160,280 L180,300 L160,320 Z" fill="#ccc" />
+          <path id="FR" class="area" d="M180,300 L200,280 L220,300 L200,320 Z" fill="#ccc" />
+          <path id="DE" class="area" d="M220,300 L240,280 L260,300 L240,320 Z" fill="#ccc" />
+          <path id="IT" class="area" d="M260,300 L280,280 L300,300 L280,320 Z" fill="#ccc" />
+        </svg>
+      </div>
+    </main>
+  </div>
+</section>
 
 <script>
-  // Profiles follow buttons - currently just link to Instagram, no dynamic follow count.
+  const colorPicker = document.getElementById('colorPicker');
+  const legendList = document.getElementById('legendList');
+  const svgMap = document.getElementById('svgMap');
+  const resetBtn = document.getElementById('resetBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const loadBtn = document.getElementById('loadBtn');
+  const loadFileInput = document.getElementById('loadFileInput');
+  const exportPngBtn = document.getElementById('exportPngBtn');
+  const exportSvgBtn = document.getElementById('exportSvgBtn');
+  const toggleThemeBtn = document.getElementById('toggleThemeBtn');
+  const mapWrapper = document.getElementById('mapWrapper');
 
-  // Bio Generator Data
-  const bioStarts = [
-    "Passionate mapper and explorer, sharing unique insights about",
-    "Dedicated to uncovering hidden gems and fascinating facts in",
-    "Bringing the world closer through detailed maps of",
-    "Cartography enthusiast revealing the beauty and history of",
-    "Your go-to source for incredible map facts and stories from"
-  ];
+  // Map state: { regionId: color }
+  let mapState = {};
 
-  const bioMiddles = [
-    "unexplored territories and cities.",
-    "the cultural and geographical wonders of the region.",
-    "ancient routes and modern trails.",
-    "urban landscapes and natural landmarks.",
-    "historical places and modern developments."
-  ];
-
-  const bioEnds = [
-    "Follow for daily map adventures and trivia!",
-    "Join me on a journey through the world's most intriguing maps.",
-    "Discover new perspectives on places you thought you knew.",
-    "Maps that tell stories beyond borders.",
-    "Exploring geography one map at a time."
-  ];
-
-  function generateBio() {
-    const start = bioStarts[Math.floor(Math.random() * bioStarts.length)];
-    const middle = bioMiddles[Math.floor(Math.random() * bioMiddles.length)];
-    const end = bioEnds[Math.floor(Math.random() * bioEnds.length)];
-    return `${start} ${middle} ${end}`;
-  }
-
-  document.getElementById('generateBioBtn').addEventListener('click', () => {
-    const bio = generateBio();
-    document.getElementById('bioOutput').value = bio;
-  });
-
-  // Quiz Data: 27 questions about world geography (Europe + Asia)
-  const quizQuestions = [
-    { q: "What is the capital of Hungary?", a: ["Budapest", "Warsaw", "Prague", "Vienna"], correct: 0 },
-    { q: "Which river flows through Moscow?", a: ["Volga", "Moskva", "Don", "Dnieper"], correct: 1 },
-    { q: "Mount Fuji is located in which country?", a: ["China", "South Korea", "Japan", "Vietnam"], correct: 2 },
-    { q: "Which desert is the largest in Asia?", a: ["Gobi", "Thar", "Karakum", "Kyzylkum"], correct: 0 },
-    { q: "What is the currency of Turkey?", a: ["Lira", "Rupee", "Dinar", "Rial"], correct: 0 },
-    { q: "Which country has the city of Sarajevo?", a: ["Croatia", "Bosnia and Herzegovina", "Serbia", "Montenegro"], correct: 1 },
-    { q: "The Ural Mountains separate which two continents?", a: ["Europe and Asia", "Asia and Africa", "Europe and Africa", "Asia and Australia"], correct: 0 },
-    { q: "Which country is home to the city of Tbilisi?", a: ["Armenia", "Georgia", "Azerbaijan", "Kazakhstan"], correct: 1 },
-    { q: "Which sea borders Romania to the east?", a: ["Black Sea", "Baltic Sea", "Adriatic Sea", "Caspian Sea"], correct: 0 },
-    { q: "What is the capital city of Laos?", a: ["Hanoi", "Vientiane", "Bangkok", "Phnom Penh"], correct: 1 },
-    { q: "Which country is NOT part of the Baltic states?", a: ["Latvia", "Lithuania", "Estonia", "Poland"], correct: 3 },
-    { q: "Which Asian country has the largest population?", a: ["India", "China", "Indonesia", "Pakistan"], correct: 1 },
-    { q: "The Danube River flows into which body of water?", a: ["Black Sea", "Mediterranean Sea", "Baltic Sea", "North Sea"], correct: 0 },
-    { q: "Which capital city is located on the Bosporus Strait?", a: ["Athens", "Istanbul", "Ankara", "Sofia"], correct: 1 },
-    { q: "What is the highest mountain in Europe?", a: ["Mount Elbrus", "Mont Blanc", "Matterhorn", "Grossglockner"], correct: 0 },
-    { q: "Which country contains the Ganges River?", a: ["Nepal", "India", "Bangladesh", "All of the above"], correct: 3 },
-    { q: "The Great Wall of China is located primarily in which province?", a: ["Hebei", "Guangdong", "Sichuan", "Yunnan"], correct: 0 },
-    { q: "Which city is the capital of Kazakhstan?", a: ["Almaty", "Astana (Nur-Sultan)", "Shymkent", "Karaganda"], correct: 1 },
-    { q: "Which island country lies south of India?", a: ["Sri Lanka", "Maldives", "Indonesia", "Philippines"], correct: 0 },
-    { q: "Which country is landlocked?", a: ["Poland", "Mongolia", "Russia", "Turkey"], correct: 1 },
-    { q: "Which strait separates Europe and Asia?", a: ["Bering Strait", "Strait of Gibraltar", "Bosporus", "Strait of Malacca"], correct: 2 },
-    { q: "Which city is NOT a capital?", a: ["Riga", "Tallinn", "Odessa", "Vilnius"], correct: 2 },
-    { q: "Which country has the largest land area in Asia?", a: ["Russia", "China", "India", "Kazakhstan"], correct: 0 },
-    { q: "What is the official language of Azerbaijan?", a: ["Turkish", "Russian", "Azerbaijani", "Persian"], correct: 2 },
-    { q: "Which sea lies between Saudi Arabia and Iran?", a: ["Red Sea", "Arabian Sea", "Persian Gulf", "Mediterranean Sea"], correct: 2 },
-    { q: "Which European country has the city of Bratislava?", a: ["Slovakia", "Czechia", "Hungary", "Austria"], correct: 0 },
-    { q: "Lake Baikal is located in which country?", a: ["Mongolia", "Russia", "China", "Kazakhstan"], correct: 1 },
-    { q: "Which Asian country has a maple leaf on its flag?", a: ["Japan", "South Korea", "Canada", "None"], correct: 3 }
-  ];
-
-  // Render quiz questions
-  const quizForm = document.getElementById('quizForm');
-  quizQuestions.forEach((item, index) => {
-    const questionDiv = document.createElement('div');
-    questionDiv.className = 'question';
-    questionDiv.innerHTML = `
-      <h3>${index + 1}. ${item.q}</h3>
-      <div class="answers">
-        ${item.a.map((answer, i) => `
-          <label>
-            <input type="radio" name="q${index}" value="${i}" required />
-            ${answer}
-          </label>
-        `).join('')}
-      </div>
-    `;
-    quizForm.appendChild(questionDiv);
-  });
-
-  // Leaderboard
-  let leaderboard = JSON.parse(localStorage.getItem('mappersLeaderboard')) || [];
-
-  function updateLeaderboard() {
-    const list = document.getElementById('leaderboardList');
-    list.innerHTML = '';
-    if (leaderboard.length === 0) {
-      list.innerHTML = '<li>No scores yet. Take the quiz!</li>';
-      return;
+  // Add or update legend entry
+  function addToLegend(id, color) {
+    let existing = legendList.querySelector(`li[data-id="${id}"]`);
+    if(existing) {
+      existing.querySelector('.color-box').style.background = color;
+    } else {
+      const li = document.createElement('li');
+      li.dataset.id = id;
+      li.className = 'flex items-center space-x-2 py-1';
+      li.innerHTML = `
+        <div class="color-box w-5 h-5 rounded border" style="background:${color}"></div>
+        <span>${id}</span>
+      `;
+      legendList.appendChild(li);
     }
-    leaderboard
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10)
-      .forEach(entry => {
-        const li = document.createElement('li');
-        li.textContent = `${entry.name}: ${entry.score} / ${quizQuestions.length}`;
-        list.appendChild(li);
-      });
   }
-  updateLeaderboard();
 
-  // Quiz submit event
-  document.getElementById('submitQuiz').addEventListener('click', () => {
-    const formData = new FormData(quizForm);
-    let score = 0;
-    for (let i = 0; i < quizQuestions.length; i++) {
-      const answer = formData.get(`q${i}`);
-      if (answer !== null && parseInt(answer) === quizQuestions[i].correct) {
-        score++;
+  // Remove legend entry
+  function removeFromLegend(id) {
+    let existing = legendList.querySelector(`li[data-id="${id}"]`);
+    if(existing) existing.remove();
+  }
+
+  // Update map fill and legend when region clicked
+  svgMap.querySelectorAll('.area').forEach(area => {
+    area.addEventListener('click', () => {
+      const id = area.id;
+      const color = colorPicker.value;
+      area.setAttribute('fill', color);
+      mapState[id] = color;
+      addToLegend(id, color);
+    });
+  });
+
+  // Reset map colors and legend
+  resetBtn.addEventListener('click', () => {
+    svgMap.querySelectorAll('.area').forEach(area => {
+      area.setAttribute('fill', '#ccc');
+    });
+    mapState = {};
+    legendList.innerHTML = '';
+  });
+
+  // Save map state as JSON
+  saveBtn.addEventListener('click', () => {
+    const dataStr = JSON.stringify(mapState, null, 2);
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = "geomarkr-map.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Load map state from JSON
+  loadBtn.addEventListener('click', () => {
+    loadFileInput.click();
+  });
+
+  loadFileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = event => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if(typeof data !== 'object') throw new Error('Invalid data');
+        mapState = data;
+        // Apply colors and update legend
+        svgMap.querySelectorAll('.area').forEach(area => {
+          const color = mapState[area.id] || '#ccc';
+          area.setAttribute('fill', color);
+          if(color !== '#ccc') addToLegend(area.id, color);
+          else removeFromLegend(area.id);
+        });
+      } catch {
+        alert('Failed to load map data. Invalid JSON.');
       }
-    }
-    const username = prompt("Great job! Enter your name for the leaderboard:", "Mapper");
-    if (username) {
-      leaderboard.push({ name: username.trim(), score });
-      localStorage.setItem('mappersLeaderboard', JSON.stringify(leaderboard));
-      updateLeaderboard();
-    }
-    document.getElementById('quizResult').textContent = `You scored ${score} out of ${quizQuestions.length}!`;
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // Reset input
   });
+
+  // Export PNG
+  exportPngBtn.addEventListener('click', () => {
+    html2canvas(mapWrapper, {backgroundColor: null, scale: 2}).then(canvas => {
+      const link = document.createElement('a');
+      link.download = 'geomarkr-map.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  });
+
+  // Export SVG
+  exportSvgBtn.addEventListener('click', () => {
+    const serializer = new XMLSerializer();
+    const source = serializer.serializeToString(svgMap);
+    const blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'geomarkr-map.svg';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Dark/light mode toggle
+  toggleThemeBtn.addEventListener('click', () => {
+    if(document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    }
+  });
+
+  // Initialize theme from localStorage
+  if(localStorage.getItem('theme') === 'dark') {
+    document.documentElement.classList.add('dark');
+  }
+
+  // Simple zoom & drag on SVG
+  let isDragging = false, startX, startY, startViewBox;
+  svgMap.style.cursor = 'grab';
+  svgMap.addEventListener('mousedown', e => {
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    const vb = svgMap.getAttribute('viewBox').split(' ').map(Number);
+    startViewBox = {x: vb[0], y: vb[1], w: vb[2], h: vb[3]};
+    svgMap.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    svgMap.style.cursor = 'grab';
+  });
+  window.addEventListener('mousemove', e => {
+    if(!isDragging) return;
+    const dx = (startX - e.clientX) * (startViewBox.w / svgMap.clientWidth);
+    const dy = (startY - e.clientY) * (startViewBox.h / svgMap.clientHeight);
+    svgMap.setAttribute('viewBox', `${startViewBox.x + dx} ${startViewBox.y + dy} ${startViewBox.w} ${startViewBox.h}`);
+  });
+  // Zoom with wheel
+  svgMap.addEventListener('wheel', e => {
+    e.preventDefault();
+    const scaleAmount = e.deltaY > 0 ? 1.1 : 0.9;
+    const vb = svgMap.getAttribute('viewBox').split(' ').map(Number);
+    const mx = (e.offsetX / svgMap.clientWidth) * vb[2] + vb[0];
+    const my = (e.offsetY / svgMap.clientHeight) * vb[3] + vb[1];
+    const newW = vb[2] * scaleAmount;
+    const newH = vb[3] * scaleAmount;
+    const newX = mx - (mx - vb[0]) * scaleAmount;
+    const newY = my - (my - vb[1]) * scaleAmount;
+    svgMap.setAttribute('viewBox', `${newX} ${newY} ${newW} ${newH}`);
+  }, { passive: false });
+
 </script>
 
 </body>
