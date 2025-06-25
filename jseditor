@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const mapObject = document.getElementById("map");
+  const paletteContainer = document.getElementById("paletteContainer");
   const colorPicker = document.getElementById("colorPicker");
   const resetBtn = document.getElementById("resetColors");
   const legendList = document.getElementById("legend-list");
@@ -9,11 +10,45 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveBtn = document.getElementById("saveMap");
   const loadBtn = document.getElementById("loadMap");
   const exportBtn = document.getElementById("exportBtn");
-  const mapContainer = document.getElementById("map-container");
 
   let svgDoc, countries, selectedCountries = new Set();
 
-  // Função para limpar seleção visual
+  // COLORS
+  const freeColors = [
+    "#FF5733", "#33FF57", "#3357FF", "#F3FF33", "#FF33F3", "#33FFF3", "#F39C12",
+    "#8E44AD", "#2980B9", "#27AE60", "#E67E22", "#16A085", "#D35400", "#7F8C8D",
+    "#2ECC71", "#3498DB", "#E74C3C", "#1ABC9C", "#9B59B6", "#34495E", "#F1C40F",
+    "#E67E22", "#ECF0F1", "#95A5A6", "#34495E"
+  ];
+  const premiumExtraColors = [
+    "#B03A2E",  // vermelho "no data"
+    "#2C3E50", "#C0392B", "#B7950B", "#884EA0", "#2471A3", "#239B56",
+    "#CA6F1E", "#7D6608", "#A569BD", "#117A65", "#D68910", "#C39BD3", "#5499C7",
+    "#52BE80", "#F4D03F", "#EC7063", "#2E4053", "#873600", "#1B4F72"
+  ];
+
+  function isPremium() {
+    return localStorage.getItem("premium") === "true";
+  }
+
+  function renderPalette() {
+    paletteContainer.innerHTML = "";
+    const colors = isPremium()
+      ? [...freeColors, ...premiumExtraColors]
+      : freeColors;
+
+    colors.forEach(color => {
+      const btn = document.createElement("button");
+      btn.style.backgroundColor = color;
+      btn.className = "w-8 h-8 m-1 rounded border border-gray-300";
+      btn.addEventListener("click", () => {
+        colorPicker.value = color;
+        applyColorToSelected(color);
+      });
+      paletteContainer.appendChild(btn);
+    });
+  }
+
   function clearSelection() {
     selectedCountries.forEach(c => {
       c.style.strokeWidth = "1";
@@ -22,10 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedCountries.clear();
   }
 
-  // Selecionar ou desselecionar país com suporte a multi-seleção (Shift)
   function selectCountry(country, multi = false) {
     if (!multi) clearSelection();
-
     if (selectedCountries.has(country)) {
       selectedCountries.delete(country);
       country.style.strokeWidth = "1";
@@ -33,49 +66,43 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       selectedCountries.add(country);
       country.style.strokeWidth = "3";
-      country.style.stroke = "#ff4500";
+      country.style.stroke = "#ff0000";
     }
   }
 
-  // Carregar mapa SVG e preparar eventos
+  function applyColorToSelected(color) {
+    selectedCountries.forEach(c => {
+      c.setAttribute("fill", color);
+    });
+  }
+
   mapObject.addEventListener("load", () => {
     svgDoc = mapObject.contentDocument;
-    countries = svgDoc.querySelectorAll("path");
+    countries = svgDoc.querySelectorAll("path, polygon, rect");
 
     countries.forEach(country => {
       country.style.cursor = "pointer";
       country.style.stroke = "#000";
       country.style.strokeWidth = "1";
 
-      // Clique para seleção / multi-seleção
       country.addEventListener("click", (e) => {
         selectCountry(country, e.shiftKey);
       });
-
-      // Tooltip simples com nome
-      country.setAttribute("title", country.id || "Unknown");
     });
+
+    renderPalette();
   });
 
-  // Pintar países selecionados com cor escolhida
   colorPicker.addEventListener("input", () => {
-    selectedCountries.forEach(c => {
-      c.setAttribute("fill", colorPicker.value);
-    });
+    applyColorToSelected(colorPicker.value);
   });
 
-  // Resetar todas cores do mapa
   resetBtn.addEventListener("click", () => {
     if (!svgDoc) return;
-    countries.forEach(c => {
-      c.removeAttribute("fill");
-      c.style.stroke = "#000";
-      c.style.strokeWidth = "1";
-    });
+    countries.forEach(c => c.removeAttribute("fill"));
     clearSelection();
   });
 
-  // Adicionar item na legenda
   addLegendBtn.addEventListener("click", () => {
     const text = legendText.value.trim();
     const color = legendColor.value;
@@ -87,24 +114,34 @@ document.addEventListener("DOMContentLoaded", () => {
     legendText.value = "";
   });
 
-  // Guardar cores no localStorage para persistência
   saveBtn.addEventListener("click", () => {
     if (!svgDoc) return;
     const colors = {};
     countries.forEach(c => {
-      const id = c.id || c.getAttribute("name") || c.getAttribute("title");
-      if (id) colors[id] = c.getAttribute("fill") || null;
+      const id = c.id || c.getAttribute("name") || c.getAttribute("title") || null;
+      if (id) {
+        colors[id] = c.getAttribute("fill") || null;
+      }
     });
     localStorage.setItem("mapColors", JSON.stringify(colors));
-    alert("Map saved locally.");
+
+    // Add 20 points for saving map (mission)
+    if(localStorage.getItem("userEmail")) {
+      let pts = parseInt(localStorage.getItem("points")) || 0;
+      pts += 20;
+      localStorage.setItem("points", pts);
+      alert("Map saved! +20 points earned.");
+      updatePointsDisplay();
+    } else {
+      alert("Map saved locally.");
+    }
   });
 
-  // Carregar cores guardadas localmente
   loadBtn.addEventListener("click", () => {
     if (!svgDoc) return;
     const colors = JSON.parse(localStorage.getItem("mapColors") || "{}");
     countries.forEach(c => {
-      const id = c.id || c.getAttribute("name") || c.getAttribute("title");
+      const id = c.id || c.getAttribute("name") || c.getAttribute("title") || null;
       if (id && colors[id]) {
         c.setAttribute("fill", colors[id]);
       } else {
@@ -114,13 +151,31 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("Map loaded.");
   });
 
-  // Exportar como JPG simulado + dar pontos (liga com missions.js)
   exportBtn.addEventListener("click", () => {
-    alert("Export as JPG successful! +10 points awarded.");
-    if (typeof addExportPoints === "function") addExportPoints();
+    alert("Export as JPG is available. +10 points earned.");
+    if (localStorage.getItem("userEmail")) {
+      let pts = parseInt(localStorage.getItem("points")) || 0;
+      pts += 10;
+      localStorage.setItem("points", pts);
+      updatePointsDisplay();
+    }
   });
 
-  // Suporte a pan (arrastar o mapa)
+  // Show points in header
+  const pointsDisplay = document.getElementById("pointsDisplay");
+  function updatePointsDisplay() {
+    let pts = parseInt(localStorage.getItem("points")) || 0;
+    pointsDisplay.textContent = `Points: ${pts} / 170`;
+    if(pts >= 170 && !isPremium()) {
+      alert("🎉 You unlocked Premium!");
+      localStorage.setItem("premium", "true");
+      renderPalette();
+    }
+  }
+  updatePointsDisplay();
+
+  // Basic pan support on map container
+  let mapContainer = document.getElementById("map-container");
   let isPanning = false, startX, startY, scrollLeft, scrollTop;
 
   mapContainer.addEventListener("mousedown", e => {
@@ -150,6 +205,56 @@ document.addEventListener("DOMContentLoaded", () => {
     mapContainer.scrollTop = scrollTop - walkY;
   });
 
+  // Missions panel toggle
+  const missionsPanel = document.getElementById("missionsPanel");
+  const showMissionsBtn = document.getElementById("showMissionsBtn");
+  const missionsList = document.getElementById("missionsList");
+
+  showMissionsBtn.addEventListener("click", () => {
+    missionsPanel.classList.toggle("hidden");
+  });
+
+  // Render missions dynamically
+  function renderMissions() {
+    if(!localStorage.getItem("userEmail")) {
+      missionsList.innerHTML = "<li>Login to start earning points!</li>";
+      return;
+    }
+    let points = parseInt(localStorage.getItem("points")) || 0;
+    const missions = [
+      { id: "createAccount", text: "Create account (70 pts)", done: localStorage.getItem("mission_createAccount") === "done" },
+      { id: "createMap", text: "Create/save a map (20 pts)", done: localStorage.getItem("mission_createMap") === "done" },
+      { id: "dailyReward", text: "Daily login reward (40 pts)", done: localStorage.getItem("mission_dailyReward") === "done" }
+    ];
+
+    missionsList.innerHTML = "";
+    missions.forEach(m => {
+      const li = document.createElement("li");
+      li.textContent = m.text + (m.done ? " ✅" : "");
+      missionsList.appendChild(li);
+    });
+  }
+  renderMissions();
+
+  // Mark mission done & give points (called from missions.js too)
+  window.markMissionDone = function(id) {
+    if(localStorage.getItem(`mission_${id}`) !== "done") {
+      localStorage.setItem(`mission_${id}`, "done");
+      let pts = parseInt(localStorage.getItem("points")) || 0;
+      if(id === "createAccount") pts += 70;
+      else if(id === "createMap") pts += 20;
+      else if(id === "dailyReward") pts += 40;
+      localStorage.setItem("points", pts);
+      alert(`Mission "${id}" completed! +${pts} points.`);
+      updatePointsDisplay();
+      renderMissions();
+    }
+  };
+
+  // Detect account creation mission on load (if userEmail present)
+  if(localStorage.getItem("userEmail")) {
+    markMissionDone("createAccount");
+  }
 });
 
 
