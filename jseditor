@@ -1,0 +1,16 @@
+document.addEventListener("DOMContentLoaded", () => {
+  const colorPicker = document.getElementById("colorPicker");
+  const mapObject = document.getElementById("map");
+
+  mapObject.addEventListener("load", () => {
+    const svgDoc = mapObject.contentDocument;
+    const countries = svgDoc.querySelectorAll("path");
+
+    countries.forEach(country => {
+      country.style.cursor = "pointer";
+      country.addEventListener("click", () => {
+        country.setAttribute("fill", colorPicker.value);
+      });
+    });
+  });
+});
