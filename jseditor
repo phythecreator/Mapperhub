@@ -1,260 +1,242 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const mapObject = document.getElementById("map");
-  const paletteContainer = document.getElementById("paletteContainer");
-  const colorPicker = document.getElementById("colorPicker");
-  const resetBtn = document.getElementById("resetColors");
-  const legendList = document.getElementById("legend-list");
-  const legendText = document.getElementById("legendText");
-  const legendColor = document.getElementById("legendColor");
-  const addLegendBtn = document.getElementById("addLegend");
-  const saveBtn = document.getElementById("saveMap");
-  const loadBtn = document.getElementById("loadMap");
-  const exportBtn = document.getElementById("exportBtn");
+// editor.js
 
-  let svgDoc, countries, selectedCountries = new Set();
+const maps = [
+  "world.svg",
+  "europe.svg",
+  "africa.svg",
+  "south_america.svg",
+  "north_america.svg",
+  "central_america.svg",
+  "asia.svg",
+  "oceania.svg"
+];
 
-  // COLORS
-  const freeColors = [
-    "#FF5733", "#33FF57", "#3357FF", "#F3FF33", "#FF33F3", "#33FFF3", "#F39C12",
-    "#8E44AD", "#2980B9", "#27AE60", "#E67E22", "#16A085", "#D35400", "#7F8C8D",
-    "#2ECC71", "#3498DB", "#E74C3C", "#1ABC9C", "#9B59B6", "#34495E", "#F1C40F",
-    "#E67E22", "#ECF0F1", "#95A5A6", "#34495E"
-  ];
-  const premiumExtraColors = [
-    "#B03A2E",  // vermelho "no data"
-    "#2C3E50", "#C0392B", "#B7950B", "#884EA0", "#2471A3", "#239B56",
-    "#CA6F1E", "#7D6608", "#A569BD", "#117A65", "#D68910", "#C39BD3", "#5499C7",
-    "#52BE80", "#F4D03F", "#EC7063", "#2E4053", "#873600", "#1B4F72"
-  ];
+const freeColors = [
+  "#1f78b4", "#33a02c", "#e31a1c", "#ff7f00", "#6a3d9a",
+  "#a6cee3", "#b2df8a", "#fb9a99", "#fdbf6f", "#cab2d6",
+  "#ffff99", "#8dd3c7", "#ffffb3", "#bebada", "#fb8072",
+  "#80b1d3", "#fdb462", "#b3de69", "#fccde5", "#d9d9d9",
+  "#bc80bd", "#ccebc5", "#ffed6f"
+];
 
-  function isPremium() {
-    return localStorage.getItem("premium") === "true";
-  }
+const premiumColors = [
+  "#b15928", "#e41a1c", "#377eb8", "#4daf4a", "#984ea3",
+  "#ff7f00", "#ffff33"
+];
 
-  function renderPalette() {
-    paletteContainer.innerHTML = "";
-    const colors = isPremium()
-      ? [...freeColors, ...premiumExtraColors]
-      : freeColors;
+const basicEmojis = [
+  "assets/emojis/basic/happy.png",
+  "assets/emojis/basic/sad.png",
+  "assets/emojis/basic/neutral.png",
+  "assets/emojis/basic/very_happy.png"
+];
 
-    colors.forEach(color => {
-      const btn = document.createElement("button");
-      btn.style.backgroundColor = color;
-      btn.className = "w-8 h-8 m-1 rounded border border-gray-300";
-      btn.addEventListener("click", () => {
-        colorPicker.value = color;
-        applyColorToSelected(color);
-      });
-      paletteContainer.appendChild(btn);
-    });
-  }
+const premiumEmojis = [
+  "assets/emojis/premium/angry.png",
+  "assets/emojis/premium/shocked.png",
+  "assets/emojis/premium/laughing.png"
+];
 
-  function clearSelection() {
-    selectedCountries.forEach(c => {
-      c.style.strokeWidth = "1";
-      c.style.stroke = "#000";
-    });
-    selectedCountries.clear();
-  }
+let points = parseInt(localStorage.getItem("points") || "0");
+const userEmail = localStorage.getItem("userEmail") || null;
+let premiumUnlocked = localStorage.getItem("premium") === "true";
 
-  function selectCountry(country, multi = false) {
-    if (!multi) clearSelection();
-    if (selectedCountries.has(country)) {
-      selectedCountries.delete(country);
-      country.style.strokeWidth = "1";
-      country.style.stroke = "#000";
-    } else {
-      selectedCountries.add(country);
-      country.style.strokeWidth = "3";
-      country.style.stroke = "#ff0000";
-    }
-  }
+const mapObj = document.getElementById("map");
+const mapSelect = document.getElementById("mapSelect");
+const paletteContainer = document.getElementById("palette");
+const emojiContainer = document.getElementById("emojiContainer");
+const pointsDisplay = document.getElementById("pointsDisplay");
 
-  function applyColorToSelected(color) {
-    selectedCountries.forEach(c => {
-      c.setAttribute("fill", color);
-    });
-  }
+let svgDoc = null;
+let countries = [];
+const selectedCountries = new Set();
 
-  mapObject.addEventListener("load", () => {
-    svgDoc = mapObject.contentDocument;
-    countries = svgDoc.querySelectorAll("path, polygon, rect");
+function updatePointsDisplay() {
+  pointsDisplay.textContent = `Points: ${points} / 170`;
+}
 
-    countries.forEach(country => {
-      country.style.cursor = "pointer";
-      country.style.stroke = "#000";
-      country.style.strokeWidth = "1";
+function savePoints() {
+  localStorage.setItem("points", points);
+}
 
-      country.addEventListener("click", (e) => {
-        selectCountry(country, e.shiftKey);
-      });
-    });
-
-    renderPalette();
-  });
-
-  colorPicker.addEventListener("input", () => {
-    applyColorToSelected(colorPicker.value);
-  });
-
-  resetBtn.addEventListener("click", () => {
-    if (!svgDoc) return;
-    countries.forEach(c => c.removeAttribute("fill"));
-    clearSelection();
-  });
-
-  addLegendBtn.addEventListener("click", () => {
-    const text = legendText.value.trim();
-    const color = legendColor.value;
-    if (!text) return alert("Please enter legend text");
-    const li = document.createElement("li");
-    li.textContent = text;
-    li.style.color = color;
-    legendList.appendChild(li);
-    legendText.value = "";
-  });
-
-  saveBtn.addEventListener("click", () => {
-    if (!svgDoc) return;
-    const colors = {};
-    countries.forEach(c => {
-      const id = c.id || c.getAttribute("name") || c.getAttribute("title") || null;
-      if (id) {
-        colors[id] = c.getAttribute("fill") || null;
-      }
-    });
-    localStorage.setItem("mapColors", JSON.stringify(colors));
-
-    // Add 20 points for saving map (mission)
-    if(localStorage.getItem("userEmail")) {
-      let pts = parseInt(localStorage.getItem("points")) || 0;
-      pts += 20;
-      localStorage.setItem("points", pts);
-      alert("Map saved! +20 points earned.");
-      updatePointsDisplay();
-    } else {
-      alert("Map saved locally.");
-    }
-  });
-
-  loadBtn.addEventListener("click", () => {
-    if (!svgDoc) return;
-    const colors = JSON.parse(localStorage.getItem("mapColors") || "{}");
-    countries.forEach(c => {
-      const id = c.id || c.getAttribute("name") || c.getAttribute("title") || null;
-      if (id && colors[id]) {
-        c.setAttribute("fill", colors[id]);
-      } else {
-        c.removeAttribute("fill");
-      }
-    });
-    alert("Map loaded.");
-  });
-
-  exportBtn.addEventListener("click", () => {
-    alert("Export as JPG is available. +10 points earned.");
-    if (localStorage.getItem("userEmail")) {
-      let pts = parseInt(localStorage.getItem("points")) || 0;
-      pts += 10;
-      localStorage.setItem("points", pts);
-      updatePointsDisplay();
-    }
-  });
-
-  // Show points in header
-  const pointsDisplay = document.getElementById("pointsDisplay");
-  function updatePointsDisplay() {
-    let pts = parseInt(localStorage.getItem("points")) || 0;
-    pointsDisplay.textContent = `Points: ${pts} / 170`;
-    if(pts >= 170 && !isPremium()) {
-      alert("🎉 You unlocked Premium!");
-      localStorage.setItem("premium", "true");
-      renderPalette();
-    }
-  }
+function addPoints(amount, key) {
+  if (key && localStorage.getItem(key)) return; // already got points for this mission
+  points += amount;
+  savePoints();
   updatePointsDisplay();
+  if (key) localStorage.setItem(key, "done");
+  checkPremium();
+}
 
-  // Basic pan support on map container
-  let mapContainer = document.getElementById("map-container");
-  let isPanning = false, startX, startY, scrollLeft, scrollTop;
+function checkPremium() {
+  if (points >= 170 && !premiumUnlocked) {
+    premiumUnlocked = true;
+    localStorage.setItem("premium", "true");
+    alert("🎉 Congratulations! Premium unlocked.");
+    showPalette();
+    showEmojis();
+  }
+}
 
-  mapContainer.addEventListener("mousedown", e => {
-    isPanning = true;
-    startX = e.pageX - mapContainer.offsetLeft;
-    startY = e.pageY - mapContainer.offsetTop;
-    scrollLeft = mapContainer.scrollLeft;
-    scrollTop = mapContainer.scrollTop;
+function loadMap(mapName) {
+  mapObj.setAttribute("data", `assets/maps/${mapName}`);
+  mapObj.addEventListener("load", () => {
+    svgDoc = mapObj.contentDocument;
+    countries = svgDoc.querySelectorAll("path, polygon, rect");
+    countries.forEach(c => {
+      c.style.cursor = "pointer";
+      c.style.stroke = "#000";
+      c.style.strokeWidth = "1";
+      c.addEventListener("click", e => {
+        if (e.shiftKey) {
+          toggleCountrySelection(c);
+        } else {
+          clearSelection();
+          selectCountry(c);
+        }
+      });
+    });
+  }, { once: true });
+}
+
+function clearSelection() {
+  selectedCountries.forEach(c => {
+    c.style.strokeWidth = "1";
+    c.style.stroke = "#000";
   });
+  selectedCountries.clear();
+}
 
-  mapContainer.addEventListener("mouseup", () => {
-    isPanning = false;
+function selectCountry(country) {
+  selectedCountries.add(country);
+  country.style.strokeWidth = "3";
+  country.style.stroke = "#ff0000";
+}
+
+function toggleCountrySelection(country) {
+  if (selectedCountries.has(country)) {
+    selectedCountries.delete(country);
+    country.style.strokeWidth = "1";
+    country.style.stroke = "#000";
+  } else {
+    selectedCountries.add(country);
+    country.style.strokeWidth = "3";
+    country.style.stroke = "#ff0000";
+  }
+}
+
+function applyColor(color) {
+  if (selectedCountries.size === 0) return alert("Select at least one country!");
+  selectedCountries.forEach(c => {
+    c.setAttribute("fill", color);
   });
+}
 
-  mapContainer.addEventListener("mouseleave", () => {
-    isPanning = false;
+function showPalette() {
+  paletteContainer.innerHTML = "";
+  const colors = premiumUnlocked ? freeColors.concat(premiumColors) : freeColors;
+  colors.forEach(c => {
+    const btn = document.createElement("button");
+    btn.style.backgroundColor = c;
+    btn.className = "w-8 h-8 m-1 rounded border border-gray-700";
+    btn.title = c;
+    btn.addEventListener("click", () => {
+      applyColor(c);
+    });
+    paletteContainer.appendChild(btn);
   });
+}
 
-  mapContainer.addEventListener("mousemove", e => {
-    if (!isPanning) return;
-    e.preventDefault();
-    const x = e.pageX - mapContainer.offsetLeft;
-    const y = e.pageY - mapContainer.offsetTop;
-    const walkX = (x - startX);
-    const walkY = (y - startY);
-    mapContainer.scrollLeft = scrollLeft - walkX;
-    mapContainer.scrollTop = scrollTop - walkY;
+function insertEmoji(url) {
+  if (!svgDoc) return;
+  if (selectedCountries.size === 0) return alert("Select at least one country!");
+  selectedCountries.forEach(c => {
+    const bbox = c.getBBox();
+    const img = svgDoc.createElementNS("http://www.w3.org/2000/svg", "image");
+    img.setAttributeNS(null, "href", url);
+    img.setAttribute("width", 20);
+    img.setAttribute("height", 20);
+    img.setAttribute("x", bbox.x + bbox.width / 2 - 10);
+    img.setAttribute("y", bbox.y + bbox.height / 2 - 10);
+    svgDoc.documentElement.appendChild(img);
   });
+}
 
-  // Missions panel toggle
-  const missionsPanel = document.getElementById("missionsPanel");
-  const showMissionsBtn = document.getElementById("showMissionsBtn");
-  const missionsList = document.getElementById("missionsList");
-
-  showMissionsBtn.addEventListener("click", () => {
-    missionsPanel.classList.toggle("hidden");
+function showEmojis() {
+  emojiContainer.innerHTML = "";
+  basicEmojis.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.className = "emoji-btn";
+    img.title = "Basic emoji";
+    img.onclick = () => insertEmoji(url);
+    emojiContainer.appendChild(img);
   });
-
-  // Render missions dynamically
-  function renderMissions() {
-    if(!localStorage.getItem("userEmail")) {
-      missionsList.innerHTML = "<li>Login to start earning points!</li>";
-      return;
-    }
-    let points = parseInt(localStorage.getItem("points")) || 0;
-    const missions = [
-      { id: "createAccount", text: "Create account (70 pts)", done: localStorage.getItem("mission_createAccount") === "done" },
-      { id: "createMap", text: "Create/save a map (20 pts)", done: localStorage.getItem("mission_createMap") === "done" },
-      { id: "dailyReward", text: "Daily login reward (40 pts)", done: localStorage.getItem("mission_dailyReward") === "done" }
-    ];
-
-    missionsList.innerHTML = "";
-    missions.forEach(m => {
-      const li = document.createElement("li");
-      li.textContent = m.text + (m.done ? " ✅" : "");
-      missionsList.appendChild(li);
+  if (premiumUnlocked) {
+    premiumEmojis.forEach(url => {
+      const img = document.createElement("img");
+      img.src = url;
+      img.className = "emoji-btn premium-emoji";
+      img.title = "Premium emoji";
+      img.onclick = () => insertEmoji(url);
+      emojiContainer.appendChild(img);
     });
   }
-  renderMissions();
+}
 
-  // Mark mission done & give points (called from missions.js too)
-  window.markMissionDone = function(id) {
-    if(localStorage.getItem(`mission_${id}`) !== "done") {
-      localStorage.setItem(`mission_${id}`, "done");
-      let pts = parseInt(localStorage.getItem("points")) || 0;
-      if(id === "createAccount") pts += 70;
-      else if(id === "createMap") pts += 20;
-      else if(id === "dailyReward") pts += 40;
-      localStorage.setItem("points", pts);
-      alert(`Mission "${id}" completed! +${pts} points.`);
-      updatePointsDisplay();
-      renderMissions();
-    }
-  };
+// Missões simuladas (podes ligar a botões e eventos)
+function completeMissionFollow() {
+  addPoints(70, "followInstagram");
+  alert("You earned 70 points for following @tugamapper!");
+}
 
-  // Detect account creation mission on load (if userEmail present)
-  if(localStorage.getItem("userEmail")) {
-    markMissionDone("createAccount");
+function completeMissionCreateMap() {
+  addPoints(20, "createdMap");
+  alert("You earned 20 points for creating a map!");
+}
+
+function completeMissionDailyReward() {
+  const today = new Date().toISOString().slice(0,10);
+  if(localStorage.getItem("dailyCheck") === today) {
+    alert("Daily reward already claimed.");
+    return;
   }
+  addPoints(40, "dailyCheck");
+  localStorage.setItem("dailyCheck", today);
+  alert("Daily reward: +40 points!");
+}
+
+function exportMap() {
+  alert("Export simulated: you earned 10 points!");
+  addPoints(10);
+  // Aqui podes implementar export real via canvas/svg2png etc
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  updatePointsDisplay();
+  showPalette();
+  showEmojis();
+  loadMap("world.svg");
+
+  mapSelect.innerHTML = "";
+  maps.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m;
+    opt.textContent = m.replace(".svg", "").replace(/_/g, " ");
+    mapSelect.appendChild(opt);
+  });
+  mapSelect.value = "world.svg";
+  mapSelect.addEventListener("change", e => {
+    clearSelection();
+    loadMap(e.target.value);
+  });
+
+  // Liga botões de missões e export (exemplo, os botões têm que existir no HTML)
+  document.getElementById("btnFollow").addEventListener("click", completeMissionFollow);
+  document.getElementById("btnCreateMap").addEventListener("click", completeMissionCreateMap);
+  document.getElementById("btnDailyReward").addEventListener("click", completeMissionDailyReward);
+  document.getElementById("btnExport").addEventListener("click", exportMap);
 });
+
 
 
