@@ -1,901 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Map Creator - Inspired by Periphern & MapChart</title>
-<style>
-  /* Reset and base */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0; background: #f4f6fb; color: #333;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  button {
-    cursor: pointer;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    transition: background-color 0.3s ease;
-  }
-  button:focus {
-    outline: 2px solid #4363d8;
-    outline-offset: 2px;
-  }
-  h1, h2, h3 {
-    margin-top: 0;
-  }
-  a {
-    color: #4363d8;
-    text-decoration: none;
-  }
-  a:hover {
-    text-decoration: underline;
-  }
-
-  /* Container */
-  #app {
-    max-width: 980px;
-    margin: 0 auto;
-    padding: 20px 24px 60px;
-  }
-
-  /* === HOME PAGE === */
-  .home-header {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  .home-header h1 {
-    font-size: 3.2rem;
-    font-weight: 700;
-    color: #4363d8;
-    margin-bottom: 8px;
-  }
-  .home-header p {
-    font-size: 1.15rem;
-    max-width: 560px;
-    margin: 0 auto 32px;
-    color: #555;
-  }
-  .home-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 40px;
-  }
-  .btn-primary {
-    background-color: #4363d8;
-    color: white;
-    padding: 14px 26px;
-    font-size: 1.1rem;
-  }
-  .btn-primary:hover {
-    background-color: #324dbd;
-  }
-  .btn-secondary {
-    background-color: #e4e7f2;
-    color: #333;
-    padding: 14px 20px;
-    font-size: 1.1rem;
-  }
-  .btn-secondary:hover {
-    background-color: #c6c9dd;
-  }
-
-  /* Tutorial */
-  .tutorial {
-    max-width: 650px;
-    margin: 0 auto 40px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 8px 20px rgb(67 99 216 / 0.12);
-    padding: 24px 28px;
-    text-align: left;
-  }
-  .tutorial h2 {
-    color: #4363d8;
-    font-weight: 700;
-    margin-bottom: 14px;
-  }
-  .tutorial ol {
-    padding-left: 20px;
-    font-size: 1rem;
-    line-height: 1.5;
-  }
-  .tutorial ol li {
-    margin-bottom: 12px;
-  }
-
-  /* Footer */
-  footer {
-    text-align: center;
-    color: #666;
-    font-size: 0.85rem;
-    margin-top: 60px;
-  }
-
-  /* === SELECT MAP PAGE === */
-  #map-select {
-    text-align: center;
-  }
-  #map-select h2 {
-    font-size: 2.4rem;
-    margin-bottom: 20px;
-    color: #4363d8;
-  }
-  .region-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 14px;
-    margin-bottom: 40px;
-  }
-  .region-btn {
-    background-color: #e4e7f2;
-    color: #333;
-    padding: 14px 24px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    min-width: 140px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.06);
-  }
-  .region-btn:hover, .region-btn.selected {
-    background-color: #4363d8;
-    color: white;
-    box-shadow: 0 6px 12px rgba(67,99,216,0.5);
-  }
-  #back-to-home {
-    margin-top: 16px;
-    background-color: #eee;
-    color: #555;
-    padding: 10px 20px;
-  }
-  #back-to-home:hover {
-    background-color: #ddd;
-  }
-
-  /* === MAP EDITOR === */
-  #editor {
-    user-select: none;
-  }
-  #editor h2 {
-    color: #4363d8;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-  .editor-controls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    align-items: center;
-  }
-  .color-picker {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .color-picker input[type=color] {
-    width: 36px;
-    height: 36px;
-    border: none;
-    cursor: pointer;
-    border-radius: 6px;
-  }
-  .color-search {
-    border: 1px solid #bbb;
-    padding: 6px 12px;
-    font-size: 1rem;
-    border-radius: 6px;
-    width: 180px;
-  }
-  .btn {
-    background-color: #4363d8;
-    color: white;
-    padding: 10px 20px;
-    font-weight: 600;
-    font-size: 1rem;
-  }
-  .btn:hover {
-    background-color: #324dbd;
-  }
-  .btn-secondary {
-    background-color: #eee;
-    color: #333;
-  }
-  .btn-secondary:hover {
-    background-color: #ddd;
-  }
-  .btn-danger {
-    background-color: #e74c3c;
-    color: white;
-  }
-  .btn-danger:hover {
-    background-color: #c0392b;
-  }
-
-  /* SVG container */
-  #svg-container {
-    border: 1px solid #ccc;
-    background: white;
-    width: 100%;
-    max-width: 900px;
-    height: 500px;
-    margin: 0 auto 30px;
-    overflow: hidden;
-    touch-action: none;
-    cursor: grab;
-    border-radius: 12px;
-    box-shadow: 0 6px 12px rgba(67, 99, 216, 0.15);
-  }
-  #svg-container:active {
-    cursor: grabbing;
-  }
-  svg {
-    user-select: none;
-  }
-
-  /* Color Palette */
-  #color-palette {
-    max-width: 900px;
-    margin: 0 auto 30px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    justify-content: center;
-  }
-  .color-swatch {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    box-shadow: 0 0 4px rgba(0,0,0,0.1);
-    transition: border-color 0.25s ease;
-  }
-  .color-swatch:hover {
-    border-color: #4363d8;
-  }
-  .color-swatch.selected {
-    border-color: black;
-  }
-
-  /* Legend Section */
-  #legends {
-    max-width: 900px;
-    margin: 0 auto 30px;
-  }
-  #legends h3 {
-    color: #4363d8;
-    margin-bottom: 12px;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    gap: 10px;
-  }
-  .legend-color {
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
-    border: 1px solid #444;
-  }
-  .legend-label {
-    flex-grow: 1;
-    padding: 6px 10px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-  }
-  .legend-remove {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-weight: 600;
-  }
-  .legend-remove:hover {
-    background: #c0392b;
-  }
-
-  /* Zoom & Export Buttons */
-  .bottom-controls {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-  }
-
-  /* Login/Register Modal */
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(0,0,0,0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  }
-  .modal-overlay.active {
-    display: flex;
-  }
-  .modal {
-    background: white;
-    border-radius: 12px;
-    padding: 30px 30px 24px;
-    width: 320px;
-    max-width: 90vw;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-    text-align: center;
-  }
-  .modal h2 {
-    margin-top: 0;
-    margin-bottom: 24px;
-    color: #4363d8;
-  }
-  .modal label {
-    display: block;
-    margin-bottom: 10px;
-    text-align: left;
-    font-weight: 600;
-    color: #333;
-  }
-  .modal input[type="text"],
-  .modal input[type="email"],
-  .modal input[type="password"] {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    margin-bottom: 18px;
-  }
-  .modal button.submit-btn {
-    background-color: #4363d8;
-    color: white;
-    font-weight: 700;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    width: 100%;
-  }
-  .modal button.submit-btn:hover {
-    background-color: #324dbd;
-  }
-  .modal button.close-btn {
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    color: #666;
-    margin-top: 12px;
-    cursor: pointer;
-  }
-  .modal button.close-btn:hover {
-    color: #333;
-  }
-
-  /* Scrollbar for legends & colors */
-  #legends, #color-palette {
-    max-height: 140px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: #888 #eee;
-  }
-  #legends::-webkit-scrollbar, #color-palette::-webkit-scrollbar {
-    width: 8px;
-  }
-  #legends::-webkit-scrollbar-thumb, #color-palette::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 6px;
-  }
-  #legends::-webkit-scrollbar-track, #color-palette::-webkit-scrollbar-track {
-    background: #eee;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapCraft - Create Custom Maps</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
+  <link rel="icon" type="image/png" href="logo.png" />
+  <style>
+    .color-option {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 2px solid white;
+      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+    }
+  </style>
 </head>
-<body>
-<div id="app">
-  <!-- Content is rendered dynamically -->
-</div>
+<body class="bg-gray-100 text-gray-900">
+  <!-- Header -->
+  <header class="bg-white shadow p-4 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+      <img src="logo.png" alt="MapCraft Logo" class="w-10 h-10" />
+      <h1 class="text-2xl font-bold">MapCraft</h1>
+    </div>
+    <div>
+      <button class="bg-blue-500 text-white px-4 py-2 rounded mr-2">Login</button>
+      <button class="bg-green-500 text-white px-4 py-2 rounded">Create Account</button>
+    </div>
+  </header>
 
-<!-- Login Modal -->
-<div id="login-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="loginTitle" tabindex="-1">
-  <div class="modal">
-    <h2 id="loginTitle">Login</h2>
-    <form id="login-form">
-      <label for="login-email">Email:</label>
-      <input id="login-email" type="email" required autocomplete="email" />
-      <label for="login-password">Password:</label>
-      <input id="login-password" type="password" required autocomplete="current-password" />
-      <button type="submit" class="submit-btn">Log In</button>
-    </form>
-    <button class="close-btn" aria-label="Close login form">&times;</button>
-  </div>
-</div>
+  <!-- Hero -->
+  <section class="text-center py-12 bg-blue-100">
+    <h2 class="text-4xl font-bold mb-4">Create Your Custom Map in Seconds</h2>
+    <p class="text-gray-700 mb-6">Select continents or countries, color regions, add legends, and export in PNG!</p>
+    <button onclick="document.getElementById('map-picker').scrollIntoView({ behavior: 'smooth' })" class="px-6 py-3 bg-blue-600 text-white rounded text-lg hover:bg-blue-700">Create Map</button>
+  </section>
 
-<!-- Register Modal -->
-<div id="register-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="registerTitle" tabindex="-1">
-  <div class="modal">
-    <h2 id="registerTitle">Create Account</h2>
-    <form id="register-form">
-      <label for="register-email">Email:</label>
-      <input id="register-email" type="email" required autocomplete="email" />
-      <label for="register-password">Password:</label>
-      <input id="register-password" type="password" required autocomplete="new-password" />
-      <label for="register-password2">Confirm Password:</label>
-      <input id="register-password2" type="password" required autocomplete="new-password" />
-      <button type="submit" class="submit-btn">Create Account</button>
-    </form>
-    <button class="close-btn" aria-label="Close registration form">&times;</button>
-  </div>
-</div>
+  <!-- Tutorial -->
+  <section class="px-8 py-10 bg-white">
+    <h3 class="text-2xl font-semibold mb-4">How It Works</h3>
+    <ol class="list-decimal ml-6 text-gray-700">
+      <li>Select a continent or country.</li>
+      <li>Click regions to apply colors from the palette.</li>
+      <li>Add a title, legend, and background if you want.</li>
+      <li>Download your custom map as PNG.</li>
+    </ol>
+  </section>
 
-<script>
-(() => {
-  // Data definitions
-  const REGIONS = [
-    { id: "world", name: "World" },
-    { id: "europe", name: "Europe" },
-    { id: "africa", name: "Africa" },
-    { id: "north-america", name: "North America" },
-    { id: "central-america", name: "Central America" },
-    { id: "south-america", name: "South America" },
-    { id: "asia", name: "Asia" },
-    { id: "oceania", name: "Oceania" }
-  ];
+  <!-- Map Picker -->
+  <section id="map-picker" class="px-8 py-12 bg-gray-50">
+    <h3 class="text-2xl font-bold mb-4">Choose a Region to Start</h3>
+    <input type="text" placeholder="Search for a country or region..." class="w-full max-w-lg px-4 py-2 border rounded mb-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <button class="bg-white border p-4 rounded hover:bg-blue-100">Europe</button>
+      <button class="bg-white border p-4 rounded hover:bg-blue-100">Africa</button>
+      <button class="bg-white border p-4 rounded hover:bg-blue-100">Asia</button>
+      <button class="bg-white border p-4 rounded hover:bg-blue-100">North America</button>
+      <button class="bg-white border p-4 rounded hover:bg-blue-100">South America</button>
+      <button class="bg-white border p-4 rounded hover:bg-blue-100">Oceania</button>
+      <button class="bg-white border p-4 rounded hover:bg-blue-100">USA</button>
+      <button class="bg-white border p-4 rounded hover:bg-blue-100">Portugal</button>
+    </div>
+  </section>
 
-  // Map data: simplified polygons for countries, just examples
-  // For brevity, these are dummy polygons for demo, real map data is large.
-  // Each map: list of countries: id, name, path (SVG path)
-  const MAPS = {
-    world: {
-      name: "World",
-      countries: [
-        { id: "usa", name: "United States", path: "M100,150 L140,120 L160,140 L140,180 Z" },
-        { id: "can", name: "Canada", path: "M100,100 L140,90 L160,110 L140,130 Z" },
-        { id: "brazil", name: "Brazil", path: "M200,220 L240,210 L260,240 L220,260 Z" },
-        { id: "arg", name: "Argentina", path: "M210,280 L250,270 L270,300 L230,320 Z" },
-        { id: "uk", name: "United Kingdom", path: "M300,80 L320,70 L340,90 L320,100 Z" },
-        { id: "spain", name: "Spain", path: "M320,110 L350,100 L370,130 L340,140 Z" },
-        { id: "greece", name: "Greece", path: "M380,140 L400,130 L420,160 L390,170 Z" },
-        { id: "russia", name: "Russia", path: "M420,60 L480,40 L520,70 L470,90 Z" },
-        { id: "poland", name: "Poland", path: "M350,90 L380,80 L400,110 L370,120 Z" },
-        { id: "switzerland", name: "Switzerland", path: "M360,110 L380,100 L400,130 L370,140 Z" },
-        { id: "czechia", name: "Czechia", path: "M370,120 L390,110 L410,140 L380,150 Z" },
-        { id: "austria", name: "Austria", path: "M380,130 L400,120 L420,150 L390,160 Z" },
-        { id: "morocco", name: "Morocco", path: "M300,200 L340,190 L360,220 L320,230 Z" },
-        { id: "turkey", name: "Turkey", path: "M420,160 L460,150 L480,180 L440,190 Z" },
-        { id: "syria", name: "Syria", path: "M430,170 L460,160 L480,190 L450,200 Z" },
-        { id: "iraq", name: "Iraq", path: "M440,180 L470,170 L490,200 L460,210 Z" },
-        { id: "china", name: "China", path: "M480,120 L530,110 L550,140 L510,150 Z" },
-        { id: "india", name: "India", path: "M490,160 L530,150 L550,180 L510,190 Z" },
-        { id: "portugal", name: "Portugal", path: "M310,120 L330,110 L350,140 L320,150 Z" },
-        { id: "algeria", name: "Algeria", path: "M320,210 L350,200 L370,230 L340,240 Z" },
-        { id: "libya", name: "Libya", path: "M350,210 L380,200 L400,230 L370,240 Z" }
-      ]
-    },
-    europe: {
-      name: "Europe",
-      countries: [
-        { id: "uk", name: "United Kingdom", path: "M100,120 L140,90 L160,110 L140,130 Z" },
-        { id: "spain", name: "Spain", path: "M160,130 L190,120 L210,150 L180,160 Z" },
-        { id: "greece", name: "Greece", path: "M210,160 L230,150 L250,180 L220,190 Z" },
-        { id: "russia", name: "Russia", path: "M260,100 L310,90 L330,130 L280,140 Z" },
-        { id: "poland", name: "Poland", path: "M190,110 L220,100 L240,130 L210,140 Z" },
-        { id: "switzerland", name: "Switzerland", path: "M200,120 L220,110 L240,140 L210,150 Z" },
-        { id: "czechia", name: "Czechia", path: "M210,130 L230,120 L250,150 L220,160 Z" },
-        { id: "austria", name: "Austria", path: "M220,140 L240,130 L260,160 L230,170 Z" },
-        { id: "portugal", name: "Portugal", path: "M150,130 L170,120 L190,150 L160,160 Z" }
-      ]
-    },
-    // Add other continents here as needed, for demo only world & europe defined
-  };
-
-  // 30 colors palette (including greens, reds, blues, yellows, etc)
-  const COLOR_PALETTE = [
-    "#1f77b4","#aec7e8","#ff7f0e","#ffbb78","#2ca02c","#98df8a","#d62728","#ff9896",
-    "#9467bd","#c5b0d5","#8c564b","#c49c94","#e377c2","#f7b6d2","#7f7f7f","#c7c7c7",
-    "#bcbd22","#dbdb8d","#17becf","#9edae5",
-    "#006400", // darkgreen
-    "#90ee90", // lightgreen
-    "#8b0000", // darkred
-    "#ff6347", // tomato
-    "#ffd700", // gold
-    "#ffa500", // orange
-    "#40e0d0", // turquoise
-    "#ff69b4", // hotpink
-    "#7b68ee", // medium slate blue
-    "#00fa9a", // medium spring green
-  ];
-
-  // State
-  let currentPage = "home"; // home, select-map, editor
-  let selectedRegion = null;
-  let selectedColor = COLOR_PALETTE[0];
-  let countryColors = {}; // countryId -> color hex
-  let legends = []; // {color: hex, label: string}
-  let svgZoom = 1;
-  let svgOffset = { x: 0, y: 0 };
-  let dragState = null; // for panning
-
-  // App root
-  const app = document.getElementById("app");
-
-  // Render functions
-  function render() {
-    if (currentPage === "home") renderHome();
-    else if (currentPage === "select-map") renderSelectMap();
-    else if (currentPage === "editor") renderEditor();
-  }
-
-  // Home page
-  function renderHome() {
-    app.innerHTML = `
-      <header class="home-header" role="banner">
-        <h1>Map Creator</h1>
-        <p>Create beautiful maps quickly and easily. Inspired by Periphern and MapChart.</p>
-      </header>
-      <div class="home-buttons" role="main">
-        <button id="btn-create-map" class="btn-primary" aria-label="Create a new map">Create Map</button>
-        <button id="btn-login" class="btn-secondary" aria-label="Log in to your account">Login</button>
-        <button id="btn-register" class="btn-secondary" aria-label="Create a new account">Create Account</button>
+  <!-- Editor -->
+  <section class="px-8 py-12 bg-white">
+    <h3 class="text-2xl font-bold mb-4">Map Editor</h3>
+    <div class="flex space-x-4 mb-6">
+      <div class="space-y-2">
+        <h4 class="font-semibold">Select a Color</h4>
+        <div class="grid grid-cols-10 gap-2">
+          <div class="color-option" style="background: #f44336"></div>
+          <div class="color-option" style="background: #e91e63"></div>
+          <div class="color-option" style="background: #9c27b0"></div>
+          <div class="color-option" style="background: #2196f3"></div>
+          <div class="color-option" style="background: #4caf50"></div>
+          <div class="color-option" style="background: #ffeb3b"></div>
+          <div class="color-option" style="background: #ff9800"></div>
+          <div class="color-option" style="background: #795548"></div>
+          <div class="color-option" style="background: #607d8b"></div>
+          <div class="color-option" style="background: #000000"></div>
+          <!-- Add more colors here -->
+        </div>
       </div>
-      <section class="tutorial" aria-label="Tutorial">
-        <h2>How to create your map</h2>
-        <ol>
-          <li>Click "Create Map" to select your region.</li>
-          <li>Choose the continent or world map you want to edit.</li>
-          <li>Click countries on the map to color them using the palette below.</li>
-          <li>Add legends to explain your colors.</li>
-          <li>Use zoom and pan controls to navigate your map.</li>
-          <li>Export your finished map as PNG.</li>
-        </ol>
-      </section>
-      <footer>
-        Made by @tugamapper - Inspired by Periphern and MapChart
-      </footer>
-    `;
+      <div class="flex-1">
+        <h4 class="font-semibold mb-2">Your Map</h4>
+        <svg id="map" viewBox="0 0 300 200" class="w-full border shadow rounded" style="background:#fff">
+          <rect x="10" y="10" width="80" height="60" fill="#ddd" stroke="#333" onclick="this.setAttribute('fill', selectedColor)" />
+          <rect x="100" y="10" width="80" height="60" fill="#ddd" stroke="#333" onclick="this.setAttribute('fill', selectedColor)" />
+        </svg>
+      </div>
+    </div>
+    <button onclick="downloadMap()" class="bg-green-600 text-white px-4 py-2 rounded">Download PNG</button>
+  </section>
 
-    document.getElementById("btn-create-map").onclick = () => {
-      currentPage = "select-map";
-      render();
-    };
-    document.getElementById("btn-login").onclick = () => showModal("login-modal");
-    document.getElementById("btn-register").onclick = () => showModal("register-modal");
-  }
+  <!-- Footer -->
+  <footer class="text-center py-6 bg-gray-200 text-sm">
+    Made by @tugamapper – Inspired by Periphern and MapChart.
+  </footer>
 
-  // Map selection page
-  function renderSelectMap() {
-    app.innerHTML = `
-      <section id="map-select" role="main">
-        <h2>Select a Region or Continent</h2>
-        <div class="region-buttons" role="list">
-          ${REGIONS.map(r =>
-            `<button class="region-btn" role="listitem" data-region="${r.id}">${r.name}</button>`
-          ).join("")}
-        </div>
-        <button id="back-to-home" class="btn-secondary" aria-label="Back to home">Back</button>
-      </section>
-    `;
-
-    document.querySelectorAll(".region-btn").forEach(btn => {
-      btn.onclick = () => {
-        selectedRegion = btn.getAttribute("data-region");
-        if (!MAPS[selectedRegion]) {
-          alert("Sorry, this map is not available yet.");
-          return;
-        }
-        currentPage = "editor";
-        resetEditor();
-        render();
-      };
-    });
-    document.getElementById("back-to-home").onclick = () => {
-      currentPage = "home";
-      render();
-    };
-  }
-
-  // Editor page
-  function renderEditor() {
-    const mapData = MAPS[selectedRegion];
-    app.innerHTML = `
-      <section id="editor" role="main" aria-label="Map Editor">
-        <h2>Editing: ${mapData.name}</h2>
-        <div class="editor-controls">
-          <div class="color-picker" role="group" aria-label="Color picker">
-            <label for="color-search" class="visually-hidden">Search colors by hex code</label>
-            <input type="text" id="color-search" class="color-search" placeholder="Search hex color, e.g. #ff0000" aria-label="Search colors by hex code">
-            <div class="color-palette" role="list">
-              ${COLOR_PALETTE.map(c =>
-                `<button class="color-btn" style="background-color: ${c}" data-color="${c}" aria-label="Select color ${c}"></button>`
-              ).join("")}
-            </div>
-          </div>
-          <button id="add-legend" class="btn-primary" aria-label="Add legend">Add Legend</button>
-          <button id="export-map" class="btn-primary" aria-label="Export map as PNG">Export PNG</button>
-          <button id="reset-colors" class="btn-secondary" aria-label="Reset all colors">Reset Colors</button>
-          <button id="back-to-select" class="btn-secondary" aria-label="Back to map selection">Back</button>
-        </div>
-        <div id="map-container" tabindex="0" aria-label="Map container with countries" role="application">
-          <svg id="map-svg" viewBox="0 0 600 400" aria-describedby="map-desc" role="img" tabindex="0" aria-label="Interactive map">
-            <desc id="map-desc">Map showing countries that can be colored</desc>
-            ${mapData.countries.map(c => `
-              <path
-                id="${c.id}"
-                d="${c.path}"
-                fill="${countryColors[c.id] || '#ddd'}"
-                stroke="#999"
-                stroke-width="1"
-                tabindex="0"
-                role="button"
-                aria-pressed="${!!countryColors[c.id]}"
-                aria-label="Country ${c.name}, color ${countryColors[c.id] || 'none'}"
-              ></path>
-            `).join("")}
-          </svg>
-        </div>
-        <div id="legends" aria-live="polite" aria-relevant="additions removals" role="region" aria-label="Legend list">
-          ${renderLegends()}
-        </div>
-      </section>
-    `;
-
-    // Color selection
-    document.querySelectorAll(".color-btn").forEach(btn => {
-      btn.onclick = () => {
-        selectedColor = btn.getAttribute("data-color");
-        highlightSelectedColor();
-      };
-    });
-
-    document.getElementById("color-search").oninput = (e) => {
-      const val = e.target.value.trim();
-      if (/^#([0-9a-f]{3}){1,2}$/i.test(val)) {
-        selectedColor = val;
-        highlightSelectedColor();
-      }
-    };
-
-    // Country coloring
-    mapData.countries.forEach(c => {
-      const pathEl = document.getElementById(c.id);
-      pathEl.onclick = () => {
-        countryColors[c.id] = selectedColor;
-        render(); // re-render to update colors & legends
-      };
-      pathEl.onkeydown = (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          countryColors[c.id] = selectedColor;
-          render();
-        }
-      };
-    });
-
-    // Legend button
-    document.getElementById("add-legend").onclick = () => {
-      const label = prompt("Enter legend label for color " + selectedColor);
-      if (label) {
-        if (!legends.find(l => l.color === selectedColor && l.label === label)) {
-          legends.push({ color: selectedColor, label });
-          render();
-        }
-      }
-    };
-
-    // Export PNG
-    document.getElementById("export-map").onclick = () => {
-      exportMapAsPNG();
-    };
-
-    // Reset colors
-    document.getElementById("reset-colors").onclick = () => {
-      if (confirm("Reset all colors?")) {
-        countryColors = {};
-        legends = [];
-        render();
-      }
-    };
-
-    // Back to map select
-    document.getElementById("back-to-select").onclick = () => {
-      currentPage = "select-map";
-      render();
-    };
-
-    // Highlight selected color
-    highlightSelectedColor();
-
-    // Zoom and Pan support
-    setupZoomPan();
-  }
-
-  // Highlight the selected color button in the palette
-  function highlightSelectedColor() {
-    document.querySelectorAll(".color-btn").forEach(btn => {
-      btn.classList.toggle("selected", btn.getAttribute("data-color") === selectedColor);
-    });
-    const colorSearchInput = document.getElementById("color-search");
-    if (colorSearchInput) {
-      colorSearchInput.value = selectedColor;
-    }
-  }
-
-  // Render legends list HTML
-  function renderLegends() {
-    if (legends.length === 0) return `<p>No legends added yet.</p>`;
-    return `<ul>${legends.map(l => `<li><span class="legend-color" style="background-color:${l.color}"></span>${l.label}</li>`).join("")}</ul>`;
-  }
-
-  // Reset editor state
-  function resetEditor() {
-    countryColors = {};
-    legends = [];
-    svgZoom = 1;
-    svgOffset = { x: 0, y: 0 };
-  }
-
-  // Export map as PNG image
-  function exportMapAsPNG() {
-    const svg = document.getElementById("map-svg");
-    const serializer = new XMLSerializer();
-    let source = serializer.serializeToString(svg);
-
-    // Add name spaces
-    if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
-      source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-    }
-    if (!source.match(/^<svg[^>]+"http:\/\/www\.w3\.org\/1999\/xlink"/)) {
-      source = source.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-    }
-
-    // Add XML declaration
-    source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
-
-    const image = new Image();
-    const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
-
-    image.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = svg.viewBox.baseVal.width * svgZoom;
-      canvas.height = svg.viewBox.baseVal.height * svgZoom;
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(image, svgOffset.x * -1 * svgZoom, svgOffset.y * -1 * svgZoom, canvas.width, canvas.height);
-      URL.revokeObjectURL(url);
-      canvas.toBlob(blob => {
-        const link = document.createElement("a");
-        link.download = `map-export-${Date.now()}.png`;
-        link.href = URL.createObjectURL(blob);
-        link.click();
+  <script>
+    let selectedColor = '#f44336';
+    document.querySelectorAll('.color-option').forEach(el => {
+      el.addEventListener('click', () => {
+        selectedColor = el.style.backgroundColor;
       });
-    };
+    });
 
-    image.onerror = (e) => {
-      alert("Error exporting the map image.");
-    };
-
-    image.src = url;
-  }
-
-  // Zoom and pan setup
-  function setupZoomPan() {
-    const container = document.getElementById("map-container");
-    const svg = document.getElementById("map-svg");
-
-    // Reset transforms
-    svg.style.transform = `translate(0px, 0px) scale(1)`;
-
-    let isDragging = false;
-    let dragStart = { x: 0, y: 0 };
-
-    container.onwheel = (e) => {
-      e.preventDefault();
-      const delta = -e.deltaY * 0.001;
-      let newZoom = svgZoom + delta;
-      newZoom = Math.min(Math.max(newZoom, 0.5), 5);
-      svgZoom = newZoom;
-      applyTransform();
-    };
-
-    container.onmousedown = (e) => {
-      if (e.button !== 0) return; // only left click
-      isDragging = true;
-      dragStart = { x: e.clientX - svgOffset.x, y: e.clientY - svgOffset.y };
-      container.style.cursor = "grabbing";
-    };
-
-    container.onmouseup = () => {
-      isDragging = false;
-      container.style.cursor = "default";
-    };
-
-    container.onmouseleave = () => {
-      isDragging = false;
-      container.style.cursor = "default";
-    };
-
-    container.onmousemove = (e) => {
-      if (!isDragging) return;
-      svgOffset = { x: e.clientX - dragStart.x, y: e.clientY - dragStart.y };
-      applyTransform();
-    };
-
-    function applyTransform() {
-      svg.style.transform = `translate(${svgOffset.x}px, ${svgOffset.y}px) scale(${svgZoom})`;
-    }
-  }
-
-  // Modal dialogs for login/register (simple implementation)
-  function showModal(id) {
-    let modal = document.getElementById(id);
-    if (!modal) {
-      modal = document.createElement("div");
-      modal.id = id;
-      modal.className = "modal";
-      modal.setAttribute("role", "dialog");
-      modal.setAttribute("aria-modal", "true");
-      modal.innerHTML = `
-        <div class="modal-content">
-          <button class="modal-close" aria-label="Close modal">&times;</button>
-          ${id === "login-modal" ? `
-            <h2>Login</h2>
-            <form id="login-form">
-              <label for="login-username">Username</label>
-              <input type="text" id="login-username" required>
-              <label for="login-password">Password</label>
-              <input type="password" id="login-password" required>
-              <button type="submit" class="btn-primary">Login</button>
-            </form>
-          ` : `
-            <h2>Create Account</h2>
-            <form id="register-form">
-              <label for="register-username">Username</label>
-              <input type="text" id="register-username" required>
-              <label for="register-password">Password</label>
-              <input type="password" id="register-password" required>
-              <button type="submit" class="btn-primary">Register</button>
-            </form>
-          `}
-        </div>
-      `;
-      document.body.appendChild(modal);
-
-      modal.querySelector(".modal-close").onclick = () => {
-        modal.remove();
+    function downloadMap() {
+      const svg = document.getElementById("map");
+      const serializer = new XMLSerializer();
+      const source = serializer.serializeToString(svg);
+      const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 800;
+        canvas.height = 600;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(blob => {
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "mapcraft.png";
+          a.click();
+        });
       };
-
-      if (id === "login-modal") {
-        modal.querySelector("#login-form").onsubmit = e => {
-          e.preventDefault();
-          alert("Login feature is not implemented.");
-          modal.remove();
-        };
-      } else if (id === "register-modal") {
-        modal.querySelector("#register-form").onsubmit = e => {
-          e.preventDefault();
-          alert("Register feature is not implemented.");
-          modal.remove();
-        };
-      }
+      img.src = url;
     }
-  }
-
-  // Initial render
-  render();
-
-})();
-</script>
-
+  </script>
 </body>
 </html>
