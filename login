@@ -11,35 +11,11 @@
     <h2 id="formTitle" class="text-2xl font-bold mb-6 text-center">Login to MapCraft</h2>
 
     <form id="authForm" class="flex flex-col gap-4" novalidate>
-      <input
-        type="email"
-        id="email"
-        placeholder="Email"
-        class="p-3 rounded bg-gray-700 text-white"
-        required
-      />
-      <input
-        type="password"
-        id="password"
-        placeholder="Password"
-        class="p-3 rounded bg-gray-700 text-white"
-        minlength="6"
-        required
-      />
-      <input
-        type="password"
-        id="confirmPassword"
-        placeholder="Confirm Password"
-        class="p-3 rounded bg-gray-700 text-white hidden"
-        minlength="6"
-      />
+      <input type="email" id="email" placeholder="Email" class="p-3 rounded bg-gray-700 text-white" required />
+      <input type="password" id="password" placeholder="Password" class="p-3 rounded bg-gray-700 text-white" minlength="6" required />
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" class="p-3 rounded bg-gray-700 text-white hidden" minlength="6" />
       <div id="errorMsg" class="text-red-500 text-sm"></div>
-      <button
-        type="submit"
-        class="bg-blue-600 py-2 rounded hover:bg-blue-700"
-      >
-        Login
-      </button>
+      <button type="submit" class="bg-blue-600 py-2 rounded hover:bg-blue-700">Login</button>
     </form>
 
     <p class="mt-4 text-sm text-gray-400 text-center" id="toggleText">
@@ -128,4 +104,5 @@
   </script>
 </body>
 </html>
+
 
