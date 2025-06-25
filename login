@@ -10,7 +10,7 @@
   <div class="bg-gray-800 p-8 rounded shadow-lg w-full max-w-md">
     <h2 id="formTitle" class="text-2xl font-bold mb-6 text-center">Login to MapCraft</h2>
 
-    <form id="authForm" class="flex flex-col gap-4">
+    <form id="authForm" class="flex flex-col gap-4" novalidate>
       <input
         type="email"
         id="email"
@@ -23,8 +23,17 @@
         id="password"
         placeholder="Password"
         class="p-3 rounded bg-gray-700 text-white"
+        minlength="6"
         required
       />
+      <input
+        type="password"
+        id="confirmPassword"
+        placeholder="Confirm Password"
+        class="p-3 rounded bg-gray-700 text-white hidden"
+        minlength="6"
+      />
+      <div id="errorMsg" class="text-red-500 text-sm"></div>
       <button
         type="submit"
         class="bg-blue-600 py-2 rounded hover:bg-blue-700"
@@ -43,37 +52,58 @@
     const toggleBtn = document.getElementById("toggleBtn");
     const toggleText = document.getElementById("toggleText");
     const formTitle = document.getElementById("formTitle");
-
+    const errorMsg = document.getElementById("errorMsg");
+    const confirmPassword = document.getElementById("confirmPassword");
     let isLogin = true;
 
-    // Toggle between login and register form
     toggleBtn.addEventListener("click", () => {
       isLogin = !isLogin;
+      errorMsg.textContent = "";
       if (isLogin) {
         formTitle.textContent = "Login to MapCraft";
         authForm.querySelector("button").textContent = "Login";
+        confirmPassword.classList.add("hidden");
         toggleText.innerHTML = `Don't have an account? <button id="toggleBtn" class="text-blue-400 underline">Sign up</button>`;
       } else {
         formTitle.textContent = "Create a new account";
         authForm.querySelector("button").textContent = "Sign Up";
+        confirmPassword.classList.remove("hidden");
         toggleText.innerHTML = `Already have an account? <button id="toggleBtn" class="text-blue-400 underline">Login</button>`;
       }
-      // Re-attach event listener for the new button (because innerHTML replaces it)
       document.getElementById("toggleBtn").addEventListener("click", () => {
         toggleBtn.click();
       });
     });
 
+    function validateEmail(email) {
+      return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email);
+    }
+
     authForm.addEventListener("submit", e => {
       e.preventDefault();
-      const email = document.getElementById("email").value.toLowerCase();
+      errorMsg.textContent = "";
+      const email = document.getElementById("email").value.trim().toLowerCase();
       const password = document.getElementById("password").value;
+      const confirm = confirmPassword.value;
 
-      // Get users from localStorage or empty array
+      if (!validateEmail(email)) {
+        errorMsg.textContent = "Please enter a valid email.";
+        return;
+      }
+
+      if (password.length < 6) {
+        errorMsg.textContent = "Password must be at least 6 characters.";
+        return;
+      }
+
+      if (!isLogin && password !== confirm) {
+        errorMsg.textContent = "Passwords do not match.";
+        return;
+      }
+
       const users = JSON.parse(localStorage.getItem("users") || "[]");
 
       if (isLogin) {
-        // Login flow
         const user = users.find(u => u.email === email && u.password === password);
         if (user) {
           localStorage.setItem("userEmail", email);
@@ -81,21 +111,21 @@
           alert(`Welcome back, ${email}!`);
           window.location.href = "index.html";
         } else {
-          alert("Invalid email or password.");
+          errorMsg.textContent = "Invalid email or password.";
         }
       } else {
-        // Register flow
         if (users.some(u => u.email === email)) {
-          alert("Email already registered.");
+          errorMsg.textContent = "Email already registered.";
           return;
         }
         users.push({ email, password });
         localStorage.setItem("users", JSON.stringify(users));
         alert("Account created! Please login.");
-        toggleBtn.click(); // Switch to login form
+        toggleBtn.click();
         authForm.reset();
       }
     });
   </script>
 </body>
 </html>
+
