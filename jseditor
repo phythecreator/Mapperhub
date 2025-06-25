@@ -1,16 +1,137 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const colorPicker = document.getElementById("colorPicker");
   const mapObject = document.getElementById("map");
+  const colorPicker = document.getElementById("colorPicker");
+  const resetBtn = document.getElementById("resetColors");
+  const legendList = document.getElementById("legend-list");
+  const legendText = document.getElementById("legendText");
+  const legendColor = document.getElementById("legendColor");
+  const addLegendBtn = document.getElementById("addLegend");
+  const saveBtn = document.getElementById("saveMap");
+  const loadBtn = document.getElementById("loadMap");
+  const exportBtn = document.getElementById("exportBtn");
+  const mapContainer = document.getElementById("map-container");
+
+  let svgDoc, countries, selectedCountries = new Set();
+
+  function clearSelection() {
+    selectedCountries.forEach(c => {
+      c.style.strokeWidth = "1";
+      c.style.stroke = "#000";
+    });
+    selectedCountries.clear();
+  }
+
+  function selectCountry(country, multi = false) {
+    if (!multi) clearSelection();
+    if (selectedCountries.has(country)) {
+      selectedCountries.delete(country);
+      country.style.strokeWidth = "1";
+      country.style.stroke = "#000";
+    } else {
+      selectedCountries.add(country);
+      country.style.strokeWidth = "3";
+      country.style.stroke = "#ff0000";
+    }
+  }
 
   mapObject.addEventListener("load", () => {
-    const svgDoc = mapObject.contentDocument;
-    const countries = svgDoc.querySelectorAll("path");
+    svgDoc = mapObject.contentDocument;
+    countries = svgDoc.querySelectorAll("path");
 
     countries.forEach(country => {
       country.style.cursor = "pointer";
-      country.addEventListener("click", () => {
-        country.setAttribute("fill", colorPicker.value);
+      country.style.stroke = "#000";
+      country.style.strokeWidth = "1";
+
+      country.addEventListener("click", (e) => {
+        selectCountry(country, e.shiftKey);
       });
     });
   });
+
+  colorPicker.addEventListener("input", () => {
+    selectedCountries.forEach(c => {
+      c.setAttribute("fill", colorPicker.value);
+    });
+  });
+
+  resetBtn.addEventListener("click", () => {
+    if (!svgDoc) return;
+    countries.forEach(c => c.removeAttribute("fill"));
+    clearSelection();
+  });
+
+  addLegendBtn.addEventListener("click", () => {
+    const text = legendText.value.trim();
+    const color = legendColor.value;
+    if (!text) return alert("Please enter legend text");
+    const li = document.createElement("li");
+    li.textContent = text;
+    li.style.color = color;
+    legendList.appendChild(li);
+    legendText.value = "";
+  });
+
+  saveBtn.addEventListener("click", () => {
+    if (!svgDoc) return;
+    const colors = {};
+    countries.forEach(c => {
+      const id = c.id || c.getAttribute("name") || c.getAttribute("title") || null;
+      if (id) {
+        colors[id] = c.getAttribute("fill") || null;
+      }
+    });
+    localStorage.setItem("mapColors", JSON.stringify(colors));
+    alert("Map saved locally.");
+  });
+
+  loadBtn.addEventListener("click", () => {
+    if (!svgDoc) return;
+    const colors = JSON.parse(localStorage.getItem("mapColors") || "{}");
+    countries.forEach(c => {
+      const id = c.id || c.getAttribute("name") || c.getAttribute("title") || null;
+      if (id && colors[id]) {
+        c.setAttribute("fill", colors[id]);
+      } else {
+        c.removeAttribute("fill");
+      }
+    });
+    alert("Map loaded.");
+  });
+
+  exportBtn.addEventListener("click", () => {
+    alert("Export as JPG is available (simulation). +10 points earned.");
+    if (typeof addExportPoints === "function") addExportPoints();
+  });
+
+  // Basic pan support on map container
+  let isPanning = false, startX, startY, scrollLeft, scrollTop;
+
+  mapContainer.addEventListener("mousedown", e => {
+    isPanning = true;
+    startX = e.pageX - mapContainer.offsetLeft;
+    startY = e.pageY - mapContainer.offsetTop;
+    scrollLeft = mapContainer.scrollLeft;
+    scrollTop = mapContainer.scrollTop;
+  });
+
+  mapContainer.addEventListener("mouseup", () => {
+    isPanning = false;
+  });
+
+  mapContainer.addEventListener("mouseleave", () => {
+    isPanning = false;
+  });
+
+  mapContainer.addEventListener("mousemove", e => {
+    if (!isPanning) return;
+    e.preventDefault();
+    const x = e.pageX - mapContainer.offsetLeft;
+    const y = e.pageY - mapContainer.offsetTop;
+    const walkX = (x - startX);
+    const walkY = (y - startY);
+    mapContainer.scrollLeft = scrollLeft - walkX;
+    mapContainer.scrollTop = scrollTop - walkY;
+  });
 });
+
