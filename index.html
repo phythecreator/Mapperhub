@@ -1,136 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MapCraft - Create Custom Maps</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" />
-  <link rel="icon" type="image/png" href="logo.png" />
+  <meta charset="UTF‑8" />
+  <meta name="viewport" content="width=device-width,initial‑scale=1" />
+  <title>MapCraft</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .color-option {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-      border-radius: 4px;
-      border: 2px solid white;
-      box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-    }
+    .color-swatch { width:24px;height:24px;border-radius:4px;cursor:pointer;border:2px solid transparent; }
+    .color-swatch.selected { border-color:#000; }
+    #map-svg { background:#f9f9f9; }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-900">
-  <!-- Header -->
-  <header class="bg-white shadow p-4 flex justify-between items-center">
-    <div class="flex items-center space-x-4">
-      <img src="logo.png" alt="MapCraft Logo" class="w-10 h-10" />
-      <h1 class="text-2xl font-bold">MapCraft</h1>
-    </div>
-    <div>
-      <button class="bg-blue-500 text-white px-4 py-2 rounded mr-2">Login</button>
-      <button class="bg-green-500 text-white px-4 py-2 rounded">Create Account</button>
-    </div>
-  </header>
+  <div id="app"></div>
+  <script type="module">
+    import { html2canvas } from 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.esm.js';
 
-  <!-- Hero -->
-  <section class="text-center py-12 bg-blue-100">
-    <h2 class="text-4xl font-bold mb-4">Create Your Custom Map in Seconds</h2>
-    <p class="text-gray-700 mb-6">Select continents or countries, color regions, add legends, and export in PNG!</p>
-    <button onclick="document.getElementById('map-picker').scrollIntoView({ behavior: 'smooth' })" class="px-6 py-3 bg-blue-600 text-white rounded text-lg hover:bg-blue-700">Create Map</button>
-  </section>
+    // APPLICATION STATE
+    let state = {
+      page: 'home', // home, login, signup, picker, editor
+      user: null,
+      maps: [
+        { id: 'world', name: 'World', regions: ['EU','NA','SA','AF','AS','OC'] },
+        { id: 'europe', name: 'Europe', regions: ['UK','FR','DE','IT','ES'] },
+        // adicione mais
+      ],
+      currentMap: null,
+      regionColors: {},
+      selectedColor: '#f44336',
+      legends: [],
+    };
 
-  <!-- Tutorial -->
-  <section class="px-8 py-10 bg-white">
-    <h3 class="text-2xl font-semibold mb-4">How It Works</h3>
-    <ol class="list-decimal ml-6 text-gray-700">
-      <li>Select a continent or country.</li>
-      <li>Click regions to apply colors from the palette.</li>
-      <li>Add a title, legend, and background if you want.</li>
-      <li>Download your custom map as PNG.</li>
-    </ol>
-  </section>
+    const COLORS = ['#f44336','#e91e63','#9c27b0','#673ab7','#3f51b5','#2196f3','#4caf50','#ffeb3b','#ff9800','#795548',
+                    '#607d8b','#000000','#ffffff','#009688','#ff5722','#00bcd4','#03a9f4','#8bc34a','#cddc39','#ffc107',
+                    '#ffeb3b','#ff6f61','#6a5acd','#dda0dd','#fa8072','#2e8b57','#4682b4','#708090','#c71585','#adff2f'];
 
-  <!-- Map Picker -->
-  <section id="map-picker" class="px-8 py-12 bg-gray-50">
-    <h3 class="text-2xl font-bold mb-4">Choose a Region to Start</h3>
-    <input type="text" placeholder="Search for a country or region..." class="w-full max-w-lg px-4 py-2 border rounded mb-6">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <button class="bg-white border p-4 rounded hover:bg-blue-100">Europe</button>
-      <button class="bg-white border p-4 rounded hover:bg-blue-100">Africa</button>
-      <button class="bg-white border p-4 rounded hover:bg-blue-100">Asia</button>
-      <button class="bg-white border p-4 rounded hover:bg-blue-100">North America</button>
-      <button class="bg-white border p-4 rounded hover:bg-blue-100">South America</button>
-      <button class="bg-white border p-4 rounded hover:bg-blue-100">Oceania</button>
-      <button class="bg-white border p-4 rounded hover:bg-blue-100">USA</button>
-      <button class="bg-white border p-4 rounded hover:bg-blue-100">Portugal</button>
-    </div>
-  </section>
+    // UTIL
+    function saveUsers(users) { localStorage.setItem('mc_users', JSON.stringify(users)); }
+    function loadUsers() { return JSON.parse(localStorage.getItem('mc_users') || '{}'); }
 
-  <!-- Editor -->
-  <section class="px-8 py-12 bg-white">
-    <h3 class="text-2xl font-bold mb-4">Map Editor</h3>
-    <div class="flex space-x-4 mb-6">
-      <div class="space-y-2">
-        <h4 class="font-semibold">Select a Color</h4>
-        <div class="grid grid-cols-10 gap-2">
-          <div class="color-option" style="background: #f44336"></div>
-          <div class="color-option" style="background: #e91e63"></div>
-          <div class="color-option" style="background: #9c27b0"></div>
-          <div class="color-option" style="background: #2196f3"></div>
-          <div class="color-option" style="background: #4caf50"></div>
-          <div class="color-option" style="background: #ffeb3b"></div>
-          <div class="color-option" style="background: #ff9800"></div>
-          <div class="color-option" style="background: #795548"></div>
-          <div class="color-option" style="background: #607d8b"></div>
-          <div class="color-option" style="background: #000000"></div>
-          <!-- Add more colors here -->
+    // RENDER
+    function render() {
+      const app = document.getElementById('app');
+      app.innerHTML = '';
+
+      // NAV (logout)
+      if (state.user) {
+        const nav = document.createElement('nav');
+        nav.className = 'flex justify-end p-4 bg-white shadow';
+        const btn = document.createElement('button');
+        btn.textContent = 'Logout';
+        btn.className = 'px-4 py-2 bg-red-500 text-white rounded';
+        btn.onclick = () => { state.user = null; localStorage.removeItem('mc_user'); state.page = 'home'; render(); };
+        nav.appendChild(btn);
+        app.appendChild(nav);
+      }
+
+      // PAGES
+      if (state.page === 'home') renderHome(app);
+      else if (state.page === 'login') renderLogin(app);
+      else if (state.page === 'signup') renderSignup(app);
+      else if (state.page === 'picker') renderPicker(app);
+      else if (state.page === 'editor') renderEditor(app);
+    }
+
+    function renderHome(app) {
+      const c = document.createElement('div');
+      c.className = 'text-center py-20 space-y-6';
+      c.innerHTML = `
+        <h1 class="text-5xl font-bold">MapCraft</h1>
+        <p class="text-lg">Create and customize maps with 30+ colors, legends, export PNG.</p>
+        <div class="space-x-4 mt-6">
+          <button id="btnLogin" class="px-6 py-3 bg-blue-600 text-white rounded">Login</button>
+          <button id="btnSignup" class="px-6 py-3 bg-green-600 text-white rounded">Create Account</button>
+          <button id="btnStart" class="px-6 py-3 bg-indigo-600 text-white rounded">Create Map</button>
         </div>
-      </div>
-      <div class="flex-1">
-        <h4 class="font-semibold mb-2">Your Map</h4>
-        <svg id="map" viewBox="0 0 300 200" class="w-full border shadow rounded" style="background:#fff">
-          <rect x="10" y="10" width="80" height="60" fill="#ddd" stroke="#333" onclick="this.setAttribute('fill', selectedColor)" />
-          <rect x="100" y="10" width="80" height="60" fill="#ddd" stroke="#333" onclick="this.setAttribute('fill', selectedColor)" />
-        </svg>
-      </div>
-    </div>
-    <button onclick="downloadMap()" class="bg-green-600 text-white px-4 py-2 rounded">Download PNG</button>
-  </section>
+        <div class="mt-12 text-left mx-auto max-w-md bg-white p-6 shadow">
+          <h2 class="font-semibold text-xl mb-2">How it works</h2>
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Login or create account.</li>
+            <li>Select a map to edit.</li>
+            <li>Click regions to color them.</li>
+            <li>Add legends if needed.</li>
+            <li>Download as PNG.</li>
+          </ol>
+        </div>`;
+      app.appendChild(c);
+      c.querySelector('#btnLogin').onclick = () => { state.page = 'login'; render(); };
+      c.querySelector('#btnSignup').onclick = () => { state.page = 'signup'; render(); };
+      c.querySelector('#btnStart').onclick = () => {
+        if (!state.user) { state.page = 'login'; render(); }
+        else { state.page = 'picker'; render(); }
+      };
+    }
 
-  <!-- Footer -->
-  <footer class="text-center py-6 bg-gray-200 text-sm">
-    Made by @tugamapper – Inspired by Periphern and MapChart.
-  </footer>
+    function renderLogin(app) {
+      const c = document.createElement('div');
+      c.className = 'max-w-md mx-auto mt-20 bg-white p-6 shadow';
+      c.innerHTML = `
+        <h2 class="text-2xl mb-4">Login</h2>
+        <input id="email" type="email" placeholder="Email" class="w-full mb-3 p-2 border rounded" />
+        <input id="pwd" type="password" placeholder="Password" class="w-full mb-3 p-2 border rounded" />
+        <button class="w-full bg-blue-600 text-white py-2 rounded" id="btn">Login</button>
+        <p class="mt-4">Don't have an account? <a href="#" id="au" class="text-green-600">Create one</a></p>`;
+      app.appendChild(c);
+      c.querySelector('#btn').onclick = () => {
+        const email = c.querySelector('#email').value;
+        const pwd = c.querySelector('#pwd').value;
+        const users = loadUsers();
+        if (users[email] && users[email] === pwd) {
+          state.user = email;
+          localStorage.setItem('mc_user', email);
+          state.page = 'picker';
+          render();
+        } else alert('Invalid credentials');
+      };
+      c.querySelector('#au').onclick = () => { state.page = 'signup'; render(); };
+    }
 
-  <script>
-    let selectedColor = '#f44336';
-    document.querySelectorAll('.color-option').forEach(el => {
-      el.addEventListener('click', () => {
-        selectedColor = el.style.backgroundColor;
+    function renderSignup(app) {
+      const c = document.createElement('div');
+      c.className = 'max-w-md mx-auto mt-20 bg-white p-6 shadow';
+      c.innerHTML = `
+        <h2 class="text-2xl mb-4">Create Account</h2>
+        <input id="email" type="email" placeholder="Email" class="w-full mb-3 p-2 border rounded" />
+        <input id="pwd" type="password" placeholder="Password" class="w-full mb-3 p-2 border rounded" />
+        <button class="w-full bg-green-600 text-white py-2 rounded" id="btn">Create Account</button>
+        <p class="mt-4">Already have an account? <a href="#" id="au" class="text-blue-600">Login</a></p>`;
+      app.appendChild(c);
+      c.querySelector('#btn').onclick = () => {
+        const email = c.querySelector('#email').value;
+        const pwd = c.querySelector('#pwd').value;
+        const users = loadUsers();
+        if (users[email]) { alert('User exists'); }
+        else {
+          users[email] = pwd; saveUsers(users);
+          alert('Registered! Please login.');
+          state.page = 'login';
+          render();
+        }
+      };
+      c.querySelector('#au').onclick = () => { state.page = 'login'; render(); };
+    }
+
+    function renderPicker(app) {
+      const c = document.createElement('div');
+      c.className = 'p-8';
+      c.innerHTML = `
+        <h2 class="text-3xl mb-6">Select Map</h2>
+        ${state.maps.map(m =>
+          `<button class="m-2 px-4 py-3 bg-white border rounded shadow inline-block">${m.name}</button>`
+        ).join('')}`;
+      app.appendChild(c);
+      c.querySelectorAll('button').forEach((btn,i) => {
+        btn.onclick = () => {
+          state.currentMap = state.maps[i];
+          state.regionColors = {};
+          state.legends = [];
+          state.page = 'editor';
+          render();
+        };
       });
-    });
+    }
 
-    function downloadMap() {
-      const svg = document.getElementById("map");
-      const serializer = new XMLSerializer();
-      const source = serializer.serializeToString(svg);
-      const svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-      const url = URL.createObjectURL(svgBlob);
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 800;
-        canvas.height = 600;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(url);
-        canvas.toBlob(blob => {
-          const a = document.createElement("a");
-          a.href = URL.createObjectURL(blob);
-          a.download = "mapcraft.png";
+    function renderEditor(app) {
+      const c = document.createElement('div');
+      c.className = 'p-8';
+      c.innerHTML = `
+        <h2 class="text-3xl mb-4">Editing: ${state.currentMap.name}</h2>
+        <div class="flex mb-4">
+          <div class="grid grid-cols-7 gap-2 mr-4">
+            ${COLORS.map(c => `<div class="color-swatch ${c===state.selectedColor?'selected':''}" style="background:${c}"></div>`).join('')}
+          </div>
+          <button id="addLegend" class="px-4 py-2 bg-yellow-500 text-white rounded">Add Legend</button>
+          <button id="download" class="px-4 py-2 bg-green-600 text-white rounded ml-4">Download PNG</button>
+        </div>
+        <svg id="map-svg" viewBox="0 0 400 300" class="border shadow mb-4 w-full" style="background:#fff;">
+          ${state.currentMap.regions.map((r,i) =>
+            `<rect id="r${r}" x="${20+i*60}" y="50" width="50" height="30" fill="#ddd" stroke="#888" />`
+          ).join('')}
+        </svg>
+        <div><strong>Legends:</strong> ${state.legends.map(l => `<span style="background:${l.c};padding:2px 6px;margin:2px;border-radius:3px;">${l.txt}</span>`).join('')}</div>
+        <button id="back" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Back to Maps</button>`;
+      app.appendChild(c);
+
+      // color picker
+      c.querySelectorAll('.color-swatch').forEach((sw, i) => {
+        sw.onclick = () => {
+          document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('selected'));
+          sw.classList.add('selected');
+          state.selectedColor = COLORS[i];
+        };
+      });
+
+      // region fill
+      state.currentMap.regions.forEach(r => {
+        const el = c.querySelector(`#r${r}`);
+        el.onclick = () => {
+          el.setAttribute('fill', state.selectedColor);
+          state.regionColors[r] = state.selectedColor;
+        };
+      });
+
+      c.querySelector('#addLegend').onclick = () => {
+        const txt = prompt('Legend text for color ' + state.selectedColor);
+        if (txt) state.legends.push({ c: state.selectedColor, txt });
+        render();
+      };
+
+      c.querySelector('#download').onclick = () => {
+        html2canvas(c.querySelector('#map-svg')).then(canvas => {
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL();
+          a.download = 'mapcraft.png';
           a.click();
         });
       };
-      img.src = url;
+
+      c.querySelector('#back').onclick = () => { state.page='picker'; render(); };
     }
+
+    // initial load
+    const u = localStorage.getItem('mc_user');
+    if (u) { state.user = u; state.page = 'picker'; }
+    render();
   </script>
 </body>
 </html>
