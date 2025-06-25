@@ -28,16 +28,22 @@
     </div>
 
     <div class="mt-6 flex flex-col gap-4">
-      <button onclick="exportMap()" class="bg-green-600 text-white px-4 py-2 rounded">Export as JPG</button>
+      <button onclick="exportMap()" class="bg-green-600 text-white px-4 py-2 rounded">Export as JPG (+10 pts)</button>
       <button onclick="followInstagram()" class="bg-pink-600 text-white px-4 py-2 rounded">Follow @tugamapper (+70 pts)</button>
       <button onclick="likeReel()" class="bg-pink-500 text-white px-4 py-2 rounded">Like a Reel (+10 pts)</button>
+      <button onclick="dailyCheckIn()" class="bg-purple-500 text-white px-4 py-2 rounded">Daily Check-in (+5 pts)</button>
+      <button onclick="redeemCode()" class="bg-yellow-500 text-black px-4 py-2 rounded">Redeem Code</button>
+    </div>
+
+    <div class="mt-6">
+      <h2 class="text-xl font-bold mb-2">🔓 Premium Unlockables:</h2>
+      <ul class="list-disc list-inside text-green-400">
+        <li>Export in HD and SVG</li>
+        <li>Access to exclusive historical maps</li>
+        <li>More map styles (regions, cities, timelines)</li>
+        <li>Advanced color gradients and themes</li>
+      </ul>
     </div>
   </main>
-
-  <script>
-    function exportMap() {
-      alert("Exporting as JPG is available to all users. Premium unlocks HD and SVG export.");
-    }
-  </script>
 </body>
 </html>
