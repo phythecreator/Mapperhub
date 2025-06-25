@@ -1,98 +1,655 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MapCraft - Map Editor</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <style>
-    #map-container {
-      width: 100%;
-      height: 600px;
-      border: 2px solid #444;
-      cursor: grab;
-      overflow: auto;
-      position: relative;
-    }
-    #map-container:active {
-      cursor: grabbing;
-    }
-    .emoji-btn {
-      width: 32px;
-      height: 32px;
-      margin: 3px;
-      cursor: pointer;
-      border-radius: 4px;
-      border: 1px solid transparent;
-      transition: border-color 0.3s;
-    }
-    .emoji-btn:hover {
-      border-color: #f59e0b;
-    }
-    .premium-emoji {
-      filter: drop-shadow(0 0 1px gold);
-    }
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MapCraft - Full Web Mapping Platform</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/canvg@4.0.11/lib/umd.min.js"></script>
+<style>
+  #map-container {
+    width: 100%;
+    height: 600px;
+    border: 2px solid #444;
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+    background: white;
+    user-select:none;
+  }
+  #map-container:active {
+    cursor: grabbing;
+  }
+  #legend-list {
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  .color-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    display: inline-block;
+    margin: 2px;
+  }
+  .color-swatch.selected {
+    border: 3px solid #000;
+  }
+  #modalBg {
+    background: rgba(0,0,0,0.6);
+  }
+</style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col">
 
-<header class="bg-gray-800 p-4 flex justify-between items-center">
-  <h1 class="text-2xl font-bold">MapCraft Editor</h1>
-  <div>
-    <span id="pointsDisplay" class="mr-4 font-semibold text-yellow-400">Points: 0 / 170</span>
-    <button onclick="location.href='login.html'" class="bg-blue-600 px-3 py-1 rounded hover:bg-blue-700">Login</button>
+<header class="bg-gray-800 p-4 flex flex-wrap justify-between items-center gap-2">
+  <h1 class="text-3xl font-bold cursor-pointer" id="goHome">MapCraft</h1>
+
+  <div id="userSection" class="flex items-center gap-4">
+    <span id="userGreeting" class="hidden"></span>
+    <button id="loginBtn" class="bg-blue-600 px-4 py-1 rounded hover:bg-blue-700">Login / Sign Up</button>
+    <button id="logoutBtn" class="bg-red-600 px-4 py-1 rounded hover:bg-red-700 hidden">Logout</button>
   </div>
 </header>
 
-<main class="flex flex-col md:flex-row flex-grow p-4 gap-6">
+<main class="flex-grow p-4 max-w-7xl mx-auto w-full">
 
-  <aside class="md:w-1/3 flex flex-col gap-6">
+  <!-- Home Page -->
+  <section id="homePage" class="">
+    <h2 class="text-4xl font-bold mb-4">Welcome to MapCraft</h2>
+    <p class="mb-4 max-w-xl">Create, customize and export maps with ease. Save your maps, track points, and unlock features by using MapCraft. Start by logging in or creating an account.</p>
+    <button id="startMappingBtn" class="bg-green-600 px-6 py-3 rounded hover:bg-green-700 text-lg font-semibold">Start Mapping</button>
 
-    <div>
-      <label for="mapSelect" class="block mb-1 font-semibold">Select Map:</label>
-      <select id="mapSelect" class="w-full p-2 rounded bg-gray-700 text-white"></select>
-    </div>
+    <hr class="my-8 border-gray-600" />
 
-    <div>
-      <h2 class="font-semibold mb-1">Color Palette:</h2>
-      <div id="palette" class="flex flex-wrap"></div>
-    </div>
+    <h3 class="text-2xl font-semibold mb-2">Tutorial</h3>
+    <p class="max-w-xl mb-2">
+      Select countries by clicking or shift+click for multiple. Choose colors from the palette to paint them. Add legends to explain your colors. Use zoom buttons or mouse wheel to zoom in/out.
+    </p>
+    <p class="max-w-xl mb-2">
+      Save your maps with titles to your account and export as PNG or JPG images.
+    </p>
+    <p class="max-w-xl mb-2">
+      Earn points by daily check-in, creating maps and logging in, and unlock premium features in future updates.
+    </p>
+  </section>
 
-    <div>
-      <h2 class="font-semibold mb-1">Emojis:</h2>
-      <div id="emojiContainer" class="flex flex-wrap"></div>
-    </div>
+  <!-- Login Page -->
+  <section id="loginPage" class="hidden max-w-md mx-auto bg-gray-800 p-6 rounded shadow-lg">
+    <h2 class="text-3xl font-bold mb-4 text-center">Login or Sign Up</h2>
+    <form id="authForm" class="flex flex-col gap-4" novalidate>
+      <input type="email" id="email" placeholder="Email" class="p-3 rounded bg-gray-700 text-white" required />
+      <input type="password" id="password" placeholder="Password" class="p-3 rounded bg-gray-700 text-white" minlength="6" required />
+      <input type="password" id="confirmPassword" placeholder="Confirm Password" class="p-3 rounded bg-gray-700 text-white hidden" minlength="6" />
+      <div id="errorMsg" class="text-red-500 text-sm"></div>
+      <button type="submit" class="bg-blue-600 py-2 rounded hover:bg-blue-700" id="submitAuthBtn">Login</button>
+    </form>
+    <p class="mt-4 text-sm text-gray-400 text-center" id="toggleAuthText">
+      Don't have an account? <button id="toggleAuthBtn" class="text-blue-400 underline">Sign up</button>
+    </p>
+  </section>
 
-    <div class="flex flex-col gap-3">
-      <button id="btnFollow" class="bg-purple-600 hover:bg-purple-700 rounded py-2">Follow @tugamapper (+70 pts)</button>
-      <button id="btnCreateMap" class="bg-green-600 hover:bg-green-700 rounded py-2">Create Map (+20 pts)</button>
-      <button id="btnDailyReward" class="bg-yellow-600 hover:bg-yellow-700 rounded py-2">Daily Reward (+40 pts)</button>
-      <button id="btnExport" class="bg-blue-600 hover:bg-blue-700 rounded py-2">Export Map (+10 pts)</button>
-    </div>
+  <!-- Editor Page -->
+  <section id="editorPage" class="hidden flex flex-col md:flex-row gap-6">
 
-    <div>
-      <h2 class="font-semibold mb-2 text-yellow-400">Premium Unlocks at 170 points</h2>
-      <ul class="list-disc list-inside text-green-400">
-        <li>Extra colors (non-essential)</li>
-        <li>Special premium emojis</li>
-        <li>Export in HD and SVG (future)</li>
-        <li>Access to historical maps</li>
-      </ul>
-    </div>
+    <!-- Sidebar -->
+    <aside class="md:w-1/3 bg-gray-800 p-4 rounded flex flex-col gap-4">
+      <h2 class="text-xl font-semibold">Hello, <span id="userNameDisplay"></span></h2>
 
-  </aside>
+      <div>
+        <label class="block mb-1">Select color:</label>
+        <div id="colorPalette" class="flex flex-wrap"></div>
+      </div>
 
-  <section id="map-container" class="md:w-2/3 rounded border border-gray-600 overflow-auto">
-    <object id="map" data="assets/maps/world.svg" type="image/svg+xml" class="w-full h-full select-none" tabindex="0"></object>
+      <button id="resetColors" class="bg-red-600 py-2 rounded hover:bg-red-700">Reset Colors</button>
+
+      <hr class="my-4 border-gray-600" />
+
+      <div>
+        <h3 class="font-semibold mb-2">Legend</h3>
+        <div class="flex gap-2 mb-2">
+          <input type="text" id="legendText" placeholder="Legend text" class="flex-grow p-2 rounded text-black" />
+          <input type="color" id="legendColor" value="#ff0000" class="w-12 h-10 rounded" />
+          <button id="addLegend" class="bg-green-600 px-3 rounded">Add</button>
+        </div>
+        <ul id="legend-list" class="list-disc list-inside text-black bg-white p-2 rounded max-h-36 overflow-auto"></ul>
+      </div>
+
+      <hr class="my-4 border-gray-600" />
+
+      <div class="flex gap-2 mb-2">
+        <button id="zoomIn" class="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 flex-grow">Zoom +</button>
+        <button id="zoomOut" class="bg-indigo-600 px-4 py-2 rounded hover:bg-indigo-700 flex-grow">Zoom -</button>
+      </div>
+
+      <hr class="my-4 border-gray-600" />
+
+      <button id="exportPngBtn" class="bg-green-600 px-4 py-2 rounded hover:bg-green-700 mb-2 w-full">Export as PNG</button>
+      <button id="exportJpgBtn" class="bg-yellow-600 px-4 py-2 rounded hover:bg-yellow-700 w-full">Export as JPG</button>
+
+      <hr class="my-4 border-gray-600" />
+
+      <div>
+        <h3 class="text-xl font-bold mb-2">My Maps</h3>
+        <input type="text" id="mapTitle" placeholder="Map title" class="w-full p-2 rounded text-black mb-2" />
+        <button id="saveMapBtn" class="bg-blue-600 px-4 py-2 rounded w-full hover:bg-blue-700 mb-2">Save Map</button>
+        <select id="loadMapSelect" class="w-full p-2 rounded mb-2 text-black"></select>
+        <button id="deleteMapBtn" class="bg-red-600 px-4 py-2 rounded w-full hover:bg-red-700">Delete Selected Map</button>
+      </div>
+
+      <hr class="my-4 border-gray-600" />
+
+      <div>
+        <h3 class="text-xl font-bold mb-2">Feedback</h3>
+        <textarea id="feedbackText" rows="3" class="w-full p-2 rounded text-black" placeholder="Write your feedback here..."></textarea>
+        <button id="sendFeedbackBtn" class="bg-blue-600 px-4 py-2 rounded mt-2 w-full hover:bg-blue-700">Send Feedback</button>
+        <ul id="feedbackList" class="mt-3 max-h-48 overflow-auto bg-gray-200 text-black rounded p-2"></ul>
+      </div>
+
+      <hr class="my-4 border-gray-600" />
+
+      <div>
+        <h3 class="text-xl font-bold mb-2">Points & Missions</h3>
+        <p>Points: <span id="pointsDisplay">0</span> / 170</p>
+        <ul id="missionsList" class="list-disc list-inside max-h-40 overflow-auto"></ul>
+        <button id="dailyCheckinBtn" class="bg-green-600 px-4 py-2 rounded mt-2 hover:bg-green-700 w-full">Daily Check-In (+40 pts)</button>
+      </div>
+    </aside>
+
+    <!-- Map Container -->
+    <section id="map-container" class="md:w-2/3 rounded overflow-hidden relative bg-white">
+      <object id="map" data="assets/maps/world.svg" type="image/svg+xml" class="w-full h-full select-none"></object>
+    </section>
   </section>
 
 </main>
 
-<script src="js/editor.js" defer></script>
+<!-- Modal Background -->
+<div id="modalBg" class="fixed inset-0 hidden items-center justify-center z-50"></div>
+
+<script>
+(() => {
+  // Helpers
+  const $ = id => document.getElementById(id);
+  const setVisible = (el, visible) => el.style.display = visible ? "block" : "none";
+  const addClass = (el, cls) => el.classList.add(cls);
+  const removeClass = (el, cls) => el.classList.remove(cls);
+
+  // Pages
+  const homePage = $("homePage");
+  const loginPage = $("loginPage");
+  const editorPage = $("editorPage");
+
+  // User Controls
+  const loginBtn = $("loginBtn");
+  const logoutBtn = $("logoutBtn");
+  const userGreeting = $("userGreeting");
+  const userNameDisplay = $("userNameDisplay");
+  const toggleAuthBtn = $("toggleAuthBtn");
+  const toggleAuthText = $("toggleAuthText");
+  const authForm = $("authForm");
+  const emailInput = $("email");
+  const passwordInput = $("password");
+  const confirmPasswordInput = $("confirmPassword");
+  const errorMsg = $("errorMsg");
+  const submitAuthBtn = $("submitAuthBtn");
+
+  // Editor Controls
+  const colorPalette = $("colorPalette");
+  const resetColorsBtn = $("resetColors");
+  const legendList = $("legend-list");
+  const legendTextInput = $("legendText");
+  const legendColorInput = $("legendColor");
+  const addLegendBtn = $("addLegend");
+  const zoomInBtn = $("zoomIn");
+  const zoomOutBtn = $("zoomOut");
+  const exportPngBtn = $("exportPngBtn");
+  const exportJpgBtn = $("exportJpgBtn");
+  const mapContainer = $("map-container");
+  const mapObject = $("map");
+
+  // My Maps Controls
+  const mapTitleInput = $("mapTitle");
+  const saveMapBtn = $("saveMapBtn");
+  const loadMapSelect = $("loadMapSelect");
+  const deleteMapBtn = $("deleteMapBtn");
+
+  // Feedback Controls
+  const feedbackText = $("feedbackText");
+  const sendFeedbackBtn = $("sendFeedbackBtn");
+  const feedbackList = $("feedbackList");
+
+  // Points and Missions
+  const pointsDisplay = $("pointsDisplay");
+  const missionsList = $("missionsList");
+  const dailyCheckinBtn = $("dailyCheckinBtn");
+
+  // User state
+  let loggedInUser = localStorage.getItem("mapcraft_user") || null;
+  let isLoginMode = true; // true = login, false = signup
+  let svgDoc, countries;
+  let selectedCountries = new Set();
+  let selectedColor = "#e6194b";
+  let zoomLevel = 1;
+
+  // Missions definitions
+  const missions = [
+    { id:"createAccount", text:"Create an account (70 pts)", points:70, done:false },
+    { id:"createMap", text:"Create a map (20 pts)", points:20, done:false },
+    { id:"dailyCheckin", text:"Daily check-in (40 pts)", points:40, done:false }
+  ];
+
+  // Points state
+  let points = parseInt(localStorage.getItem("mapcraft_points")) || 0;
+
+  // Initialize
+  function init() {
+    updateUI();
+    attachEventListeners();
+    renderColorPalette();
+    if (loggedInUser) loadUserMaps();
+    updateMissionsDisplay();
+    if(loggedInUser) loadFeedbacks();
+  }
+
+  // Navigation
+  function showPage(page) {
+    [homePage, loginPage, editorPage].forEach(p => p.classList.add("hidden"));
+    page.classList.remove("hidden");
+  }
+
+  // Update UI based on login state
+  function updateUI() {
+    if (loggedInUser) {
+      userGreeting.textContent = `Hello, ${loggedInUser}`;
+      userGreeting.classList.remove("hidden");
+      loginBtn.classList.add("hidden");
+      logoutBtn.classList.remove("hidden");
+      userNameDisplay.textContent = loggedInUser;
+      showPage(editorPage);
+    } else {
+      userGreeting.classList.add("hidden");
+      loginBtn.classList.remove("hidden");
+      logoutBtn.classList.add("hidden");
+      showPage(homePage);
+    }
+    pointsDisplay.textContent = points;
+  }
+
+  // Toggle auth mode login/signup
+  toggleAuthText.addEventListener("click", e => {
+    if(e.target.id === "toggleAuthBtn"){
+      isLoginMode = !isLoginMode;
+      errorMsg.textContent = "";
+      if(isLoginMode){
+        submitAuthBtn.textContent = "Login";
+        confirmPasswordInput.classList.add("hidden");
+        toggleAuthText.innerHTML = `Don't have an account? <button id="toggleAuthBtn" class="text-blue-400 underline">Sign up</button>`;
+      } else {
+        submitAuthBtn.textContent = "Sign Up";
+        confirmPasswordInput.classList.remove("hidden");
+        toggleAuthText.innerHTML = `Already have an account? <button id="toggleAuthBtn" class="text-blue-400 underline">Login</button>`;
+      }
+    }
+  });
+
+  // Validate email format simple
+  function validateEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  // Auth form submit
+  authForm.addEventListener("submit", e => {
+    e.preventDefault();
+    errorMsg.textContent = "";
+    const email = emailInput.value.trim().toLowerCase();
+    const password = passwordInput.value;
+    const confirm = confirmPasswordInput.value;
+
+    if(!validateEmail(email)){
+      errorMsg.textContent = "Please enter a valid email.";
+      return;
+    }
+    if(password.length < 6){
+      errorMsg.textContent = "Password must be at least 6 characters.";
+      return;
+    }
+    if(!isLoginMode && password !== confirm){
+      errorMsg.textContent = "Passwords do not match.";
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem("mapcraft_users") || "[]");
+
+    if(isLoginMode){
+      // login
+      const user = users.find(u => u.email === email && u.password === password);
+      if(user){
+        loggedInUser = email;
+        localStorage.setItem("mapcraft_user", loggedInUser);
+        alert(`Welcome back, ${loggedInUser}! +70 points for logging in.`);
+        addPoints("createAccount");
+        updateUI();
+        loadUserMaps();
+      } else {
+        errorMsg.textContent = "Incorrect email or password.";
+      }
+    } else {
+      // signup
+      if(users.find(u => u.email === email)){
+        errorMsg.textContent = "Email already registered.";
+        return;
+      }
+      users.push({email,password});
+      localStorage.setItem("mapcraft_users", JSON.stringify(users));
+      alert("Account created! You can now login.");
+      isLoginMode = true;
+      submitAuthBtn.textContent = "Login";
+      confirmPasswordInput.classList.add("hidden");
+      toggleAuthText.innerHTML = `Don't have an account? <button id="toggleAuthBtn" class="text-blue-400 underline">Sign up</button>`;
+    }
+  });
+
+  // Logout
+  logoutBtn.addEventListener("click", () => {
+    loggedInUser = null;
+    localStorage.removeItem("mapcraft_user");
+    points = 0;
+    localStorage.removeItem("mapcraft_points");
+    updateUI();
+  });
+
+  // Start Mapping button on home
+  $("startMappingBtn").addEventListener("click", () => {
+    if(loggedInUser) {
+      showPage(editorPage);
+    } else {
+      showPage(loginPage);
+    }
+  });
+
+  // Render color palette (free colors)
+  const colors = [
+    "#e6194b","#3cb44b","#ffe119","#4363d8","#f58231","#911eb4",
+    "#46f0f0","#f032e6","#bcf60c","#fabebe","#008080","#e6beff",
+    "#9a6324","#fffac8","#800000","#aaffc3","#808000","#ffd8b1",
+    "#000075","#808080","#ffffff","#000000"
+  ];
+
+  function renderColorPalette() {
+    colorPalette.innerHTML = "";
+    colors.forEach(color => {
+      const swatch = document.createElement("div");
+      swatch.className = "color-swatch";
+      swatch.style.backgroundColor = color;
+      if(color === selectedColor) swatch.classList.add("selected");
+      swatch.onclick = () => {
+        selectedColor = color;
+        renderColorPalette();
+      };
+      colorPalette.appendChild(swatch);
+    });
+  }
+
+  // Load SVG and setup click events on countries
+  mapObject.addEventListener("load", () => {
+    svgDoc = mapObject.contentDocument;
+    countries = svgDoc.querySelectorAll("path, polygon, rect");
+    countries.forEach(country => {
+      country.style.cursor = "pointer";
+      country.style.stroke = "#000";
+      country.style.strokeWidth = "1";
+      country.addEventListener("click", e => {
+        if(e.shiftKey){
+          toggleCountrySelection(country);
+        } else {
+          clearSelection();
+          selectCountry(country);
+        }
+        colorSelectedCountries();
+      });
+    });
+    renderColorPalette();
+  });
+
+  function clearSelection() {
+    selectedCountries.forEach(c => {
+      c.style.strokeWidth = "1";
+      c.style.stroke = "#000";
+    });
+    selectedCountries.clear();
+  }
+
+  function selectCountry(country) {
+    selectedCountries.add(country);
+    country.style.strokeWidth = "3";
+    country.style.stroke = "#ff0000";
+  }
+
+  function toggleCountrySelection(country) {
+    if(selectedCountries.has(country)){
+      selectedCountries.delete(country);
+      country.style.strokeWidth = "1";
+      country.style.stroke = "#000";
+    } else {
+      selectCountry(country);
+    }
+  }
+
+  function colorSelectedCountries() {
+    selectedCountries.forEach(c => {
+      c.setAttribute("fill", selectedColor);
+    });
+  }
+
+  resetColorsBtn.addEventListener("click", () => {
+    if(!svgDoc) return;
+    countries.forEach(c => c.removeAttribute("fill"));
+    clearSelection();
+  });
+
+  // Legend
+  addLegendBtn.addEventListener("click", () => {
+    const text = legendTextInput.value.trim();
+    const color = legendColorInput.value;
+    if(!text) return alert("Please enter legend text");
+    const li = document.createElement("li");
+    li.textContent = text;
+    li.style.color = color;
+    legendList.appendChild(li);
+    legendTextInput.value = "";
+  });
+
+  // Zoom
+  function setZoom(level) {
+    zoomLevel = Math.min(Math.max(level, 0.5), 5);
+    const svg = mapContainer.querySelector("svg");
+    if(!svg) return;
+    svg.style.transformOrigin = "center center";
+    svg.style.transform = `scale(${zoomLevel})`;
+  }
+  zoomInBtn.addEventListener("click", () => setZoom(zoomLevel + 0.25));
+  zoomOutBtn.addEventListener("click", () => setZoom(zoomLevel - 0.25));
+  mapContainer.addEventListener("wheel", e => {
+    e.preventDefault();
+    setZoom(zoomLevel + (e.deltaY < 0 ? 0.1 : -0.1));
+  });
+
+  // Export PNG/JPG
+  async function exportMap(format = "png") {
+    if(!svgDoc) {
+      alert("Map not loaded yet!");
+      return;
+    }
+    const svg = mapContainer.querySelector("svg");
+    if(!svg) {
+      alert("SVG not found.");
+      return;
+    }
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = svg.viewBox.baseVal.width || svg.clientWidth || 1000;
+    canvas.height = svg.viewBox.baseVal.height || svg.clientHeight || 600;
+    const ctx = canvas.getContext("2d");
+
+    try {
+      const v = await canvg.Canvg.fromString(ctx, svgString);
+      await v.render();
+
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `MapCraft_export.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, `image/${format}`);
+    } catch(e) {
+      alert("Export failed: " + e.message);
+    }
+  }
+  exportPngBtn.onclick = () => exportMap("png");
+  exportJpgBtn.onclick = () => exportMap("jpeg");
+
+  // My Maps save/load/delete - guarda no localStorage por usuário
+  function saveMap() {
+    if(!loggedInUser) return alert("You must be logged in to save maps.");
+    const title = mapTitleInput.value.trim();
+    if(!title) return alert("Please enter a title for your map.");
+    if(!svgDoc) return alert("Map not loaded.");
+
+    const svg = mapContainer.querySelector("svg");
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+
+    const userMaps = JSON.parse(localStorage.getItem(`mapcraft_maps_${loggedInUser}`) || "{}");
+    userMaps[title] = svgString;
+    localStorage.setItem(`mapcraft_maps_${loggedInUser}`, JSON.stringify(userMaps));
+    alert("Map saved!");
+    loadUserMaps();
+    addPoints("createMap");
+  }
+
+  function loadUserMaps() {
+    if(!loggedInUser) return;
+    const userMaps = JSON.parse(localStorage.getItem(`mapcraft_maps_${loggedInUser}`) || "{}");
+    loadMapSelect.innerHTML = "";
+    Object.keys(userMaps).forEach(title => {
+      const option = document.createElement("option");
+      option.value = title;
+      option.textContent = title;
+      loadMapSelect.appendChild(option);
+    });
+  }
+
+  function loadSelectedMap() {
+    if(!svgDoc) return alert("Map not loaded.");
+    if(!loggedInUser) return alert("You must be logged in.");
+    const title = loadMapSelect.value;
+    if(!title) return alert("Select a map to load.");
+    const userMaps = JSON.parse(localStorage.getItem(`mapcraft_maps_${loggedInUser}`) || "{}");
+    const svgString = userMaps[title];
+    if(!svgString) return alert("Map data missing.");
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(svgString, "image/svg+xml");
+    const newSvg = doc.documentElement;
+
+    // Replace old svg with new one inside object
+    // Trick: reload object with data URI of svg
+    const svgEncoded = encodeURIComponent(svgString);
+    mapObject.data = "data:image/svg+xml;charset=utf-8," + svgEncoded;
+  }
+
+  function deleteSelectedMap() {
+    if(!loggedInUser) return alert("You must be logged in.");
+    const title = loadMapSelect.value;
+    if(!title) return alert("Select a map to delete.");
+    const userMaps = JSON.parse(localStorage.getItem(`mapcraft_maps_${loggedInUser}`) || "{}");
+    if(!userMaps[title]) return alert("Map not found.");
+    if(!confirm(`Are you sure you want to delete map "${title}"?`)) return;
+    delete userMaps[title];
+    localStorage.setItem(`mapcraft_maps_${loggedInUser}`, JSON.stringify(userMaps));
+    loadUserMaps();
+    alert("Map deleted.");
+  }
+
+  saveMapBtn.addEventListener("click", saveMap);
+  loadMapSelect.addEventListener("change", loadSelectedMap);
+  deleteMapBtn.addEventListener("click", deleteSelectedMap);
+
+  // Feedback (localStorage)
+  function loadFeedbacks() {
+    const feedbacks = JSON.parse(localStorage.getItem("mapcraft_feedbacks") || "[]");
+    feedbackList.innerHTML = "";
+    feedbacks.forEach(fb => {
+      const li = document.createElement("li");
+      li.textContent = fb;
+      feedbackList.appendChild(li);
+    });
+  }
+
+  sendFeedbackBtn.addEventListener("click", () => {
+    const text = feedbackText.value.trim();
+    if(!text) return alert("Write your feedback before sending.");
+    const feedbacks = JSON.parse(localStorage.getItem("mapcraft_feedbacks") || "[]");
+    feedbacks.push(text);
+    localStorage.setItem("mapcraft_feedbacks", JSON.stringify(feedbacks));
+    feedbackText.value = "";
+    loadFeedbacks();
+    alert("Thanks for your feedback!");
+  });
+
+  // Points and missions
+  function addPoints(missionId) {
+    const mission = missions.find(m => m.id === missionId);
+    if(!mission || mission.done) return;
+    points += mission.points;
+    localStorage.setItem("mapcraft_points", points);
+    mission.done = true;
+    updateMissionsDisplay();
+    pointsDisplay.textContent = points;
+  }
+
+  function updateMissionsDisplay() {
+    missionsList.innerHTML = "";
+    missions.forEach(m => {
+      const li = document.createElement("li");
+      li.textContent = `${m.text} ${m.done ? "(Completed)" : ""}`;
+      if(m.done) li.style.textDecoration = "line-through";
+      missionsList.appendChild(li);
+    });
+  }
+
+  // Daily Check-in button logic
+  dailyCheckinBtn.addEventListener("click", () => {
+    if(!loggedInUser) return alert("You must be logged in.");
+    const lastCheckin = localStorage.getItem(`mapcraft_dailycheckin_${loggedInUser}`);
+    const today = new Date().toDateString();
+    if(lastCheckin === today){
+      alert("You already did your daily check-in today.");
+      return;
+    }
+    localStorage.setItem(`mapcraft_dailycheckin_${loggedInUser}`, today);
+    alert("Daily check-in done! +40 points.");
+    addPoints("dailyCheckin");
+  });
+
+  // Init all
+  init();
+
+  // Logo click to home
+  $("goHome").addEventListener("click", () => {
+    if(loggedInUser) showPage(editorPage);
+    else showPage(homePage);
+  });
+
+})();
+</script>
 
 </body>
 </html>
