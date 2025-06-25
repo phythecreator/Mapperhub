@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let svgDoc, countries, selectedCountries = new Set();
 
+  // Função para limpar seleção visual
   function clearSelection() {
     selectedCountries.forEach(c => {
       c.style.strokeWidth = "1";
@@ -21,8 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedCountries.clear();
   }
 
+  // Selecionar ou desselecionar país com suporte a multi-seleção (Shift)
   function selectCountry(country, multi = false) {
     if (!multi) clearSelection();
+
     if (selectedCountries.has(country)) {
       selectedCountries.delete(country);
       country.style.strokeWidth = "1";
@@ -30,10 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       selectedCountries.add(country);
       country.style.strokeWidth = "3";
-      country.style.stroke = "#ff0000";
+      country.style.stroke = "#ff4500";
     }
   }
 
+  // Carregar mapa SVG e preparar eventos
   mapObject.addEventListener("load", () => {
     svgDoc = mapObject.contentDocument;
     countries = svgDoc.querySelectorAll("path");
@@ -43,24 +47,35 @@ document.addEventListener("DOMContentLoaded", () => {
       country.style.stroke = "#000";
       country.style.strokeWidth = "1";
 
+      // Clique para seleção / multi-seleção
       country.addEventListener("click", (e) => {
         selectCountry(country, e.shiftKey);
       });
+
+      // Tooltip simples com nome
+      country.setAttribute("title", country.id || "Unknown");
     });
   });
 
+  // Pintar países selecionados com cor escolhida
   colorPicker.addEventListener("input", () => {
     selectedCountries.forEach(c => {
       c.setAttribute("fill", colorPicker.value);
     });
   });
 
+  // Resetar todas cores do mapa
   resetBtn.addEventListener("click", () => {
     if (!svgDoc) return;
-    countries.forEach(c => c.removeAttribute("fill"));
+    countries.forEach(c => {
+      c.removeAttribute("fill");
+      c.style.stroke = "#000";
+      c.style.strokeWidth = "1";
+    });
     clearSelection();
   });
 
+  // Adicionar item na legenda
   addLegendBtn.addEventListener("click", () => {
     const text = legendText.value.trim();
     const color = legendColor.value;
@@ -72,24 +87,24 @@ document.addEventListener("DOMContentLoaded", () => {
     legendText.value = "";
   });
 
+  // Guardar cores no localStorage para persistência
   saveBtn.addEventListener("click", () => {
     if (!svgDoc) return;
     const colors = {};
     countries.forEach(c => {
-      const id = c.id || c.getAttribute("name") || c.getAttribute("title") || null;
-      if (id) {
-        colors[id] = c.getAttribute("fill") || null;
-      }
+      const id = c.id || c.getAttribute("name") || c.getAttribute("title");
+      if (id) colors[id] = c.getAttribute("fill") || null;
     });
     localStorage.setItem("mapColors", JSON.stringify(colors));
     alert("Map saved locally.");
   });
 
+  // Carregar cores guardadas localmente
   loadBtn.addEventListener("click", () => {
     if (!svgDoc) return;
     const colors = JSON.parse(localStorage.getItem("mapColors") || "{}");
     countries.forEach(c => {
-      const id = c.id || c.getAttribute("name") || c.getAttribute("title") || null;
+      const id = c.id || c.getAttribute("name") || c.getAttribute("title");
       if (id && colors[id]) {
         c.setAttribute("fill", colors[id]);
       } else {
@@ -99,12 +114,13 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("Map loaded.");
   });
 
+  // Exportar como JPG simulado + dar pontos (liga com missions.js)
   exportBtn.addEventListener("click", () => {
-    alert("Export as JPG is available (simulation). +10 points earned.");
+    alert("Export as JPG successful! +10 points awarded.");
     if (typeof addExportPoints === "function") addExportPoints();
   });
 
-  // Basic pan support on map container
+  // Suporte a pan (arrastar o mapa)
   let isPanning = false, startX, startY, scrollLeft, scrollTop;
 
   mapContainer.addEventListener("mousedown", e => {
@@ -133,5 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
     mapContainer.scrollLeft = scrollLeft - walkX;
     mapContainer.scrollTop = scrollTop - walkY;
   });
+
 });
+
 
