@@ -1,330 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MapperHub Editor</title>
-  <link rel="icon" href="https://i.imgur.com/a/L1n8V2E.png" type="image/png" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapperHub</title>
   <style>
-    .draggable {
-      position: absolute;
-      cursor: move;
-    }
-
-    #mapCanvas {
-      border: 2px solid #444;
-      background-color: #f9fafb;
-    }
-
-    .map-image-container {
-      position: relative;
-    }
-
-    .like-btn,
-    .save-btn {
-      cursor: pointer;
-      margin-right: 8px;
-      padding: 4px 8px;
-      border-radius: 5px;
-      font-weight: 600;
-      user-select: none;
-      background: #2563eb;
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #1e1e1e;
       color: white;
-      transition: background 0.3s;
     }
-
-    .like-btn:hover,
-    .save-btn:hover {
-      background: #1e40af;
+    header {
+      background-color: #111;
+      padding: 20px;
+      text-align: center;
     }
-
-    .like-count {
-      margin-left: 6px;
-      font-weight: 600;
+    header img {
+      max-height: 80px;
     }
-
-    .btns-wrapper {
-      margin-top: 4px;
+    .section {
+      padding: 20px;
+    }
+    .section h2 {
+      margin-top: 0;
+    }
+    .gallery {
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-
-    #startCreateBtn {
-      background: #059669;
-      color: white;
-      padding: 8px 14px;
-      font-weight: bold;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-      border: none;
+    .gallery img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      background-color: #333;
+      border-radius: 12px;
+      padding: 5px;
+      transition: transform 0.3s;
     }
-
-    #startCreateBtn:hover {
-      background: #047857;
+    .gallery img:hover {
+      transform: scale(1.1);
+    }
+    #editorCanvas {
+      border: 2px solid #555;
+      margin-top: 20px;
+      background-color: white;
+    }
+    #controls {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
   </style>
 </head>
-
-<body class="bg-gray-950 text-white min-h-screen">
-  <!-- HEADER -->
-  <header class="p-6 text-center bg-gray-900">
-    <img src="https://i.imgur.com/ijbOSYV.png" alt="MapperHub Logo" class="mx-auto w-24" />
-    <h1 class="text-4xl font-bold mt-2">MapperHub Editor</h1>
-    <p class="text-sm">Beta Version - More features coming soon!</p>
+<body>
+  <header>
+    <img src="https://i.imgur.com/iBdzDDD.png" alt="MapperHub Logo">
   </header>
 
-  <!-- LANGUAGE -->
-  <div class="flex justify-center space-x-4 p-4">
-    <button onclick="changeLang('pt')">🇵🇹 Portuguese</button>
-    <button onclick="changeLang('en')">🇬🇧 English</button>
+  <div class="section">
+    <h2>🌍 Mapas Temáticos</h2>
+    <div class="gallery">
+      <img src="https://i.imgur.com/0QbrXQK.png" title="Defeated Brazil (2025)">
+      <img src="https://i.imgur.com/ePcFV7U.png" title="Barcelona Player (2025)">
+      <img src="https://i.imgur.com/NE46OQK.png" title="Brawler Inspired">
+      <img src="https://i.imgur.com/gx5EbYE.png" title="Gaming Company">
+      <img src="https://i.imgur.com/DmZPpXN.png" title="Safest Countries (2025)">
+      <img src="https://i.imgur.com/1wkZCGw.png" title="Most Visited (2025)">
+    </div>
   </div>
 
-  <!-- START CREATING MAPS BUTTON -->
-  <div class="max-w-5xl mx-auto px-4">
-    <button id="startCreateBtn">Start Creating Maps</button>
+  <div class="section">
+    <h2>🔵 Emojis & Faces</h2>
+    <div class="gallery">
+      <img src="https://i.imgur.com/HXXafQq.png" title="Mega Happy">
+      <img src="https://i.imgur.com/229WN6u.png" title="Mega Happy Blue">
+      <img src="https://i.imgur.com/l5I7pWc.png" title="Headphones">
+      <img src="https://i.imgur.com/24ZG51o.png" title="Very Very Happy">
+      <img src="https://i.imgur.com/uqrWA1f.png" title="Very Happy">
+      <img src="https://i.imgur.com/HmrkGxu.png" title="Happy">
+      <img src="https://i.imgur.com/2JjbAHJ.png" title="Normal">
+      <img src="https://i.imgur.com/bVZdn48.png" title="A Little Angry">
+      <img src="https://i.imgur.com/3KQ2Zod.png" title="Angry">
+      <img src="https://i.imgur.com/SS0A09s.png" title="Very Angry">
+      <img src="https://i.imgur.com/kiLYcrE.png" title="Mega Angry">
+      <img src="https://i.imgur.com/kWCa2cc.png" title="F#ck!!">
+    </div>
   </div>
 
-  <!-- MAP EDITOR -->
-  <section id="editor" class="p-4 max-w-5xl mx-auto">
-    <h2 class="text-2xl mb-4">🗺️ Map Editor</h2>
-    <input type="color" id="colorPicker" class="mb-2" />
-    <input type="range" id="opacityRange" min="0" max="1" step="0.01" value="1" />
-    <label>Opacity</label><br />
-    <input type="file" id="uploadMap" accept="image/*" class="mb-2" />
-    <button id="removeBgBtn" class="bg-yellow-500 px-3 py-1 rounded mb-2 text-black font-semibold">Remove Background</button>
-    <div class="overflow-auto border relative">
-      <canvas id="mapCanvas" width="800" height="500"></canvas>
+  <div class="section">
+    <h2>🎯 Icons</h2>
+    <div class="gallery">
+      <img src="https://i.imgur.com/2RtAvsf.png" title="EU">
+      <img src="https://i.imgur.com/gtnvu5s.png" title="Soviet">
+      <img src="https://i.imgur.com/aqtAEAG.png" title="World Languages">
+      <img src="https://i.imgur.com/BDiIMy2.png" title="Dead">
+      <img src="https://i.imgur.com/DJLlamR.png" title="GDP">
+      <img src="https://i.imgur.com/flwrtQ7.png" title="Follow">
+      <img src="https://i.imgur.com/qprW4Nu.png" title="Christian">
+      <img src="https://i.imgur.com/78lPcuC.png" title="Islam">
+      <img src="https://i.imgur.com/B15QgPp.png" title="Beer Time">
+      <img src="https://i.imgur.com/mOXiqGm.png" title="Face">
+      <img src="https://i.imgur.com/NZYroaB.png" title="Energy">
+      <img src="https://i.imgur.com/mpl5m0r.png" title="Brawl Stars Up">
+      <img src="https://i.imgur.com/1g5RtUh.png" title="Brawl Stars Down">
+      <img src="https://i.imgur.com/cbwmJlX.png" title="GigaChad">
+      <img src="https://i.imgur.com/3T9VJsS.png" title="Deadly">
+      <img src="https://i.imgur.com/o30f1cM.png" title="Happy Face">
+      <img src="https://i.imgur.com/0G2odpT.png" title="Books">
+      <img src="https://i.imgur.com/SwSxVab.png" title="Orthodox">
+      <img src="https://i.imgur.com/bnmfJZv.png" title="LGBT">
+      <img src="https://i.imgur.com/lbcMZK2.png" title="Quran">
+      <img src="https://i.imgur.com/9aKNbrQ.png" title="Bible">
+      <img src="https://i.imgur.com/hvNw6sT.png" title="Atheism">
+      <img src="https://i.imgur.com/0eCaYhL.png" title="Chinese Man">
+      <img src="https://i.imgur.com/C0yo78Y.png" title="Gold">
+      <img src="https://i.imgur.com/cMBsKi0.png" title="Swords">
+      <img src="https://i.imgur.com/Sq6RDNF.png" title="Brain">
     </div>
-    <div class="mt-4 space-x-2">
-      <button onclick="exportMap()" class="bg-blue-600 px-4 py-2 rounded">Export PNG</button>
-      <button onclick="clearCanvas()" class="bg-red-600 px-4 py-2 rounded">Clear</button>
-      <button onclick="zoom(1.2)" class="bg-gray-700 px-2">➕</button>
-      <button onclick="zoom(0.8)" class="bg-gray-700 px-2">➖</button>
+  </div>
+
+  <div class="section">
+    <h2>🗺️ Editor de Mapas</h2>
+    <canvas id="editorCanvas" width="800" height="600"></canvas>
+    <div id="controls">
+      <input type="color" id="colorPicker" value="#000000">
+      <input type="range" id="opacitySlider" min="0" max="1" step="0.1" value="1">
+      <button onclick="clearCanvas()">Limpar</button>
+      <button onclick="downloadCanvas()">Exportar PNG</button>
+      <label for="upload">📁 Upload Mapa</label>
+      <input type="file" id="upload" accept="image/*" onchange="uploadImage(event)">
+      <select id="langSelect" onchange="setLang(this.value)">
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
+      </select>
     </div>
-  </section>
+  </div>
 
-  <!-- ICONS SECTION -->
-  <section class="p-4 max-w-6xl mx-auto">
-    <h2 class="text-2xl mb-4">🌀 Icons and Emojis</h2>
-    <div id="iconGallery" class="grid grid-cols-4 gap-4"></div>
-  </section>
-
-  <!-- MAPS SECTION -->
-  <section class="p-4 max-w-6xl mx-auto">
-    <h2 class="text-2xl mb-4">🗺️ Thematic Maps</h2>
-    <div class="grid grid-cols-2 gap-4" id="mapsGrid">
-      <!-- Images will be inserted here dynamically -->
-    </div>
-  </section>
-
-  <!-- JS SCRIPT -->
   <script>
-    const canvas = document.getElementById("mapCanvas");
-    const ctx = canvas.getContext("2d");
-    const colorPicker = document.getElementById("colorPicker");
-    const opacityRange = document.getElementById("opacityRange");
-    let scale = 1;
+    const canvas = document.getElementById('editorCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const opacitySlider = document.getElementById('opacitySlider');
+    let painting = false;
 
-    canvas.addEventListener("click", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / scale;
-      const y = (e.clientY - rect.top) / scale;
-      ctx.globalAlpha = parseFloat(opacityRange.value);
+    canvas.addEventListener('mousedown', () => painting = true);
+    canvas.addEventListener('mouseup', () => painting = false);
+    canvas.addEventListener('mouseleave', () => painting = false);
+    canvas.addEventListener('mousemove', draw);
+
+    function draw(e) {
+      if (!painting) return;
       ctx.fillStyle = colorPicker.value;
+      ctx.globalAlpha = opacitySlider.value;
       ctx.beginPath();
-      ctx.arc(x, y, 10, 0, 2 * Math.PI);
+      ctx.arc(e.offsetX, e.offsetY, 5, 0, Math.PI * 2);
       ctx.fill();
-    });
-
-    document.getElementById("uploadMap").addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
-          clearCanvas();
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        };
-        img.src = URL.createObjectURL(file);
-      }
-    });
-
-    // Remove background (simple white-ish pixels removal)
-    document.getElementById("removeBgBtn").addEventListener("click", () => {
-      let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      let data = imageData.data;
-
-      // Threshold for white-ish pixels
-      const threshold = 220;
-
-      for (let i = 0; i < data.length; i += 4) {
-        let r = data[i];
-        let g = data[i + 1];
-        let b = data[i + 2];
-
-        if (r > threshold && g > threshold && b > threshold) {
-          data[i + 3] = 0; // Set alpha to 0 (transparent)
-        }
-      }
-      ctx.putImageData(imageData, 0, 0);
-    });
-
-    function exportMap() {
-      const link = document.createElement("a");
-      link.download = "map.png";
-      link.href = canvas.toDataURL();
-      link.click();
     }
 
     function clearCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    function zoom(factor) {
-      scale *= factor;
-      canvas.style.transform = `scale(${scale})`;
+    function downloadCanvas() {
+      const link = document.createElement('a');
+      link.download = 'mapa.png';
+      link.href = canvas.toDataURL();
+      link.click();
     }
 
-    function changeLang(lang) {
-      alert("Language changed to: " + lang);
-      // You can extend this to translate page dynamically if desired
-    }
-
-    const iconLinks = [
-      "https://i.imgur.com/SFDzJ4S.png",
-      "https://i.imgur.com/R3W7Z0I.png",
-      "https://i.imgur.com/sZH74a9.png",
-      "https://i.imgur.com/nmcs066.png",
-      "https://i.imgur.com/3VHSclb.png",
-      "https://i.imgur.com/IE06ypK.png",
-      "https://i.imgur.com/uRHbpgm.png",
-      "https://i.imgur.com/tXjNENl.png",
-      "https://i.imgur.com/1hswyNj.png",
-      "https://i.imgur.com/cZgpfwK.png",
-    ];
-
-    const iconGallery = document.getElementById("iconGallery");
-
-    iconLinks.forEach((url) => {
-      const container = document.createElement("div");
-      const img = document.createElement("img");
-      img.src = url;
-      img.className =
-        "rounded shadow-lg hover:scale-105 transition transform duration-300 cursor-pointer";
-      img.style.maxWidth = "100%";
-      img.onclick = () => makeDraggableIcon(url);
-      container.appendChild(img);
-      iconGallery.appendChild(container);
-    });
-
-    function makeDraggableIcon(src) {
-      const img = document.createElement("img");
-      img.src = src;
-      img.className = "draggable";
-      img.style.width = "60px";
-      img.style.top = "50px";
-      img.style.left = "50px";
-      document.body.appendChild(img);
-
-      interact(img).draggable({
-        modifiers: [
-          interact.modifiers.restrictRect({ restriction: "parent", endOnly: true }),
-        ],
-        listeners: {
-          move(event) {
-            const { target } = event;
-            const x = (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
-            const y = (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
-            target.style.transform = `translate(${x}px, ${y}px)`;
-            target.setAttribute("data-x", x);
-            target.setAttribute("data-y", y);
-          },
-        },
-      });
-    }
-
-    // Thematic Maps URLs
-    const mapImages = [
-      "https://i.imgur.com/0QbrXQK.png",
-      "https://i.imgur.com/ePcFV7U.png",
-      "https://i.imgur.com/NE46OQK.png",
-      "https://i.imgur.com/gx5EbYE.png",
-      "https://i.imgur.com/DmZPpXN.png",
-      "https://i.imgur.com/1wkZCGw.png",
-    ];
-
-    const mapsGrid = document.getElementById("mapsGrid");
-
-    mapImages.forEach((src, index) => {
-      const container = document.createElement("div");
-      container.className = "map-image-container";
-
-      const img = document.createElement("img");
-      img.src = src;
-      img.className = "w-full rounded shadow-lg";
-      img.alt = `Thematic map ${index + 1}`;
-
-      // Like button and counter
-      const likeBtn = document.createElement("button");
-      likeBtn.className = "like-btn";
-      likeBtn.innerText = "👍 Like";
-
-      const likeCount = document.createElement("span");
-      likeCount.className = "like-count";
-      likeCount.innerText = "0";
-
-      likeBtn.onclick = () => {
-        likeCount.innerText = parseInt(likeCount.innerText) + 1;
+    function uploadImage(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        img.src = e.target.result;
       };
+      reader.readAsDataURL(file);
+    }
 
-      // Save as PNG button
-      const saveBtn = document.createElement("button");
-      saveBtn.className = "save-btn";
-      saveBtn.innerText = "💾 Save PNG";
-
-      saveBtn.onclick = () => {
-        // Create a hidden canvas to export the image
-        const tempCanvas = document.createElement("canvas");
-        const tempCtx = tempCanvas.getContext("2d");
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-        image.onload = () => {
-          tempCanvas.width = image.width;
-          tempCanvas.height = image.height;
-          tempCtx.drawImage(image, 0, 0);
-          const link = document.createElement("a");
-          link.download = `map-image-${index + 1}.png`;
-          link.href = tempCanvas.toDataURL("image/png");
-          link.click();
-        };
-        image.src = src;
-      };
-
-      const btnWrapper = document.createElement("div");
-      btnWrapper.className = "btns-wrapper";
-      btnWrapper.appendChild(likeBtn);
-      btnWrapper.appendChild(likeCount);
-      btnWrapper.appendChild(saveBtn);
-
-      container.appendChild(img);
-      container.appendChild(btnWrapper);
-
-      mapsGrid.appendChild(container);
-    });
-
-    // Start Creating Maps button alert
-    document.getElementById("startCreateBtn").addEventListener("click", () => {
-      alert(
-        "Creating Maps functions is under development..\nYou can see our other features ⏱️ ( Date of map editor release: 03/07/2025 )."
-      );
-    });
+    function setLang(lang) {
+      alert('Idioma alterado para: ' + lang);
+    }
   </script>
 </body>
-
 </html>
 
