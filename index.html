@@ -1,133 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MapperHub - Mapping Made Easy</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  <title>MapperHub Editor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Outfit', sans-serif;
-      background: linear-gradient(to right, #00a8ff, #00f2c3);
-      color: white;
-    }
-    header {
-      background-color: #003f5c;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    header img {
-      height: 40px;
-    }
-    main {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      padding: 4rem 6rem;
-      gap: 3rem;
-    }
-    .text-content {
-      max-width: 600px;
-    }
-    h1 {
-      font-size: 3rem;
-      font-weight: 800;
-      margin: 0 0 1rem;
-    }
-    p {
-      font-size: 1.25rem;
-      line-height: 1.6;
-    }
-    .cta {
-      margin-top: 2rem;
-    }
-    .btn {
-      padding: 1rem 2rem;
-      background: white;
-      color: #0077ff;
-      font-weight: bold;
-      border-radius: 8px;
-      border: none;
+    .color-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
       cursor: pointer;
-      transition: 0.3s;
     }
-    .btn:hover {
-      background: #f0f0f0;
-    }
-    .screenshot {
-      max-width: 600px;
-      border-radius: 10px;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-    }
-    #betaModal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: white;
-      color: black;
-      padding: 2rem;
-      border-radius: 10px;
-      max-width: 500px;
-      text-align: center;
-    }
-    .modal-content button {
-      margin-top: 1.5rem;
-      background: #0077ff;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      cursor: pointer;
+    #icon-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 1rem;
     }
   </style>
 </head>
-<body>
-  <header>
-    <img src="/mnt/data/5ad0bbd3-43de-4584-86b7-03d42df8d209.png" alt="MapperHub Logo">
+
+<body class="bg-gray-900 text-white">
+  <header class="bg-gray-800 p-4 flex justify-between items-center shadow-lg">
+    <div class="flex items-center">
+      <img src="/mnt/data/5ad0bbd3-43de-4584-86b7-03d42df8d209.png" alt="Logo" class="h-10 mr-3">
+      <span class="text-2xl font-bold">MapperHub</span>
+    </div>
+    <button onclick="scrollToEditor()" class="bg-gradient-to-r from-blue-400 to-cyan-400 hover:from-blue-500 hover:to-cyan-500 text-white px-5 py-2 rounded-2xl text-lg font-semibold shadow-lg">🚀 Start Editing Maps</button>
   </header>
 
-  <main>
-    <div class="text-content">
-      <h1>Mapping Has Never Been Easier</h1>
-      <p>
-        MapperHub removes the hustle of editing maps pixel by pixel. Focus on your data and create beautiful maps effortlessly!
-      </p>
-      <div class="cta">
-        <button class="btn" onclick="openBetaModal()">Start Editing Maps</button>
-      </div>
-    </div>
-    <img src="https://i.imgur.com/1whxe4z.png" alt="Editor Preview" class="screenshot">
-  </main>
-
-  <div id="betaModal">
-    <div class="modal-content">
-      <h2>BETA Notice</h2>
-      <p>This is a <strong>BETA</strong> version, so you only have basic customization options. In the future, we will add more features!</p>
-      <button onclick="closeBetaModal()">Continue</button>
-    </div>
+  <!-- Alert Box -->
+  <div id="beta-alert" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-black px-6 py-3 rounded-xl shadow-lg z-50">
+    This is a BETA version, so you only have basic customization options. In the future we will add more things!
+    <button onclick="document.getElementById('beta-alert').style.display='none'" class="ml-4 text-red-700 font-bold">X</button>
   </div>
 
+  <section class="text-center py-24 bg-gradient-to-r from-blue-500 to-cyan-400">
+    <h1 class="text-4xl md:text-5xl font-extrabold mb-4">Can Mapping be easier? With MapperHub it is!</h1>
+    <p class="max-w-xl mx-auto mb-6 text-lg">We have a sections with all the icons, geometry dash faces and maps you need!</p>
+    <button onclick="scrollToEditor()" class="bg-white text-blue-700 px-6 py-3 rounded-xl text-lg font-bold shadow hover:bg-gray-100">✨ Start Editing Maps</button>
+  </section>
+
+  <section id="editor" class="px-6 py-10">
+    <h2 class="text-3xl font-bold text-center mb-6">Map Editor</h2>
+    <div class="mb-4">
+      <label for="mapUpload" class="block mb-2">Upload Your Own Map:</label>
+      <input type="file" id="mapUpload" accept="image/*" class="text-black" onchange="loadMap(event)" />
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <img id="editableMap" src="https://i.imgur.com/1whxe4z.png" alt="Map" class="w-full max-w-3xl border-4 border-white rounded-lg">
+      </div>
+      <div>
+        <h3 class="text-xl font-semibold mb-2">Select a Color:</h3>
+        <div class="grid grid-cols-10 gap-2 mb-4">
+          <script>
+            const colors = [
+              '#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D',
+              '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A', '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC',
+              '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC', '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399',
+              '#E666B3', '#33991A', '#CC9999', '#B3B31A', '#00E680', '#4D8066', '#809980', '#1AFF33', '#999933', '#FF3380',
+              '#CCCC00', '#66E64D', '#4D80CC', '#9900B3', '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'
+            ];
+            colors.forEach(color => {
+              document.write(`<div class='color-btn' style='background:${color}' onclick='setColor("${color}")'></div>`);
+            });
+          </script>
+        </div>
+        <button onclick="exportPNG()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-xl">Export as PNG</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-10 bg-gray-800">
+    <h2 class="text-3xl font-bold text-center mb-6">Available Icons, Emojis & Faces</h2>
+    <div id="icon-gallery" class="px-6"></div>
+    <div class="mt-10 text-center">
+      <a href="https://www.remove.bg" target="_blank" class="text-blue-300 underline text-lg hover:text-white">🧽 Use Our Free Background Remover</a>
+      <p class="text-sm text-gray-400 mt-1">Perfect for cleaning up your images before editing maps.</p>
+    </div>
+  </section>
+
   <script>
-    function openBetaModal() {
-      document.getElementById('betaModal').style.display = 'flex';
+    const editableMap = document.getElementById('editableMap');
+    let selectedColor = '#FF6633';
+
+    function setColor(color) {
+      selectedColor = color;
     }
-    function closeBetaModal() {
-      window.location.href = '/editor.html';
+
+    editableMap.addEventListener('click', function (e) {
+      const x = e.offsetX;
+      const y = e.offsetY;
+      const ctx = getContextFromImage(editableMap);
+      ctx.fillStyle = selectedColor;
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    function getContextFromImage(img) {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      return ctx;
+    }
+
+    function exportPNG() {
+      html2canvas(document.getElementById('editor')).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'map.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+
+    function scrollToEditor() {
+      document.getElementById('editor').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function loadMap(event) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        editableMap.src = reader.result;
+      }
+      reader.readAsDataURL(event.target.files[0]);
+    }
+
+    const images = [
+      'https://i.imgur.com/2RtAvsf.png','https://i.imgur.com/gtnvu5s.png','https://i.imgur.com/aqtAEAG.png','https://i.imgur.com/BDiIMy2.png',
+      'https://i.imgur.com/DJLlamR.png','https://i.imgur.com/flwrtQ7.png','https://i.imgur.com/qprW4Nu.png','https://i.imgur.com/78lPcuC.png',
+      'https://i.imgur.com/B15QgPp.png','https://i.imgur.com/mOXiqGm.png','https://i.imgur.com/NZYroaB.png','https://i.imgur.com/mpl5m0r.png',
+      'https://i.imgur.com/1g5RtUh.png','https://i.imgur.com/cbwmJlX.png','https://i.imgur.com/3T9VJsS.png','https://i.imgur.com/o30f1cM.png',
+      'https://i.imgur.com/0G2odpT.png','https://i.imgur.com/SwSxVab.png','https://i.imgur.com/bnmfJZv.png','https://i.imgur.com/lbcMZK2.png',
+      'https://i.imgur.com/9aKNbrQ.png','https://i.imgur.com/hvNw6sT.png','https://i.imgur.com/0eCaYhL.png','https://i.imgur.com/C0yo78Y.png',
+      'https://i.imgur.com/cMBsKi0.png','https://i.imgur.com/Sq6RDNF.png'
+    ];
+
+    const gallery = document.getElementById('icon-gallery');
+    images.forEach(url => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bg-white p-2 rounded-lg text-center text-black shadow';
+      wrapper.innerHTML = `
+        <img src="${url}" alt="icon" class="w-full rounded mb-2">
+        <button onclick="like(this)" class="text-sm text-blue-500">❤️ Like</button>
+        <button onclick="download('${url}')" class="text-sm text-green-600 ml-2">⬇️ PNG</button>
+      `;
+      gallery.appendChild(wrapper);
+    });
+
+    function like(btn) {
+      btn.innerText = '❤️ Liked';
+      btn.disabled = true;
+    }
+
+    function download(url) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'icon.png';
+      a.click();
     }
   </script>
 </body>
 </html>
-
