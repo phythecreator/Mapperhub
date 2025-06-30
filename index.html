@@ -6,187 +6,220 @@
   <title>MapperHub</title>
   <style>
     body {
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #1e1e1e;
+      background: #101010;
       color: white;
     }
     header {
-      background-color: #111;
-      padding: 20px;
+      background: #1a1a1a;
+      padding: 10px;
       text-align: center;
     }
     header img {
-      max-height: 80px;
+      height: 100px;
     }
-    .section {
+    section {
       padding: 20px;
     }
-    .section h2 {
-      margin-top: 0;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
     }
-    .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+    .item {
+      background: #1f1f1f;
+      padding: 10px;
+      border-radius: 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
     }
-    .gallery img {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-      background-color: #333;
+    .item img {
+      max-width: 100%;
       border-radius: 12px;
-      padding: 5px;
-      transition: transform 0.3s;
     }
-    .gallery img:hover {
-      transform: scale(1.1);
+    .item-title {
+      margin-top: 8px;
+      font-size: 14px;
     }
-    #editorCanvas {
-      border: 2px solid #555;
-      margin-top: 20px;
-      background-color: white;
-    }
-    #controls {
-      margin-top: 10px;
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .popup-content {
+      background: #222;
+      border-radius: 16px;
+      padding: 20px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      position: relative;
+    }
+    .popup-content img, .popup-content video {
+      max-width: 100%;
+      border-radius: 12px;
+    }
+    .popup-content h3 {
+      margin: 10px 0;
+    }
+    .popup-content button {
+      margin: 10px 5px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 10px;
+      background: #00aaff;
+      color: white;
+      cursor: pointer;
+    }
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: red;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      width: 30px;
+      height: 30px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .no-sound {
+      background: gray;
+      padding: 6px 12px;
+      border-radius: 10px;
+      margin-top: 10px;
+      display: inline-block;
     }
   </style>
 </head>
 <body>
   <header>
-    <img src="https://i.imgur.com/iBdzDDD.png" alt="MapperHub Logo">
+    <img src="https://i.imgur.com/iBdzDDD.png" alt="Logo" />
   </header>
+  <section id="faces">
+    <h2>Geometry Dash Faces</h2>
+    <div class="grid" id="faces-grid"></div>
+  </section>
+  <section id="icons">
+    <h2>Icons</h2>
+    <div class="grid" id="icons-grid"></div>
+  </section>
+  <section id="maps">
+    <h2>Maps</h2>
+    <div class="grid" id="maps-grid"></div>
+  </section>
+  <section id="backgrounds">
+    <h2>Backgrounds</h2>
+    <div class="grid" id="backgrounds-grid"></div>
+  </section>
 
-  <div class="section">
-    <h2>🌍 Mapas Temáticos</h2>
-    <div class="gallery">
-      <img src="https://i.imgur.com/0QbrXQK.png" title="Defeated Brazil (2025)">
-      <img src="https://i.imgur.com/ePcFV7U.png" title="Barcelona Player (2025)">
-      <img src="https://i.imgur.com/NE46OQK.png" title="Brawler Inspired">
-      <img src="https://i.imgur.com/gx5EbYE.png" title="Gaming Company">
-      <img src="https://i.imgur.com/DmZPpXN.png" title="Safest Countries (2025)">
-      <img src="https://i.imgur.com/1wkZCGw.png" title="Most Visited (2025)">
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>🔵 Emojis & Faces</h2>
-    <div class="gallery">
-      <img src="https://i.imgur.com/HXXafQq.png" title="Mega Happy">
-      <img src="https://i.imgur.com/229WN6u.png" title="Mega Happy Blue">
-      <img src="https://i.imgur.com/l5I7pWc.png" title="Headphones">
-      <img src="https://i.imgur.com/24ZG51o.png" title="Very Very Happy">
-      <img src="https://i.imgur.com/uqrWA1f.png" title="Very Happy">
-      <img src="https://i.imgur.com/HmrkGxu.png" title="Happy">
-      <img src="https://i.imgur.com/2JjbAHJ.png" title="Normal">
-      <img src="https://i.imgur.com/bVZdn48.png" title="A Little Angry">
-      <img src="https://i.imgur.com/3KQ2Zod.png" title="Angry">
-      <img src="https://i.imgur.com/SS0A09s.png" title="Very Angry">
-      <img src="https://i.imgur.com/kiLYcrE.png" title="Mega Angry">
-      <img src="https://i.imgur.com/kWCa2cc.png" title="F#ck!!">
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>🎯 Icons</h2>
-    <div class="gallery">
-      <img src="https://i.imgur.com/2RtAvsf.png" title="EU">
-      <img src="https://i.imgur.com/gtnvu5s.png" title="Soviet">
-      <img src="https://i.imgur.com/aqtAEAG.png" title="World Languages">
-      <img src="https://i.imgur.com/BDiIMy2.png" title="Dead">
-      <img src="https://i.imgur.com/DJLlamR.png" title="GDP">
-      <img src="https://i.imgur.com/flwrtQ7.png" title="Follow">
-      <img src="https://i.imgur.com/qprW4Nu.png" title="Christian">
-      <img src="https://i.imgur.com/78lPcuC.png" title="Islam">
-      <img src="https://i.imgur.com/B15QgPp.png" title="Beer Time">
-      <img src="https://i.imgur.com/mOXiqGm.png" title="Face">
-      <img src="https://i.imgur.com/NZYroaB.png" title="Energy">
-      <img src="https://i.imgur.com/mpl5m0r.png" title="Brawl Stars Up">
-      <img src="https://i.imgur.com/1g5RtUh.png" title="Brawl Stars Down">
-      <img src="https://i.imgur.com/cbwmJlX.png" title="GigaChad">
-      <img src="https://i.imgur.com/3T9VJsS.png" title="Deadly">
-      <img src="https://i.imgur.com/o30f1cM.png" title="Happy Face">
-      <img src="https://i.imgur.com/0G2odpT.png" title="Books">
-      <img src="https://i.imgur.com/SwSxVab.png" title="Orthodox">
-      <img src="https://i.imgur.com/bnmfJZv.png" title="LGBT">
-      <img src="https://i.imgur.com/lbcMZK2.png" title="Quran">
-      <img src="https://i.imgur.com/9aKNbrQ.png" title="Bible">
-      <img src="https://i.imgur.com/hvNw6sT.png" title="Atheism">
-      <img src="https://i.imgur.com/0eCaYhL.png" title="Chinese Man">
-      <img src="https://i.imgur.com/C0yo78Y.png" title="Gold">
-      <img src="https://i.imgur.com/cMBsKi0.png" title="Swords">
-      <img src="https://i.imgur.com/Sq6RDNF.png" title="Brain">
-    </div>
-  </div>
-
-  <div class="section">
-    <h2>🗺️ Editor de Mapas</h2>
-    <canvas id="editorCanvas" width="800" height="600"></canvas>
-    <div id="controls">
-      <input type="color" id="colorPicker" value="#000000">
-      <input type="range" id="opacitySlider" min="0" max="1" step="0.1" value="1">
-      <button onclick="clearCanvas()">Limpar</button>
-      <button onclick="downloadCanvas()">Exportar PNG</button>
-      <label for="upload">📁 Upload Mapa</label>
-      <input type="file" id="upload" accept="image/*" onchange="uploadImage(event)">
-      <select id="langSelect" onchange="setLang(this.value)">
-        <option value="pt">Português</option>
-        <option value="en">English</option>
-        <option value="es">Español</option>
-      </select>
-    </div>
+  <div id="popup" class="popup" style="display: none;">
+    <div class="popup-content" id="popup-content"></div>
+    <button class="close-btn" onclick="closePopup()">X</button>
   </div>
 
   <script>
-    const canvas = document.getElementById('editorCanvas');
-    const ctx = canvas.getContext('2d');
-    const colorPicker = document.getElementById('colorPicker');
-    const opacitySlider = document.getElementById('opacitySlider');
-    let painting = false;
+    const faces = [
+      ["https://i.imgur.com/5AVoz9g.png", "Perfect Face"],
+      ["https://i.imgur.com/HXXafQq.png", "Mega Happy"],
+      ["https://i.imgur.com/229WN6u.png", "Mega Happy Blue Face"],
+      ["https://i.imgur.com/l5I7pWc.png", "Headphones Face"],
+      ["https://i.imgur.com/24ZG51o.png", "Very Very Happy"],
+      ["https://i.imgur.com/uqrWA1f.png", "Very Happy"],
+      ["https://i.imgur.com/HmrkGxu.png", "Happy"],
+      ["https://i.imgur.com/2JjbAHJ.png", "Normal"],
+      ["https://i.imgur.com/bVZdn48.png", "A little bit Angry"],
+      ["https://i.imgur.com/3KQ2Zod.png", "Angry"],
+      ["https://i.imgur.com/SS0A09s.png", "Very Angry"],
+      ["https://i.imgur.com/kiLYcrE.png", "Mega Angry"],
+      ["https://i.imgur.com/kWCa2cc.png", "F#ck!!"],
+      ["https://i.imgur.com/p8soC6j.png", "Medium Demon"],
+      ["https://i.imgur.com/Xc7Jv9u.png", "Impossible #404"]
+    ];
 
-    canvas.addEventListener('mousedown', () => painting = true);
-    canvas.addEventListener('mouseup', () => painting = false);
-    canvas.addEventListener('mouseleave', () => painting = false);
-    canvas.addEventListener('mousemove', draw);
+    const icons = [
+      ["https://i.imgur.com/EfDEP1t.png", "Student"],
+      ["https://i.imgur.com/b3qmh7r.png", "NATO"],
+      ["https://i.imgur.com/w0s7RZF.png", "Deal"],
+      ["https://i.imgur.com/zxyU0Nc.png", "Angry Fire Face"]
+    ];
 
-    function draw(e) {
-      if (!painting) return;
-      ctx.fillStyle = colorPicker.value;
-      ctx.globalAlpha = opacitySlider.value;
-      ctx.beginPath();
-      ctx.arc(e.offsetX, e.offsetY, 5, 0, Math.PI * 2);
-      ctx.fill();
+    const maps = [
+      ["https://i.imgur.com/0QbrXQK.png", "Has your country ever defeated Brazil at football? (2025)"],
+      ["https://i.imgur.com/ePcFV7U.png", "Has your country ever had a Barcelona player? (2025)"],
+      ["https://i.imgur.com/NE46OQK.png", "Does your country has a brawler inspired on it?"],
+      ["https://i.imgur.com/gx5EbYE.png", "Does your country have a famous gaming company?"],
+      ["https://i.imgur.com/DmZPpXN.png", "Is your country one of the #10 safest in the world? (2025)"],
+      ["https://i.imgur.com/1wkZCGw.png", "Is your country one of the #10 most visited in the world? (2025)"]
+    ];
+
+    const backgrounds = [
+      ["https://i.imgur.com/eGZkcrj.mp4", "Nature", true],
+      ["https://i.imgur.com/fzuFAVT.mp4", "Paris Eiffel Tower", true],
+      ["https://i.imgur.com/ks0UIDS.mp4", "Arc de Triomphe", true],
+      ["https://i.imgur.com/fwUwJNv.mp4", "Island", false],
+      ["https://i.imgur.com/1EpEw0h.mp4", "Streets of France", true]
+    ];
+
+    function loadSection(sectionId, data, isVideo = false) {
+      const container = document.getElementById(sectionId);
+      data.forEach(([url, title, hasSound]) => {
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = isVideo ? `<video src="${url}" muted autoplay loop></video>` : `<img src="${url}" alt="${title}" />`;
+        const label = document.createElement("div");
+        label.className = "item-title";
+        label.innerText = title;
+        div.appendChild(label);
+        div.onclick = () => openPopup(url, title, isVideo, hasSound);
+        container.appendChild(div);
+      });
     }
 
-    function clearCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function openPopup(url, title, isVideo, hasSound = true) {
+      const content = document.getElementById("popup-content");
+      content.innerHTML = `
+        <h3>${title}</h3>
+        ${isVideo ? `<video src="${url}" controls autoplay></video>` : `<img src="${url}" />`}
+        ${!hasSound && isVideo ? `<div class='no-sound'>No Sound</div>` : ''}
+        <div>
+          <button onclick="markFavourite()">❤️ Mark as Favourite</button>
+          <button onclick="exportImage('${url}')">Export as PNG</button>
+        </div>`;
+      document.getElementById("popup").style.display = "flex";
     }
 
-    function downloadCanvas() {
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    function markFavourite() {
+      alert("Marked as Favourite (feature coming soon!)");
+    }
+
+    function exportImage(url) {
       const link = document.createElement('a');
-      link.download = 'mapa.png';
-      link.href = canvas.toDataURL();
+      link.href = url;
+      link.download = 'image.png';
       link.click();
     }
 
-    function uploadImage(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function setLang(lang) {
-      alert('Idioma alterado para: ' + lang);
-    }
+    loadSection("faces-grid", faces);
+    loadSection("icons-grid", icons);
+    loadSection("maps-grid", maps);
+    loadSection("backgrounds-grid", backgrounds, true);
   </script>
 </body>
 </html>
+
 
