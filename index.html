@@ -147,14 +147,14 @@
       <h3 id="popup-title"></h3>
       <div id="popup-note"></div>
       <a id="popup-link" target="_blank">
-        <button>🔗 Página Individual</button>
+        <button>🔗 Open on Imgur</button>
       </a>
       <button onclick="downloadCurrent()">⬇️ Download PNG/MP4</button>
       <button onclick="sendFeedback()">💬 Feedback</button>
-      <button onclick="toggleFavorite()">❤️ Marcar como Favorito</button>
+      <button onclick="toggleFavorite()">❤️ Favorite</button>
       <div class="nav-btns">
-        <button onclick="prevItem()">⬅ Anterior</button>
-        <button onclick="nextItem()">Seguinte ➡</button>
+        <button onclick="prevItem()">⬅ Previous</button>
+        <button onclick="nextItem()">Next ➡</button>
       </div>
     </div>
   </div>
@@ -247,12 +247,24 @@
     function downloadCurrent() {
       const item = currentArray[currentIndex];
       const url = `https://i.imgur.com/${item.src}`;
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = item.src;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const filename = item.src;
+
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error("Network response was not ok");
+          return response.blob();
+        })
+        .then(blob => {
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        })
+        .catch(() => alert("Failed to download the file."));
     }
 
     function nextItem() {
@@ -269,10 +281,10 @@
       const index = favs.indexOf(item.src);
       if (index >= 0) {
         favs.splice(index, 1);
-        alert("Removido dos favoritos!");
+        alert("Removed from favorites!");
       } else {
         favs.push(item.src);
-        alert("Adicionado aos favoritos!");
+        alert("Added to favorites!");
       }
       localStorage.setItem('favorites', JSON.stringify(favs));
       document.getElementById('favMark').style.display = isFavorite(item.src) ? 'block' : 'none';
@@ -296,6 +308,7 @@
   </script>
 </body>
 </html>
+
 
 
 
