@@ -1,74 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MapperHub Gallery</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapperHub - Mapping Made Easy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0e0e0e;
-      color: #fff;
       margin: 0;
-      padding: 0;
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(to right, #00a8ff, #00f2c3);
+      color: white;
     }
-    header, footer {
-      background-color: #1a1a1a;
-      padding: 1.5rem;
-      text-align: center;
-    }
-    header h1 {
-      font-size: 2.5rem;
-      margin: 0;
-    }
-    .gallery {
+    header {
+      background-color: #003f5c;
+      padding: 1rem 2rem;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1.5rem;
-      padding: 2rem;
+      align-items: center;
+      justify-content: space-between;
     }
-    .item {
-      background-color: #1f1f1f;
-      border-radius: 12px;
-      padding: 1rem;
-      width: 200px;
-      text-align: center;
-      transition: transform 0.3s;
+    header img {
+      height: 40px;
     }
-    .item:hover {
-      transform: scale(1.05);
+    main {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4rem 6rem;
+      gap: 3rem;
     }
-    .item img {
-      max-width: 100%;
+    .text-content {
+      max-width: 600px;
+    }
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 0 0 1rem;
+    }
+    p {
+      font-size: 1.25rem;
+      line-height: 1.6;
+    }
+    .cta {
+      margin-top: 2rem;
+    }
+    .btn {
+      padding: 1rem 2rem;
+      background: white;
+      color: #0077ff;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: #f0f0f0;
+    }
+    .screenshot {
+      max-width: 600px;
       border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     }
-    .item a {
-      display: block;
-      margin-top: 0.8rem;
-      color: #00bfff;
-      text-decoration: none;
+    #betaModal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      align-items: center;
+      justify-content: center;
     }
-    .item a:hover {
-      text-decoration: underline;
+    .modal-content {
+      background: white;
+      color: black;
+      padding: 2rem;
+      border-radius: 10px;
+      max-width: 500px;
+      text-align: center;
+    }
+    .modal-content button {
+      margin-top: 1.5rem;
+      background: #0077ff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Welcome to MapperHub</h1>
-    <p>Explore emojis, faces, icons, and maps. Click on an image to open its PNG page with download and feedback options.</p>
+    <img src="/mnt/data/5ad0bbd3-43de-4584-86b7-03d42df8d209.png" alt="MapperHub Logo">
   </header>
 
-  <section class="gallery">
-    <div class="item">
-      <img src="https://i.imgur.com/HXXafQq.png" alt="Mewing Blue Emoji">
-      <a href="https://i.imgur.com/HXXafQq.png" target="_blank">Download PNG</a>
+  <main>
+    <div class="text-content">
+      <h1>Mapping Has Never Been Easier</h1>
+      <p>
+        MapperHub removes the hustle of editing maps pixel by pixel. Focus on your data and create beautiful maps effortlessly!
+      </p>
+      <div class="cta">
+        <button class="btn" onclick="openBetaModal()">Start Editing Maps</button>
+      </div>
     </div>
-  </section>
+    <img src="https://i.imgur.com/1whxe4z.png" alt="Editor Preview" class="screenshot">
+  </main>
 
-  <footer>
-    <p>Some icons were taken from <a href="https://discord.gg/VGNWhczXq3" target="_blank">this Discord server</a>. Instagram: <a href="https://instagram.com/tugamapper" target="_blank">@tugamapper</a></p>
-  </footer>
+  <div id="betaModal">
+    <div class="modal-content">
+      <h2>BETA Notice</h2>
+      <p>This is a <strong>BETA</strong> version, so you only have basic customization options. In the future, we will add more features!</p>
+      <button onclick="closeBetaModal()">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    function openBetaModal() {
+      document.getElementById('betaModal').style.display = 'flex';
+    }
+    function closeBetaModal() {
+      window.location.href = '/editor.html';
+    }
+  </script>
 </body>
 </html>
+
