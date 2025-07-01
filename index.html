@@ -147,11 +147,11 @@
       <h3 id="popup-title"></h3>
       <div id="popup-note"></div>
       <a id="popup-link" target="_blank">
-        <button>🔗 Open on Imgur</button>
+        <button>🔗 Individual Page</button>
       </a>
       <button onclick="downloadCurrent()">⬇️ Download PNG/MP4</button>
       <button onclick="sendFeedback()">💬 Feedback</button>
-      <button onclick="toggleFavorite()">❤️ Favorite</button>
+      <button onclick="toggleFavorite()">❤️ Mark as Favorite</button>
       <div class="nav-btns">
         <button onclick="prevItem()">⬅ Previous</button>
         <button onclick="nextItem()">Next ➡</button>
@@ -166,7 +166,8 @@
       {src:'NE46OQK.png', title:'Does your country has a brawler inspired on it?'},
       {src:'gx5EbYE.png', title:'Does your country have a famous gaming company?'},
       {src:'DmZPpXN.png', title:'Is your country one of the #10 safest in the world? 2025'},
-      {src:'1wkZCGw.png', title:'Is your country one of the #10 most visited in the world? 2025'}
+      {src:'1wkZCGw.png', title:'Is your country one of the #10 most visited in the world? 2025'},
+      {src:'0oJmppv.png', title:'Largest stadium in each country (Credits: 🇧🇦YGA🗺)'}
     ];
     const icons = [
       {src:'2RtAvsf.png', title:'European Union'}, {src:'gtnvu5s.png', title:'Sovietic Icon'},
@@ -183,7 +184,9 @@
       {src:'0eCaYhL.png', title:'Chinese Man'}, {src:'C0yo78Y.png', title:'Gold'},
       {src:'cMBsKi0.png', title:'Swords'}, {src:'Sq6RDNF.png', title:'Brain'},
       {src:'EfDEP1t.png', title:'Student'}, {src:'b3qmh7r.png', title:'NATO'},
-      {src:'w0s7RZF.png', title:'Deal'}, {src:'zxyU0Nc.png', title:'Angry Fire Face'}
+      {src:'w0s7RZF.png', title:'Deal'}, {src:'zxyU0Nc.png', title:'Angry Fire Face'},
+      {src:'WtimfWW.png', title:'Discord Icon'}, {src:'udqXvqR.png', title:'Money'},
+      {src:'2kuUuNs.png', title:'World'}
     ];
     const faces = [
       {src:'HXXafQq.png', title:'Mega Happy'}, {src:'5AVoz9g.png', title:'Perfect Face'},
@@ -200,7 +203,11 @@
       {src:'fzuFAVT.mp4', title:'Paris Eiffel Tower', sound:true},
       {src:'ks0UIDS.mp4', title:'Arc de Triomphe', sound:true},
       {src:'fwUwJNv.mp4', title:'Island', sound:false},
-      {src:'1EpEw0h.mp4', title:'Streets of France', sound:true}
+      {src:'1EpEw0h.mp4', title:'Streets of France', sound:true},
+      {src:'1rWQQV5.mp4', title:'Nature #2', sound:true},
+      {src:'0vdYbWN.mp4', title:'JetSki Ride', sound:true},
+      {src:'TlRfrBT.mp4', title:'Nature #3', sound:true},
+      {src:'LEOHzLm.mp4', title:'Nature #4', sound:true}
     ];
 
     let currentIndex = 0;
@@ -247,7 +254,8 @@
     function downloadCurrent() {
       const item = currentArray[currentIndex];
       const url = `https://i.imgur.com/${item.src}`;
-      const filename = item.src;
+      const fileExtension = item.src.split('.').pop();
+      const filename = `${item.title} - mapperhub.org.${fileExtension}`;
 
       fetch(url)
         .then(response => {
@@ -308,7 +316,6 @@
   </script>
 </body>
 </html>
-
 
 
 
