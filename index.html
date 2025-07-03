@@ -1,319 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MapperHub</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #111;
-      color: #fff;
-    }
-    header {
-      text-align: center;
-      padding: 20px;
-      background: #000;
-    }
-    header img {
-      max-height: 100px;
-    }
-    h2 {
-      margin-top: 40px;
-      padding-left: 20px;
-    }
-    .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      padding: 20px;
-    }
-    .item {
-      width: 150px;
-      background: #222;
-      border-radius: 12px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .item:hover {
-      transform: scale(1.05);
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MapperHub Gallery</title>
+<style>
+  /* Reset & básico */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 20px;
+    background: #121212;
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  input#search {
+    display: block;
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto 30px auto;
+    padding: 10px 15px;
+    border-radius: 25px;
+    border: none;
+    font-size: 1rem;
+    background: #222;
+    color: #eee;
+    box-shadow: 0 0 5px #00aaff;
+    outline: none;
+    transition: box-shadow 0.3s;
+  }
+  input#search:focus {
+    box-shadow: 0 0 12px #00ccff;
+  }
+  h2 {
+    margin-top: 40px;
+    border-bottom: 2px solid #00aaff;
+    padding-bottom: 8px;
+  }
+
+  /* Gallery grid */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    gap: 20px;
+    margin-top: 15px;
+  }
+
+  .item {
+    background: #222;
+    border-radius: 12px;
+    box-shadow: 0 0 6px #003344;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s, transform 0.2s;
+  }
+  .item:hover {
+    box-shadow: 0 0 14px #00bbff;
+    transform: translateY(-5px);
+  }
+  .item img, .item video {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+    border-bottom: 1px solid #00aaff;
+    background: #000;
+    flex-shrink: 0;
+  }
+  .title {
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    line-height: 1.1;
+    flex-grow: 1;
+  }
+
+  /* Modal styles */
+  #modal {
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    z-index: 9999;
+  }
+  #modal.active {
+    display: flex;
+  }
+  #modal-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: #111;
+    border-radius: 15px;
+    box-shadow: 0 0 20px #00ccff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  #modal-title {
+    color: #00ccff;
+    padding: 12px 20px;
+    font-size: 1.2rem;
+    border-bottom: 1px solid #00ccff;
+    text-align: center;
+  }
+  #modal-media {
+    max-height: calc(90vh - 120px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+  }
+  #modal-media img, #modal-media video {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 0 0 15px 15px;
+    background: #000;
+  }
+  #modal-buttons {
+    display: flex;
+    justify-content: center;
+    padding: 15px;
+    gap: 20px;
+    background: #111;
+    border-top: 1px solid #00ccff;
+  }
+  #modal-buttons a, #modal-buttons button {
+    background: #00aaff;
+    border: none;
+    color: #111;
+    padding: 10px 25px;
+    font-size: 1rem;
+    border-radius: 30px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.3s;
+  }
+  #modal-buttons a:hover, #modal-buttons button:hover {
+    background: #0088cc;
+  }
+  #modal-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 1.8rem;
+    color: #00ccff;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
     .item img, .item video {
-      max-width: 100%;
-      border-radius: 8px;
+      height: 110px;
     }
-    .popup {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
-    }
-    .popup-content {
-      background: #222;
-      padding: 20px;
-      border-radius: 20px;
-      max-width: 80%;
-      max-height: 90%;
-      overflow-y: auto;
-      position: relative;
-    }
-    .popup img, .popup video {
-      max-width: 100%;
-      border-radius: 12px;
-    }
-    .popup h3 {
-      margin-top: 10px;
-    }
-    .popup .close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #ff4d4d;
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      font-size: 18px;
-      color: white;
-      cursor: pointer;
-    }
-    .popup button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      border-radius: 10px;
-      background: #00ccff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .popup .nav-btns {
-      margin-top: 10px;
-    }
-    .popup .nav-btns button {
-      background: #333;
-      margin: 5px;
-    }
-    .no-sound {
-      margin-top: 5px;
-      background: #888;
-      color: #fff;
-      padding: 5px 10px;
-      border-radius: 10px;
-      display: inline-block;
-    }
-    .favorite-mark {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 20px;
-      color: red;
-    }
-  </style>
+  }
+
+</style>
 </head>
 <body>
-  <header>
-    <img src="https://i.imgur.com/iBdzDDD.png" alt="Logo" />
-  </header>
 
+<h1>MapperHub Gallery</h1>
+
+<input type="text" id="search" placeholder="Search by title..." autocomplete="off" />
+
+<!-- Categories -->
+<section>
+  <h2>Flags</h2>
+  <div id="flags" class="gallery"></div>
+</section>
+
+<section>
   <h2>Maps</h2>
-  <div class="gallery" id="maps"></div>
+  <div id="maps" class="gallery"></div>
+</section>
 
-  <h2>Icons</h2>
-  <div class="gallery" id="icons"></div>
-
-  <h2>Faces (Geometry Dash)</h2>
-  <div class="gallery" id="faces"></div>
-
+<section>
   <h2>Backgrounds</h2>
-  <div class="gallery" id="backgrounds"></div>
+  <div id="backgrounds" class="gallery"></div>
+</section>
 
-  <div class="popup" id="popup">
-    <div class="popup-content">
-      <button class="close" onclick="closePopup()">✖</button>
-      <div class="favorite-mark" id="favMark">❤️</div>
-      <div id="popup-media"></div>
-      <h3 id="popup-title"></h3>
-      <div id="popup-note"></div>
-      <a id="popup-link" target="_blank">
-        <button>🔗 Individual Page</button>
-      </a>
-      <button onclick="downloadCurrent()">⬇️ Download PNG/MP4</button>
-      <button onclick="sendFeedback()">💬 Feedback</button>
-      <button onclick="toggleFavorite()">❤️ Mark as Favorite</button>
-      <div class="nav-btns">
-        <button onclick="prevItem()">⬅ Previous</button>
-        <button onclick="nextItem()">Next ➡</button>
-      </div>
+<section>
+  <h2>Icons</h2>
+  <div id="icons" class="gallery"></div>
+</section>
+
+<section>
+  <h2>Faces</h2>
+  <div id="faces" class="gallery"></div>
+</section>
+
+<!-- Modal -->
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div id="modal-content">
+    <div id="modal-close" aria-label="Close modal">&times;</div>
+    <div id="modal-title"></div>
+    <div id="modal-media"></div>
+    <div id="modal-buttons">
+      <a id="modal-download" href="#" download target="_blank" rel="noopener noreferrer">Download</a>
+      <button id="modal-close-btn">Close</button>
     </div>
   </div>
+</div>
 
-  <script>
-    const maps = [
-      {src:'0QbrXQK.png', title:'Has your country ever defeated Brazil at football? 2025'},
-      {src:'ePcFV7U.png', title:'Has your country ever had a Barcelona player? 2025'},
-      {src:'NE46OQK.png', title:'Does your country has a brawler inspired on it?'},
-      {src:'gx5EbYE.png', title:'Does your country have a famous gaming company?'},
-      {src:'DmZPpXN.png', title:'Is your country one of the #10 safest in the world? 2025'},
-      {src:'1wkZCGw.png', title:'Is your country one of the #10 most visited in the world? 2025'},
-      {src:'0oJmppv.png', title:'Largest stadium in each country (Credits: 🇧🇦YGA🗺)'}
-    ];
-    const icons = [
-      {src:'2RtAvsf.png', title:'European Union'}, {src:'gtnvu5s.png', title:'Sovietic Icon'},
-      {src:'aqtAEAG.png', title:'World Languages'}, {src:'BDiIMy2.png', title:'Dead'},
-      {src:'DJLlamR.png', title:'GDP Icon'}, {src:'flwrtQ7.png', title:'Follow Button'},
-      {src:'qprW4Nu.png', title:'Christian'}, {src:'78lPcuC.png', title:'Islam'},
-      {src:'B15QgPp.png', title:'Beer Time!'}, {src:'mOXiqGm.png', title:'Face Icon'},
-      {src:'NZYroaB.png', title:'Energy Icon'}, {src:'mpl5m0r.png', title:'Brawl Stars Finger Up!'},
-      {src:'1g5RtUh.png', title:'Brawl Stars Finger Down!'}, {src:'cbwmJlX.png', title:'GigaChad'},
-      {src:'3T9VJsS.png', title:'Deadly Icon'}, {src:'o30f1cM.png', title:'Happy Face'},
-      {src:'0G2odpT.png', title:'Books'}, {src:'SwSxVab.png', title:'Orthodox'},
-      {src:'bnmfJZv.png', title:'LGBT Flag'}, {src:'lbcMZK2.png', title:'The Quran'},
-      {src:'9aKNbrQ.png', title:'The Bible'}, {src:'hvNw6sT.png', title:'Atheism'},
-      {src:'0eCaYhL.png', title:'Chinese Man'}, {src:'C0yo78Y.png', title:'Gold'},
-      {src:'cMBsKi0.png', title:'Swords'}, {src:'Sq6RDNF.png', title:'Brain'},
-      {src:'EfDEP1t.png', title:'Student'}, {src:'b3qmh7r.png', title:'NATO'},
-      {src:'w0s7RZF.png', title:'Deal'}, {src:'zxyU0Nc.png', title:'Angry Fire Face'},
-      {src:'WtimfWW.png', title:'Discord Icon'}, {src:'udqXvqR.png', title:'Money'},
-      {src:'2kuUuNs.png', title:'World'}
-    ];
-    const faces = [
-      {src:'HXXafQq.png', title:'Mega Happy'}, {src:'5AVoz9g.png', title:'Perfect Face'},
-      {src:'229WN6u.png', title:'Mega Happy Blue Face'}, {src:'l5I7pWc.png', title:'Headphones Face'},
-      {src:'24ZG51o.png', title:'Very Very Happy'}, {src:'uqrWA1f.png', title:'Very Happy'},
-      {src:'HmrkGxu.png', title:'Happy'}, {src:'2JjbAHJ.png', title:'Normal'},
-      {src:'bVZdn48.png', title:'A little bit Angry'}, {src:'3KQ2Zod.png', title:'Angry'},
-      {src:'SS0A09s.png', title:'Very Angry'}, {src:'kiLYcrE.png', title:'Mega Angry'},
-      {src:'kWCa2cc.png', title:'F#ck!!'}, {src:'p8soC6j.png', title:'Medium Demon'},
-      {src:'Xc7Jv9u.png', title:'Impossiblle #404'}
-    ];
-    const backgrounds = [
-      {src:'eGZkcrj.mp4', title:'Nature', sound:true},
-      {src:'fzuFAVT.mp4', title:'Paris Eiffel Tower', sound:true},
-      {src:'ks0UIDS.mp4', title:'Arc de Triomphe', sound:true},
-      {src:'fwUwJNv.mp4', title:'Island', sound:false},
-      {src:'1EpEw0h.mp4', title:'Streets of France', sound:true},
-      {src:'1rWQQV5.mp4', title:'Nature #2', sound:true},
-      {src:'0vdYbWN.mp4', title:'JetSki Ride', sound:true},
-      {src:'TlRfrBT.mp4', title:'Nature #3', sound:true},
-      {src:'LEOHzLm.mp4', title:'Nature #4', sound:true}
-    ];
+<script>
+  // Dados de exemplo com URLs diretas de imgur
+  const flags = [
+    {src:'https://i.imgur.com/XXmPq1U.png', title:'Flag Example 1'},
+    {src:'https://i.imgur.com/8QKsw46.png', title:'Flag Example 2'},
+    {src:'https://i.imgur.com/someflag3.png', title:'Flag Example 3'}
+  ];
 
-    let currentIndex = 0;
-    let currentArray = [];
-    let currentIsVideo = false;
+  const maps = [
+    {src:'https://i.imgur.com/0QbrXQK.png', title:'Has your country ever defeated Brazil at football? 2025'},
+    {src:'https://i.imgur.com/ePcFV7U.png', title:'Has your country ever had a Barcelona player? 2025'},
+    {src:'https://i.imgur.com/NE46OQK.png', title:'Does your country have a brawler inspired on it?'},
+    {src:'https://i.imgur.com/gx5EbYE.png', title:'Does your country have a famous gaming company?'},
+    {src:'https://i.imgur.com/DmZPpXN.png', title:'Is your country one of the #10 safest in the world? 2025'},
+    {src:'https://i.imgur.com/1wkZCGw.png', title:'Is your country one of the #10 most visited in the world? 2025'},
+    {src:'https://i.imgur.com/0oJmppv.png', title:'Largest stadium in each country (Credits: 🇧🇦YGA🗺)'}
+  ];
 
-    function createGallery(id, data, isVideo=false) {
-      const container = document.getElementById(id);
-      data.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'item';
-        div.onclick = () => openPopup(index, data, isVideo);
-        const media = isVideo ? document.createElement('video') : document.createElement('img');
-        media.src = `https://i.imgur.com/${item.src}`;
-        if (isVideo) media.setAttribute('muted', true);
-        div.appendChild(media);
-        const title = document.createElement('div');
-        title.innerText = item.title;
-        div.appendChild(title);
-        container.appendChild(div);
-      });
+  const backgrounds = [
+    {src:'https://i.imgur.com/eGZkcrj.mp4', title:'Nature', isVideo:true},
+    {src:'https://i.imgur.com/fzuFAVT.mp4', title:'Paris Eiffel Tower', isVideo:true},
+    {src:'https://i.imgur.com/ks0UIDS.mp4', title:'Arc de Triomphe', isVideo:true},
+    {src:'https://i.imgur.com/fwUwJNv.mp4', title:'Island', isVideo:true},
+    {src:'https://i.imgur.com/1EpEw0h.mp4', title:'Streets of France', isVideo:true},
+    {src:'https://i.imgur.com/1rWQQV5.mp4', title:'Nature #2', isVideo:true},
+    {src:'https://i.imgur.com/0vdYbWN.mp4', title:'JetSki Ride', isVideo:true},
+    {src:'https://i.imgur.com/TlRfrBT.mp4', title:'Nature #3', isVideo:true},
+    {src:'https://i.imgur.com/LEOHzLm.mp4', title:'Nature #4', isVideo:true}
+  ];
+
+  const icons = [
+    {src:'https://i.imgur.com/2RtAvsf.png', title:'European Union'},
+    {src:'https://i.imgur.com/gtnvu5s.png', title:'Sovietic Icon'},
+    {src:'https://i.imgur.com/aqtAEAG.png', title:'World Languages'},
+    {src:'https://i.imgur.com/BDiIMy2.png', title:'Dead'},
+    {src:'https://i.imgur.com/DJLlamR.png', title:'GDP Icon'},
+    {src:'https://i.imgur.com/flwrtQ7.png', title:'Follow Button'},
+    {src:'https://i.imgur.com/qprW4Nu.png', title:'Christian'},
+    {src:'https://i.imgur.com/78lPcuC.png', title:'Islam'},
+    {src:'https://i.imgur.com/B15QgPp.png', title:'Beer Time!'},
+    {src:'https://i.imgur.com/mOXiqGm.png', title:'Face Icon'},
+    {src:'https://i.imgur.com/NZYroaB.png', title:'Energy Icon'},
+    {src:'https://i.imgur.com/mpl5m0r.png', title:'Brawl Stars Finger Up!'},
+    {src:'https://i.imgur.com/1g5RtUh.png', title:'Brawl Stars Finger Down!'},
+    {src:'https://i.imgur.com/cbwmJlX.png', title:'GigaChad'},
+    {src:'https://i.imgur.com/3T9VJsS.png', title:'Deadly Icon'},
+    {src:'https://i.imgur.com/o30f1cM.png', title:'Happy Face'},
+    {src:'https://i.imgur.com/0G2odpT.png', title:'Books'},
+    {src:'https://i.imgur.com/SwSxVab.png', title:'Orthodox'},
+    {src:'https://i.imgur.com/bnmfJZv.png', title:'LGBT Flag'},
+    {src:'https://i.imgur.com/lbcMZK2.png', title:'The Quran'},
+    {src:'https://i.imgur.com/9aKNbrQ.png', title:'The Bible'},
+    {src:'https://i.imgur.com/hvNw6sT.png', title:'Atheism'},
+    {src:'https://i.imgur.com/0eCaYhL.png', title:'Chinese Man'},
+    {src:'https://i.imgur.com/C0yo78Y.png', title:'Gold'},
+    {src:'https://i.imgur.com/cMBsKi0.png', title:'Swords'},
+    {src:'https://i.imgur.com/Sq6RDNF.png', title:'Brain'},
+    {src:'https://i.imgur.com/EfDEP1t.png', title:'Student'},
+    {src:'https://i.imgur.com/b3qmh7G.png', title:'Gold Hand'},
+    {src:'https://i.imgur.com/PG5kA36.png', title:'Paper'}
+  ];
+
+  const faces = [
+    {src:'https://i.imgur.com/zROsAha.png', title:'Summer'},
+    {src:'https://i.imgur.com/sUEC7MA.png', title:'Winter'},
+    {src:'https://i.imgur.com/pmumgMP.png', title:'Autumn'},
+    {src:'https://i.imgur.com/ZbHYRYf.png', title:'Spring'}
+  ];
+
+  // Função para criar cada item da galeria
+  function createItem(item) {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.tabIndex = 0; // para foco via teclado
+
+    // Conteúdo: vídeo ou imagem
+    if(item.isVideo) {
+      const video = document.createElement('video');
+      video.src = item.src;
+      video.muted = false;
+      video.controls = false;
+      video.loop = true;
+      video.autoplay = true;
+      video.playsInline = true;
+      video.style.pointerEvents = "none"; // para o clique ir para o div
+      div.appendChild(video);
+    } else {
+      const img = document.createElement('img');
+      img.src = item.src;
+      img.alt = item.title;
+      div.appendChild(img);
     }
 
-    function openPopup(index, arr, isVideo) {
-      currentIndex = index;
-      currentArray = arr;
-      currentIsVideo = isVideo;
-      const item = arr[index];
-      const media = isVideo
-        ? `<video controls autoplay><source src='https://i.imgur.com/${item.src}' type='video/mp4'></video>`
-        : `<img src='https://i.imgur.com/${item.src}' />`;
-      document.getElementById('popup-media').innerHTML = media;
-      document.getElementById('popup-title').innerText = item.title;
-      document.getElementById('popup-note').innerHTML = item.sound === false ? "<div class='no-sound'>No Sound</div>" : "";
-      document.getElementById('popup-link').href = `https://i.imgur.com/${item.src}`;
-      document.getElementById('popup').style.display = 'flex';
-      document.getElementById('favMark').style.display = isFavorite(item.src) ? 'block' : 'none';
-    }
+    // Título
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = item.title;
+    div.appendChild(title);
 
-    function closePopup() {
-      document.getElementById('popup').style.display = 'none';
-    }
-
-    function downloadCurrent() {
-      const item = currentArray[currentIndex];
-      const url = `https://i.imgur.com/${item.src}`;
-      const fileExtension = item.src.split('.').pop();
-      const filename = `${item.title} - mapperhub.org.${fileExtension}`;
-
-      fetch(url)
-        .then(response => {
-          if (!response.ok) throw new Error("Network response was not ok");
-          return response.blob();
-        })
-        .then(blob => {
-          const blobUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = blobUrl;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(blobUrl);
-        })
-        .catch(() => alert("Failed to download the file."));
-    }
-
-    function nextItem() {
-      if (currentIndex + 1 < currentArray.length) openPopup(currentIndex + 1, currentArray, currentIsVideo);
-    }
-
-    function prevItem() {
-      if (currentIndex > 0) openPopup(currentIndex - 1, currentArray, currentIsVideo);
-    }
-
-    function toggleFavorite() {
-      const item = currentArray[currentIndex];
-      const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-      const index = favs.indexOf(item.src);
-      if (index >= 0) {
-        favs.splice(index, 1);
-        alert("Removed from favorites!");
-      } else {
-        favs.push(item.src);
-        alert("Added to favorites!");
+    // Evento clique para abrir modal
+    div.addEventListener('click', () => openModal(item));
+    div.addEventListener('keypress', e => {
+      if(e.key === 'Enter' || e.key === ' ') {
+        openModal(item);
       }
-      localStorage.setItem('favorites', JSON.stringify(favs));
-      document.getElementById('favMark').style.display = isFavorite(item.src) ? 'block' : 'none';
+    });
+
+    return div;
+  }
+
+  // Renderizar galerias
+  function renderGallery(galleryId, items) {
+    const container = document.getElementById(galleryId);
+    container.innerHTML = '';
+    items.forEach(item => {
+      container.appendChild(createItem(item));
+    });
+  }
+
+  // Abrir modal
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalMedia = document.getElementById('modal-media');
+  const modalDownload = document.getElementById('modal-download');
+
+  function openModal(item) {
+    modalTitle.textContent = item.title;
+    modalMedia.innerHTML = '';
+
+    if(item.isVideo) {
+      const video = document.createElement('video');
+      video.src = item.src;
+      video.controls = true;
+      video.autoplay = true;
+      video.muted = false;
+      video.playsInline = true;
+      modalMedia.appendChild(video);
+    } else {
+      const img = document.createElement('img');
+      img.src = item.src;
+      img.alt = item.title;
+      modalMedia.appendChild(img);
     }
 
-    function isFavorite(src) {
-      const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
-      return favs.includes(src);
+    modalDownload.href = item.src;
+    modalDownload.setAttribute('download', '');
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Fechar modal
+  function closeModal() {
+    modal.classList.remove('active');
+    modalMedia.innerHTML = '';
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => {
+    if(e.target === modal) closeModal();
+  });
+
+  // Search filter
+  const searchInput = document.getElementById('search');
+  searchInput.addEventListener('input', e => {
+    const searchTerm = e.target.value.toLowerCase();
+
+    // Função auxiliar para filtrar e renderizar
+    function filterAndRender(galleryId, items) {
+      const filtered = items.filter(item => item.title.toLowerCase().includes(searchTerm));
+      renderGallery(galleryId, filtered);
     }
 
-    function sendFeedback() {
-      const item = currentArray[currentIndex];
-      const mailto = `mailto:hypexservices0@gmail.com?subject=Feedback on ${encodeURIComponent(item.title)}&body=I have feedback about ${item.title} (${item.src})`;
-      window.open(mailto);
-    }
+    filterAndRender('flags', flags);
+    filterAndRender('maps', maps);
+    filterAndRender('backgrounds', backgrounds);
+    filterAndRender('icons', icons);
+    filterAndRender('faces', faces);
+  });
 
-    createGallery('maps', maps);
-    createGallery('icons', icons);
-    createGallery('faces', faces);
-    createGallery('backgrounds', backgrounds, true);
-  </script>
+  // Renderização inicial
+  renderGallery('flags', flags);
+  renderGallery('maps', maps);
+  renderGallery('backgrounds', backgrounds);
+  renderGallery('icons', icons);
+  renderGallery('faces', faces);
+</script>
+
 </body>
 </html>
 
