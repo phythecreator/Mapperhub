@@ -1,45 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Maintenance | MapperHub</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      background-color: #0a0a2a; /* azul escuro */
-      font-family: Arial, sans-serif;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MapperHub</title>
+<style>
+  /* Reset & base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #121212;
+    color: #eee;
+    line-height: 1.6;
+  }
+  a {
+    color: #4fc3f7;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  header {
+    background: #1e1e1e;
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #333;
+  }
+  header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: #4fc3f7;
+  }
+  nav a {
+    margin-left: 1.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  nav a:hover {
+    color: #81d4fa;
+  }
+
+  main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  section {
+    margin-bottom: 3rem;
+  }
+  section h2 {
+    border-bottom: 3px solid #4fc3f7;
+    padding-bottom: 0.25rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 2rem;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(140px,1fr));
+    gap: 1rem;
+  }
+  .gallery-item {
+    background: #222;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(79, 195, 247, 0.3);
+    transition: transform 0.2s ease;
+  }
+  .gallery-item:hover {
+    transform: scale(1.05);
+  }
+  .gallery-item img {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+  }
+  .caption {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    text-align: center;
+    color: #b0bec5;
+  }
+
+  /* Lightbox */
+  #lightbox {
+    position: fixed;
+    display: none;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.85);
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    cursor: pointer;
+  }
+  #lightbox img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+    box-shadow: 0 0 20px #4fc3f7;
+  }
+
+  footer {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    background: #1e1e1e;
+    color: #78909c;
+    font-size: 0.9rem;
+    border-top: 1px solid #333;
+  }
+  footer a {
+    color: #4fc3f7;
+    font-weight: 600;
+  }
+  footer .discord {
+    margin-top: 0.5rem;
+  }
+
+  /* Responsive tweaks */
+  @media (max-width: 600px) {
+    nav a {
+      margin-left: 0.75rem;
+      font-size: 0.9rem;
     }
-    .popup {
-      background-color: #111144;
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      text-align: center;
-      max-width: 400px;
-      width: 90%;
+    section h2 {
+      font-size: 1.5rem;
     }
-    .popup emoji {
-      font-size: 3rem;
-    }
-    .popup p {
-      font-size: 1.2rem;
-      margin-top: 15px;
-      line-height: 1.5;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
-  <div class="popup">
-    <div style="font-size: 3rem;">🚧</div>
-    <p><strong>The website is being updated right now.</strong><br>
-    We plan to reopen the website at <strong>00:00 05/07/2025</strong></p>
+
+<header>
+  <h1>MapperHub</h1>
+  <nav>
+    <a href="#blue-emojis">Blue Emojis</a>
+    <a href="#geometry-dash">Geometry Dash Faces</a>
+    <a href="#icons">Icons</a>
+    <a href="#maps">Maps</a>
+  </nav>
+</header>
+
+<main>
+
+<section id="blue-emojis">
+  <h2>Blue Emojis</h2>
+  <div class="gallery">
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/SFDzJ4S.png" alt="Mewing Blue Emoji" /><div class="caption">Mewing Blue Emoji</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/R3W7Z0I.png" alt="Thousand-Yard Stare Emoji" /><div class="caption">Thousand-Yard Stare Emoji</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/sZH74a9.png" alt="Party" /><div class="caption">Party</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/nmcs066.png" alt="Sigma Face" /><div class="caption">Sigma Face</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/3VHSclb.png" alt="Ok Emoji" /><div class="caption">Ok Emoji</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/IE06ypK.png" alt="Laughing Emoji" /><div class="caption">Laughing Emoji</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/uRHbpgm.png" alt="Smiling Face" /><div class="caption">Smiling Face</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/tXjNENl.png" alt="Huge Grin Emoji" /><div class="caption">Huge Grin Emoji</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/1hswyNj.png" alt="Angry Beast" /><div class="caption">Angry Beast</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/cZgpfwK.png" alt="Suspicious Big Eye" /><div class="caption">Suspicious Big Eye</div></div>
   </div>
+</section>
+
+<section id="geometry-dash">
+  <h2>Geometry Dash Faces</h2>
+  <div class="gallery">
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/hVwxImx.png" alt="Mega Happy" /><div class="caption">Mega Happy</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/WSs4SGg.png" alt="Mega Happy Blue Face" /><div class="caption">Mega Happy Blue Face</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/8ovT5u5.png" alt="Headphones Face" /><div class="caption">Headphones Face</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/A7Jk0Bn.png" alt="Very Very Happy" /><div class="caption">Very Very Happy</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/qu9KjzZ.png" alt="Very Happy" /><div class="caption">Very Happy</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/DU8gRu2.png" alt="Happy" /><div class="caption">Happy</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/iInWT6M.png" alt="Normal" /><div class="caption">Normal</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/VTsc6p8.png" alt="A Little Bit Angry" /><div class="caption">A Little Bit Angry</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/oAVmKzZ.png" alt="Angry" /><div class="caption">Angry</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/cQUpeNu.png" alt="Very Angry" /><div class="caption">Very Angry</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/iiMYyVY.png" alt="Mega Angry" /><div class="caption">Mega Angry</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/9x3pHLr.png" alt="F##k!!" /><div class="caption">F##k!!</div></div>
+  </div>
+</section>
+
+<section id="icons">
+  <h2>Icons</h2>
+  <div class="gallery">
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/gfScoB6.png" alt="European Union" /><div class="caption">European Union</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/7Ukjg8c.png" alt="Sovietic Icon" /><div class="caption">Sovietic Icon</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/vRCG1qj.png" alt="World Languages" /><div class="caption">World Languages</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/5KJwwI5.png" alt="Dead" /><div class="caption">Dead</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/kYPwGrN.png" alt="GDP Icon" /><div class="caption">GDP Icon</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/utCe1PW.png" alt="Follow Button" /><div class="caption">Follow Button</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/E2Y2OKW.png" alt="Christian" /><div class="caption">Christian</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/jThGmjT.png" alt="Islam" /><div class="caption">Islam</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/Q9stjWQ.png" alt="Beer Time" /><div class="caption">Beer Time</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/sIwpjrq.png" alt="Face Icon" /><div class="caption">Face Icon</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/gR4oC68.png" alt="Energy Icon" /><div class="caption">Energy Icon</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/LEjqdiK.png" alt="Brawl Stars Icon Up" /><div class="caption">Brawl Stars Icon Up</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/bswXW1c.png" alt="Brawl Stars Icon Down" /><div class="caption">Brawl Stars Icon Down</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/oXJEtEq.png" alt="GigaChad" /><div class="caption">GigaChad</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/einY2Kq.png" alt="Deadly" /><div class="caption">Deadly</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/5gAVh5y.png" alt="Happy Face" /><div class="caption">Happy Face</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/SnEuvkX.png" alt="LGBT Flag" /><div class="caption">LGBT Flag</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/6QOIZzY.png" alt="Quran" /><div class="caption">Quran</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/ZcvIAT0.png" alt="The Bible" /><div class="caption">The Bible</div></div>
+  </div>
+</section>
+
+<section id="maps">
+  <h2>Maps</h2>
+  <div class="gallery">
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/cJvONYB.png" alt="Has your country ever defeated Brazil in football?" /><div class="caption">Has your country ever defeated Brazil in football?</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/TiNiYON.png" alt="Has your country ever had a Barcelona player?" /><div class="caption">Has your country ever had a Barcelona player?</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/wbQg2Oi.png" alt="Brawlers from Europe 2025" /><div class="caption">Brawlers from Europe 2025</div></div>
+    <div class="gallery-item" tabindex="0"><img src="https://i.imgur.com/Tw2vvvb.png" alt="Does your country have a famous game company? 2025" /><div class="caption">Does your country have a famous game company? 2025</div></div>
+  </div>
+</section>
+
+<section id="credits" style="text-align:center; margin-top:4rem;">
+  <p style="font-size:1rem; color:#bbb;">
+    Some icons were taken from this server: <a href="https://discord.gg/VGNWhczXq3" target="_blank" rel="noopener noreferrer">discord.gg/VGNWhczXq3</a>
+  </p>
+  <p style="font-size:1rem; color:#bbb;">
+    Instagram: <a href="https://instagram.com/tugamapper" target="_blank" rel="noopener noreferrer">@tugamapper</a>
+  </p>
+</section>
+
+</main>
+
+<!-- Lightbox container -->
+<div id="lightbox" role="dialog" aria-modal="true" tabindex="-1">
+  <img src="" alt="Enlarged image" />
+</div>
+
+<script>
+  // Lightbox functionality
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = lightbox.querySelector('img');
+  const galleryItems = document.querySelectorAll('.gallery-item');
+
+  galleryItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const img = item.querySelector('img');
+      lightboxImg.src = img.src;
+      lightboxImg.alt = img.alt;
+      lightbox.style.display = 'flex';
+      lightbox.focus();
+    });
+    // Allow keyboard "Enter" to open image
+    item.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        item.click();
+      }
+    });
+  });
+
+  lightbox.addEventListener('click', () => {
+    lightbox.style.display = 'none';
+    lightboxImg.src = '';
+  });
+
+  // Close lightbox on Escape key
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && lightbox.style.display === 'flex') {
+      lightbox.style.display = 'none';
+      lightboxImg.src = '';
+    }
+  });
+
+</script>
+
 </body>
 </html>
 
