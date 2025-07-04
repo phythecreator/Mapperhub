@@ -1,98 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MapperHub</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <script>
-    const geometryFaces = [
-      {src:'HXXafQq.png', title:'Mega Happy'}, {src:'5AVoz9g.png', title:'Perfect Face'},
-      {src:'229WN6u.png', title:'Mega Happy Blue Face'}, {src:'l5I7pWc.png', title:'Headphones Face'},
-      {src:'24ZG51o.png', title:'Very Very Happy'}, {src:'uqrWA1f.png', title:'Very Happy'},
-      {src:'HmrkGxu.png', title:'Happy'}, {src:'2JjbAHJ.png', title:'Normal'},
-      {src:'bVZdn48.png', title:'A little bit Angry'}, {src:'3KQ2Zod.png', title:'Angry'},
-      {src:'SS0A09s.png', title:'Very Angry'}, {src:'kiLYcrE.png', title:'Mega Angry'},
-      {src:'kWCa2cc.png', title:'F#ck!!'}, {src:'p8soC6j.png', title:'Medium Demon'},
-      {src:'Xc7Jv9u.png', title:'Impossiblle #404'},
-      {src:'zROsAha.png', title:'Summer'}, {src:'sUEC7MA.png', title:'Winter'},
-      {src:'pmumgMP.png', title:'Autumn'}, {src:'ZbHYRYf.png', title:'Spring'}
-    ];
-
-    const blueEmojis = [
-      {src:'SFDzJ4S.png', title:'Mewing Blue Emoji'},
-      {src:'R3W7Z0I.png', title:'Thousand-Yard Stare Emoji'},
-      {src:'sZH74a9.png', title:'Party'}, {src:'nmcs066.png', title:'Sigma Face'},
-      {src:'3VHSclb.png', title:'Ok Emoji'}, {src:'IE06ypK.png', title:'Laughing Emoji'},
-      {src:'uRHbpgm.png', title:'Smiling Face'}, {src:'tXjNENl.png', title:'Huge Grin Emoji'},
-      {src:'1hswyNj.png', title:'Angry Beast'}, {src:'cZgpfwK.png', title:'Suspicious Big Eye'}
-    ];
-
-    const maps = [
-      {src:'0QbrXQK.png', title:'Has your country ever defeated Brazil at football?'},
-      {src:'ePcFV7U.png', title:'Has your country ever had a Barcelona player?'},
-      {src:'NE46OQK.png', title:'Does your country have a brawler inspired on it?'},
-      {src:'gx5EbYE.png', title:'Does your country have a famous gaming company?'},
-      {src:'DmZPpXN.png', title:'Is your country one of the #10 safest in the world?'},
-      {src:'1wkZCGw.png', title:'Is your country one of the #10 most visited in the world?'}
-    ];
-
-    const icons = [
-      {src:'AqBGFL2.png', title:'Graduation Icon'}, {src:'711WdPS.png', title:'Levels'},
-      {src:'rynhBi0.png', title:'GTA'}, {src:'1quA7MC.jpeg', title:'Brawl Stars'},
-      {src:'2RtAvsf.png', title:'European Union'}, {src:'gtnvu5s.png', title:'Sovietic Icon'},
-      {src:'aqtAEAG.png', title:'World Languages'}, {src:'BDiIMy2.png', title:'Dead'},
-      {src:'DJLlamR.png', title:'GDP Icon'}, {src:'flwrtQ7.png', title:'Follow Button'},
-      {src:'qprW4Nu.png', title:'Christian'}, {src:'78lPcuC.png', title:'Islam'},
-      {src:'B15QgPp.png', title:'Beer Time!'}, {src:'mOXiqGm.png', title:'Face Icon'},
-      {src:'NZYroaB.png', title:'Energy Icon'}, {src:'mpl5m0r.png', title:'Brawl Stars Finger Up!'},
-      {src:'1g5RtUh.png', title:'Brawl Stars Finger Down!'}, {src:'cbwmJlX.png', title:'GigaChad'},
-      {src:'3T9VJsS.png', title:'Deadly Icon'}, {src:'o30f1cM.png', title:'Happy Face'},
-      {src:'0G2odpT.png', title:'Books'}, {src:'SwSxVab.png', title:'Orthodox'},
-      {src:'bnmfJZv.png', title:'LGBT Flag'}, {src:'lbcMZK2.png', title:'The Quran'},
-      {src:'9aKNbrQ.png', title:'The Bible'}, {src:'hvNw6sT.png', title:'Atheism'},
-      {src:'0eCaYhL.png', title:'Chinese Man'}, {src:'C0yo78Y.png', title:'Gold'},
-      {src:'cMBsKi0.png', title:'Swords'}, {src:'Sq6RDNF.png', title:'Brain'},
-      {src:'EfDEP1t.png', title:'Student'}, {src:'b3qmh7r.png', title:'NATO'},
-      {src:'w0s7RZF.png', title:'Deal'}, {src:'zxyU0Nc.png', title:'Angry Fire Face'},
-      {src:'WtimfWW.png', title:'Discord Icon'}, {src:'udqXvqR.png', title:'Money'},
-      {src:'2kuUuNs.png', title:'World'}
-    ];
-
-    const backgrounds = [
-      {src:'swU4kjh.png', title:'MapperHub Banner'}
-    ];
-
-    const flags = [
-      { src: 'wAlO2Wn.png', title: 'Turkey Flag' }, { src: 'CiXPwql.png', title: 'Italy Flag' },
-      { src: 'EWqDdfU.png', title: 'UK Flag' }, { src: 'nMxqtV5.png', title: 'Russia Flag' },
-      { src: 'poE65ex.png', title: 'Spain Flag' }, { src: 'jtmH7eP.png', title: 'Czechia Flag' },
-      { src: 'Vtct8UJ.png', title: 'Saudi Arabia Flag' }, { src: 'H0zPAyK.png', title: 'USA Flag' },
-      { src: '7pXfvAk.png', title: 'Ukraine Flag' }, { src: '7hfKYSP.png', title: 'Germany Flag' },
-      { src: 'P6mc9Nn.png', title: 'Poland Flag' }, { src: 'ntzLe3y.png', title: 'Japan Flag' },
-      { src: 'YUQd2D4.png', title: 'Portugal Flag' }, { src: '3pPiZaz.png', title: 'Sweden Flag' },
-      { src: '1qAi9k0.png', title: 'Norway Flag' }, { src: '9vyNzI5.png', title: 'Finland Flag' },
-      { src: '2HzIdtG.png', title: 'Denmark Flag' }, { src: 'PCnE8RP.png', title: 'Belarus Flag' },
-      { src: 'hzKzMDS.png', title: 'Switzerland Flag' }, { src: '552EebJ.png', title: 'Serbia Flag' },
-      { src: 'De7lXOl.png', title: 'Croatia Flag' }, { src: 'NtZsmqk.png', title: 'Kosovo Flag' },
-      { src: 'n0icIg3.png', title: 'Albania Flag' }, { src: 'oS11BgH.png', title: 'Greece Flag' },
-      { src: 'EuDPNkl.png', title: 'Bosnia Flag' }, { src: 'y9zP5L8.png', title: 'Estonia Flag' },
-      { src: '7FWbBAP.png', title: 'Lithuania Flag' }, { src: 'jXIlHGa.png', title: 'Latvia Flag' },
-      { src: 'VoLOEOx.png', title: 'Hungary Flag' }, { src: 'Up5IjgC.png', title: 'Slovakia Flag' },
-      { src: '4dAaaVz.png', title: 'Austria Flag' }, { src: '0Di2bjI.png', title: 'Slovenia Flag' },
-      { src: '5WQutar.png', title: 'Belgium Flag' }, { src: 'H17SWtz.png', title: 'Netherlands Flag' },
-      { src: '6jhzYxd.png', title: 'Ireland Flag' }, { src: 'IseSvjn.png', title: 'Moldova Flag' },
-      { src: 'IK7BiGt.png', title: 'Montenegro Flag' }, { src: 'AP560uj.png', title: 'France Flag' },
-      { src: 'iuK88Zl.png', title: 'Morocco Flag' }, { src: 're9kMla.png', title: 'Algeria Flag' },
-      { src: 't23TxVb.png', title: 'Palestine Flag' }, { src: 'ae8EkRL.png', title: 'Israel Flag' },
-      { src: 'dtDen18.png', title: 'Iran Flag' }, { src: 'dtDen18.png', title: 'Canada Flag' },
-      { src: 'bvDpagX.png', title: 'Brazil Flag' }, { src: 'kRGjx4l.png', title: 'Saudi Arabia Flag' }
-    ];
-  </script>
+  <meta charset="UTF-8">
+  <title>Maintenance | MapperHub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background-color: #0a0a2a; /* azul escuro */
+      font-family: Arial, sans-serif;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .popup {
+      background-color: #111144;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+    }
+    .popup emoji {
+      font-size: 3rem;
+    }
+    .popup p {
+      font-size: 1.2rem;
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+  </style>
 </head>
-<body class="bg-gray-900 text-white">
-  <!-- Conteúdo renderizado por JavaScript -->
+<body>
+  <div class="popup">
+    <div style="font-size: 3rem;">🚧</div>
+    <p><strong>The website is being updated right now.</strong><br>
+    We plan to reopen the website at <strong>00:00 05/07/2025</strong></p>
+  </div>
 </body>
 </html>
-
 
