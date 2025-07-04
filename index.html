@@ -1,409 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>MapperHub Gallery</title>
-<style>
-  /* Reset & básico */
-  * {
-    box-sizing: border-box;
-  }
-  body {
-    margin: 0; padding: 20px;
-    background: #121212;
-    color: #eee;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  h1 {
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  input#search {
-    display: block;
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto 30px auto;
-    padding: 10px 15px;
-    border-radius: 25px;
-    border: none;
-    font-size: 1rem;
-    background: #222;
-    color: #eee;
-    box-shadow: 0 0 5px #00aaff;
-    outline: none;
-    transition: box-shadow 0.3s;
-  }
-  input#search:focus {
-    box-shadow: 0 0 12px #00ccff;
-  }
-  h2 {
-    margin-top: 40px;
-    border-bottom: 2px solid #00aaff;
-    padding-bottom: 8px;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MapperHub</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script>
+    const geometryFaces = [
+      {src:'HXXafQq.png', title:'Mega Happy'}, {src:'5AVoz9g.png', title:'Perfect Face'},
+      {src:'229WN6u.png', title:'Mega Happy Blue Face'}, {src:'l5I7pWc.png', title:'Headphones Face'},
+      {src:'24ZG51o.png', title:'Very Very Happy'}, {src:'uqrWA1f.png', title:'Very Happy'},
+      {src:'HmrkGxu.png', title:'Happy'}, {src:'2JjbAHJ.png', title:'Normal'},
+      {src:'bVZdn48.png', title:'A little bit Angry'}, {src:'3KQ2Zod.png', title:'Angry'},
+      {src:'SS0A09s.png', title:'Very Angry'}, {src:'kiLYcrE.png', title:'Mega Angry'},
+      {src:'kWCa2cc.png', title:'F#ck!!'}, {src:'p8soC6j.png', title:'Medium Demon'},
+      {src:'Xc7Jv9u.png', title:'Impossiblle #404'},
+      {src:'zROsAha.png', title:'Summer'}, {src:'sUEC7MA.png', title:'Winter'},
+      {src:'pmumgMP.png', title:'Autumn'}, {src:'ZbHYRYf.png', title:'Spring'}
+    ];
 
-  /* Gallery grid */
-  .gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
-    gap: 20px;
-    margin-top: 15px;
-  }
+    const blueEmojis = [
+      {src:'SFDzJ4S.png', title:'Mewing Blue Emoji'},
+      {src:'R3W7Z0I.png', title:'Thousand-Yard Stare Emoji'},
+      {src:'sZH74a9.png', title:'Party'}, {src:'nmcs066.png', title:'Sigma Face'},
+      {src:'3VHSclb.png', title:'Ok Emoji'}, {src:'IE06ypK.png', title:'Laughing Emoji'},
+      {src:'uRHbpgm.png', title:'Smiling Face'}, {src:'tXjNENl.png', title:'Huge Grin Emoji'},
+      {src:'1hswyNj.png', title:'Angry Beast'}, {src:'cZgpfwK.png', title:'Suspicious Big Eye'}
+    ];
 
-  .item {
-    background: #222;
-    border-radius: 12px;
-    box-shadow: 0 0 6px #003344;
-    overflow: hidden;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    transition: box-shadow 0.3s, transform 0.2s;
-  }
-  .item:hover {
-    box-shadow: 0 0 14px #00bbff;
-    transform: translateY(-5px);
-  }
-  .item img, .item video {
-    width: 100%;
-    height: 140px;
-    object-fit: cover;
-    border-bottom: 1px solid #00aaff;
-    background: #000;
-    flex-shrink: 0;
-  }
-  .title {
-    padding: 8px 12px;
-    font-size: 0.95rem;
-    line-height: 1.1;
-    flex-grow: 1;
-  }
+    const maps = [
+      {src:'0QbrXQK.png', title:'Has your country ever defeated Brazil at football?'},
+      {src:'ePcFV7U.png', title:'Has your country ever had a Barcelona player?'},
+      {src:'NE46OQK.png', title:'Does your country have a brawler inspired on it?'},
+      {src:'gx5EbYE.png', title:'Does your country have a famous gaming company?'},
+      {src:'DmZPpXN.png', title:'Is your country one of the #10 safest in the world?'},
+      {src:'1wkZCGw.png', title:'Is your country one of the #10 most visited in the world?'}
+    ];
 
-  /* Modal styles */
-  #modal {
-    position: fixed;
-    top:0; left:0; right:0; bottom:0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    z-index: 9999;
-  }
-  #modal.active {
-    display: flex;
-  }
-  #modal-content {
-    position: relative;
-    max-width: 90vw;
-    max-height: 90vh;
-    background: #111;
-    border-radius: 15px;
-    box-shadow: 0 0 20px #00ccff;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  #modal-title {
-    color: #00ccff;
-    padding: 12px 20px;
-    font-size: 1.2rem;
-    border-bottom: 1px solid #00ccff;
-    text-align: center;
-  }
-  #modal-media {
-    max-height: calc(90vh - 120px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #000;
-  }
-  #modal-media img, #modal-media video {
-    max-width: 100%;
-    max-height: 100%;
-    border-radius: 0 0 15px 15px;
-    background: #000;
-  }
-  #modal-buttons {
-    display: flex;
-    justify-content: center;
-    padding: 15px;
-    gap: 20px;
-    background: #111;
-    border-top: 1px solid #00ccff;
-  }
-  #modal-buttons a, #modal-buttons button {
-    background: #00aaff;
-    border: none;
-    color: #111;
-    padding: 10px 25px;
-    font-size: 1rem;
-    border-radius: 30px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.3s;
-  }
-  #modal-buttons a:hover, #modal-buttons button:hover {
-    background: #0088cc;
-  }
-  #modal-close {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    font-size: 1.8rem;
-    color: #00ccff;
-    cursor: pointer;
-    user-select: none;
-  }
+    const icons = [
+      {src:'AqBGFL2.png', title:'Graduation Icon'}, {src:'711WdPS.png', title:'Levels'},
+      {src:'rynhBi0.png', title:'GTA'}, {src:'1quA7MC.jpeg', title:'Brawl Stars'},
+      {src:'2RtAvsf.png', title:'European Union'}, {src:'gtnvu5s.png', title:'Sovietic Icon'},
+      {src:'aqtAEAG.png', title:'World Languages'}, {src:'BDiIMy2.png', title:'Dead'},
+      {src:'DJLlamR.png', title:'GDP Icon'}, {src:'flwrtQ7.png', title:'Follow Button'},
+      {src:'qprW4Nu.png', title:'Christian'}, {src:'78lPcuC.png', title:'Islam'},
+      {src:'B15QgPp.png', title:'Beer Time!'}, {src:'mOXiqGm.png', title:'Face Icon'},
+      {src:'NZYroaB.png', title:'Energy Icon'}, {src:'mpl5m0r.png', title:'Brawl Stars Finger Up!'},
+      {src:'1g5RtUh.png', title:'Brawl Stars Finger Down!'}, {src:'cbwmJlX.png', title:'GigaChad'},
+      {src:'3T9VJsS.png', title:'Deadly Icon'}, {src:'o30f1cM.png', title:'Happy Face'},
+      {src:'0G2odpT.png', title:'Books'}, {src:'SwSxVab.png', title:'Orthodox'},
+      {src:'bnmfJZv.png', title:'LGBT Flag'}, {src:'lbcMZK2.png', title:'The Quran'},
+      {src:'9aKNbrQ.png', title:'The Bible'}, {src:'hvNw6sT.png', title:'Atheism'},
+      {src:'0eCaYhL.png', title:'Chinese Man'}, {src:'C0yo78Y.png', title:'Gold'},
+      {src:'cMBsKi0.png', title:'Swords'}, {src:'Sq6RDNF.png', title:'Brain'},
+      {src:'EfDEP1t.png', title:'Student'}, {src:'b3qmh7r.png', title:'NATO'},
+      {src:'w0s7RZF.png', title:'Deal'}, {src:'zxyU0Nc.png', title:'Angry Fire Face'},
+      {src:'WtimfWW.png', title:'Discord Icon'}, {src:'udqXvqR.png', title:'Money'},
+      {src:'2kuUuNs.png', title:'World'}
+    ];
 
-  /* Responsive */
-  @media (max-width: 480px) {
-    .item img, .item video {
-      height: 110px;
-    }
-  }
+    const backgrounds = [
+      {src:'swU4kjh.png', title:'MapperHub Banner'}
+    ];
 
-</style>
+    const flags = [
+      { src: 'wAlO2Wn.png', title: 'Turkey Flag' }, { src: 'CiXPwql.png', title: 'Italy Flag' },
+      { src: 'EWqDdfU.png', title: 'UK Flag' }, { src: 'nMxqtV5.png', title: 'Russia Flag' },
+      { src: 'poE65ex.png', title: 'Spain Flag' }, { src: 'jtmH7eP.png', title: 'Czechia Flag' },
+      { src: 'Vtct8UJ.png', title: 'Saudi Arabia Flag' }, { src: 'H0zPAyK.png', title: 'USA Flag' },
+      { src: '7pXfvAk.png', title: 'Ukraine Flag' }, { src: '7hfKYSP.png', title: 'Germany Flag' },
+      { src: 'P6mc9Nn.png', title: 'Poland Flag' }, { src: 'ntzLe3y.png', title: 'Japan Flag' },
+      { src: 'YUQd2D4.png', title: 'Portugal Flag' }, { src: '3pPiZaz.png', title: 'Sweden Flag' },
+      { src: '1qAi9k0.png', title: 'Norway Flag' }, { src: '9vyNzI5.png', title: 'Finland Flag' },
+      { src: '2HzIdtG.png', title: 'Denmark Flag' }, { src: 'PCnE8RP.png', title: 'Belarus Flag' },
+      { src: 'hzKzMDS.png', title: 'Switzerland Flag' }, { src: '552EebJ.png', title: 'Serbia Flag' },
+      { src: 'De7lXOl.png', title: 'Croatia Flag' }, { src: 'NtZsmqk.png', title: 'Kosovo Flag' },
+      { src: 'n0icIg3.png', title: 'Albania Flag' }, { src: 'oS11BgH.png', title: 'Greece Flag' },
+      { src: 'EuDPNkl.png', title: 'Bosnia Flag' }, { src: 'y9zP5L8.png', title: 'Estonia Flag' },
+      { src: '7FWbBAP.png', title: 'Lithuania Flag' }, { src: 'jXIlHGa.png', title: 'Latvia Flag' },
+      { src: 'VoLOEOx.png', title: 'Hungary Flag' }, { src: 'Up5IjgC.png', title: 'Slovakia Flag' },
+      { src: '4dAaaVz.png', title: 'Austria Flag' }, { src: '0Di2bjI.png', title: 'Slovenia Flag' },
+      { src: '5WQutar.png', title: 'Belgium Flag' }, { src: 'H17SWtz.png', title: 'Netherlands Flag' },
+      { src: '6jhzYxd.png', title: 'Ireland Flag' }, { src: 'IseSvjn.png', title: 'Moldova Flag' },
+      { src: 'IK7BiGt.png', title: 'Montenegro Flag' }, { src: 'AP560uj.png', title: 'France Flag' },
+      { src: 'iuK88Zl.png', title: 'Morocco Flag' }, { src: 're9kMla.png', title: 'Algeria Flag' },
+      { src: 't23TxVb.png', title: 'Palestine Flag' }, { src: 'ae8EkRL.png', title: 'Israel Flag' },
+      { src: 'dtDen18.png', title: 'Iran Flag' }, { src: 'dtDen18.png', title: 'Canada Flag' },
+      { src: 'bvDpagX.png', title: 'Brazil Flag' }, { src: 'kRGjx4l.png', title: 'Saudi Arabia Flag' }
+    ];
+  </script>
 </head>
-<body>
-
-<h1>MapperHub Gallery</h1>
-
-<input type="text" id="search" placeholder="Search by title..." autocomplete="off" />
-
-<!-- Categories -->
-<section>
-  <h2>Flags</h2>
-  <div id="flags" class="gallery"></div>
-</section>
-
-<section>
-  <h2>Maps</h2>
-  <div id="maps" class="gallery"></div>
-</section>
-
-<section>
-  <h2>Backgrounds</h2>
-  <div id="backgrounds" class="gallery"></div>
-</section>
-
-<section>
-  <h2>Icons</h2>
-  <div id="icons" class="gallery"></div>
-</section>
-
-<section>
-  <h2>Faces</h2>
-  <div id="faces" class="gallery"></div>
-</section>
-
-<!-- Modal -->
-<div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-  <div id="modal-content">
-    <div id="modal-close" aria-label="Close modal">&times;</div>
-    <div id="modal-title"></div>
-    <div id="modal-media"></div>
-    <div id="modal-buttons">
-      <a id="modal-download" href="#" download target="_blank" rel="noopener noreferrer">Download</a>
-      <button id="modal-close-btn">Close</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Dados de exemplo com URLs diretas de imgur
-  const flags = [
-    {src:'https://i.imgur.com/XXmPq1U.png', title:'Flag Example 1'},
-    {src:'https://i.imgur.com/8QKsw46.png', title:'Flag Example 2'},
-    {src:'https://i.imgur.com/someflag3.png', title:'Flag Example 3'}
-  ];
-
-  const maps = [
-    {src:'https://i.imgur.com/0QbrXQK.png', title:'Has your country ever defeated Brazil at football? 2025'},
-    {src:'https://i.imgur.com/ePcFV7U.png', title:'Has your country ever had a Barcelona player? 2025'},
-    {src:'https://i.imgur.com/NE46OQK.png', title:'Does your country have a brawler inspired on it?'},
-    {src:'https://i.imgur.com/gx5EbYE.png', title:'Does your country have a famous gaming company?'},
-    {src:'https://i.imgur.com/DmZPpXN.png', title:'Is your country one of the #10 safest in the world? 2025'},
-    {src:'https://i.imgur.com/1wkZCGw.png', title:'Is your country one of the #10 most visited in the world? 2025'},
-    {src:'https://i.imgur.com/0oJmppv.png', title:'Largest stadium in each country (Credits: 🇧🇦YGA🗺)'}
-  ];
-
-  const backgrounds = [
-    {src:'https://i.imgur.com/eGZkcrj.mp4', title:'Nature', isVideo:true},
-    {src:'https://i.imgur.com/fzuFAVT.mp4', title:'Paris Eiffel Tower', isVideo:true},
-    {src:'https://i.imgur.com/ks0UIDS.mp4', title:'Arc de Triomphe', isVideo:true},
-    {src:'https://i.imgur.com/fwUwJNv.mp4', title:'Island', isVideo:true},
-    {src:'https://i.imgur.com/1EpEw0h.mp4', title:'Streets of France', isVideo:true},
-    {src:'https://i.imgur.com/1rWQQV5.mp4', title:'Nature #2', isVideo:true},
-    {src:'https://i.imgur.com/0vdYbWN.mp4', title:'JetSki Ride', isVideo:true},
-    {src:'https://i.imgur.com/TlRfrBT.mp4', title:'Nature #3', isVideo:true},
-    {src:'https://i.imgur.com/LEOHzLm.mp4', title:'Nature #4', isVideo:true}
-  ];
-
-  const icons = [
-    {src:'https://i.imgur.com/2RtAvsf.png', title:'European Union'},
-    {src:'https://i.imgur.com/gtnvu5s.png', title:'Sovietic Icon'},
-    {src:'https://i.imgur.com/aqtAEAG.png', title:'World Languages'},
-    {src:'https://i.imgur.com/BDiIMy2.png', title:'Dead'},
-    {src:'https://i.imgur.com/DJLlamR.png', title:'GDP Icon'},
-    {src:'https://i.imgur.com/flwrtQ7.png', title:'Follow Button'},
-    {src:'https://i.imgur.com/qprW4Nu.png', title:'Christian'},
-    {src:'https://i.imgur.com/78lPcuC.png', title:'Islam'},
-    {src:'https://i.imgur.com/B15QgPp.png', title:'Beer Time!'},
-    {src:'https://i.imgur.com/mOXiqGm.png', title:'Face Icon'},
-    {src:'https://i.imgur.com/NZYroaB.png', title:'Energy Icon'},
-    {src:'https://i.imgur.com/mpl5m0r.png', title:'Brawl Stars Finger Up!'},
-    {src:'https://i.imgur.com/1g5RtUh.png', title:'Brawl Stars Finger Down!'},
-    {src:'https://i.imgur.com/cbwmJlX.png', title:'GigaChad'},
-    {src:'https://i.imgur.com/3T9VJsS.png', title:'Deadly Icon'},
-    {src:'https://i.imgur.com/o30f1cM.png', title:'Happy Face'},
-    {src:'https://i.imgur.com/0G2odpT.png', title:'Books'},
-    {src:'https://i.imgur.com/SwSxVab.png', title:'Orthodox'},
-    {src:'https://i.imgur.com/bnmfJZv.png', title:'LGBT Flag'},
-    {src:'https://i.imgur.com/lbcMZK2.png', title:'The Quran'},
-    {src:'https://i.imgur.com/9aKNbrQ.png', title:'The Bible'},
-    {src:'https://i.imgur.com/hvNw6sT.png', title:'Atheism'},
-    {src:'https://i.imgur.com/0eCaYhL.png', title:'Chinese Man'},
-    {src:'https://i.imgur.com/C0yo78Y.png', title:'Gold'},
-    {src:'https://i.imgur.com/cMBsKi0.png', title:'Swords'},
-    {src:'https://i.imgur.com/Sq6RDNF.png', title:'Brain'},
-    {src:'https://i.imgur.com/EfDEP1t.png', title:'Student'},
-    {src:'https://i.imgur.com/b3qmh7G.png', title:'Gold Hand'},
-    {src:'https://i.imgur.com/PG5kA36.png', title:'Paper'}
-  ];
-
-  const faces = [
-    {src:'https://i.imgur.com/zROsAha.png', title:'Summer'},
-    {src:'https://i.imgur.com/sUEC7MA.png', title:'Winter'},
-    {src:'https://i.imgur.com/pmumgMP.png', title:'Autumn'},
-    {src:'https://i.imgur.com/ZbHYRYf.png', title:'Spring'}
-  ];
-
-  // Função para criar cada item da galeria
-  function createItem(item) {
-    const div = document.createElement('div');
-    div.className = 'item';
-    div.tabIndex = 0; // para foco via teclado
-
-    // Conteúdo: vídeo ou imagem
-    if(item.isVideo) {
-      const video = document.createElement('video');
-      video.src = item.src;
-      video.muted = false;
-      video.controls = false;
-      video.loop = true;
-      video.autoplay = true;
-      video.playsInline = true;
-      video.style.pointerEvents = "none"; // para o clique ir para o div
-      div.appendChild(video);
-    } else {
-      const img = document.createElement('img');
-      img.src = item.src;
-      img.alt = item.title;
-      div.appendChild(img);
-    }
-
-    // Título
-    const title = document.createElement('div');
-    title.className = 'title';
-    title.textContent = item.title;
-    div.appendChild(title);
-
-    // Evento clique para abrir modal
-    div.addEventListener('click', () => openModal(item));
-    div.addEventListener('keypress', e => {
-      if(e.key === 'Enter' || e.key === ' ') {
-        openModal(item);
-      }
-    });
-
-    return div;
-  }
-
-  // Renderizar galerias
-  function renderGallery(galleryId, items) {
-    const container = document.getElementById(galleryId);
-    container.innerHTML = '';
-    items.forEach(item => {
-      container.appendChild(createItem(item));
-    });
-  }
-
-  // Abrir modal
-  const modal = document.getElementById('modal');
-  const modalTitle = document.getElementById('modal-title');
-  const modalMedia = document.getElementById('modal-media');
-  const modalDownload = document.getElementById('modal-download');
-
-  function openModal(item) {
-    modalTitle.textContent = item.title;
-    modalMedia.innerHTML = '';
-
-    if(item.isVideo) {
-      const video = document.createElement('video');
-      video.src = item.src;
-      video.controls = true;
-      video.autoplay = true;
-      video.muted = false;
-      video.playsInline = true;
-      modalMedia.appendChild(video);
-    } else {
-      const img = document.createElement('img');
-      img.src = item.src;
-      img.alt = item.title;
-      modalMedia.appendChild(img);
-    }
-
-    modalDownload.href = item.src;
-    modalDownload.setAttribute('download', '');
-
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-
-  // Fechar modal
-  function closeModal() {
-    modal.classList.remove('active');
-    modalMedia.innerHTML = '';
-    document.body.style.overflow = '';
-  }
-
-  document.getElementById('modal-close').addEventListener('click', closeModal);
-  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
-  modal.addEventListener('click', e => {
-    if(e.target === modal) closeModal();
-  });
-
-  // Search filter
-  const searchInput = document.getElementById('search');
-  searchInput.addEventListener('input', e => {
-    const searchTerm = e.target.value.toLowerCase();
-
-    // Função auxiliar para filtrar e renderizar
-    function filterAndRender(galleryId, items) {
-      const filtered = items.filter(item => item.title.toLowerCase().includes(searchTerm));
-      renderGallery(galleryId, filtered);
-    }
-
-    filterAndRender('flags', flags);
-    filterAndRender('maps', maps);
-    filterAndRender('backgrounds', backgrounds);
-    filterAndRender('icons', icons);
-    filterAndRender('faces', faces);
-  });
-
-  // Renderização inicial
-  renderGallery('flags', flags);
-  renderGallery('maps', maps);
-  renderGallery('backgrounds', backgrounds);
-  renderGallery('icons', icons);
-  renderGallery('faces', faces);
-</script>
-
+<body class="bg-gray-900 text-white">
+  <!-- Conteúdo renderizado por JavaScript -->
 </body>
 </html>
-
-
 
 
