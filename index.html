@@ -2,164 +2,164 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MapperHub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MapperHub.org</title>
   <style>
     body {
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      font-family: 'Inter', sans-serif;
-      background-color: #111;
+      background-color: #1e1e1e;
       color: #fff;
     }
     header {
-      background: #1a1a1a;
-      padding: 1rem;
+      background-color: #111;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid #333;
+      padding: 10px 20px;
     }
     header img {
-      height: 50px;
+      height: 60px;
     }
-    .discord-button {
+    header a {
       background-color: #5865F2;
       color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
+      padding: 10px 16px;
+      border-radius: 8px;
+      text-decoration: none;
       font-weight: bold;
     }
     h2 {
-      padding: 1rem;
-      margin-bottom: 0;
+      text-align: center;
+      margin-top: 30px;
     }
-    .section {
-      padding: 1rem;
+    .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 20px;
     }
     .item {
-      background: #222;
-      padding: 0.5rem;
-      border-radius: 10px;
+      background: #2a2a2a;
+      border-radius: 12px;
+      padding: 10px;
       text-align: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
     .item img {
-      max-width: 100%;
-      border-radius: 6px;
-      cursor: pointer;
+      width: 100%;
+      border-radius: 10px;
     }
     .item p {
-      font-size: 0.9rem;
-      margin-top: 0.5rem;
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    .item a.download {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 12px;
+      background-color: #0e76a8;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .item a.download:hover {
+      background-color: #095a85;
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="https://i.imgur.com/iBdzDDD.png" alt="MapperHub Logo" />
-    <button class="discord-button" onclick="window.open('https://discord.gg/Xba7q3gf','_blank')">Join Discord Server</button>
-  </header>
 
-  <h2>Blue Emojis</h2>
-  <div class="section">
-    <!-- Nenhum listado aqui ainda -->
-  </div>
+<header>
+  <img src="https://i.imgur.com/iBdzDDD.png" alt="Logo" />
+  <a href="https://discord.gg/Xba7q3gf" target="_blank">Join Discord Server</a>
+</header>
 
-  <h2>Geometry Dash Faces</h2>
-  <div class="section">
-    <div class="item"><img src="https://i.imgur.com/HXXafQq.png" onclick="download(this)"><p>Mega Happy</p></div>
-    <div class="item"><img src="https://i.imgur.com/229WN6u.png" onclick="download(this)"><p>Mega Happy Blue Face</p></div>
-    <div class="item"><img src="https://i.imgur.com/l5I7pWc.png" onclick="download(this)"><p>Headphones Face</p></div>
-    <div class="item"><img src="https://i.imgur.com/24ZG51o.png" onclick="download(this)"><p>Very Very Happy</p></div>
-    <div class="item"><img src="https://i.imgur.com/uqrWA1f.png" onclick="download(this)"><p>Very Happy</p></div>
-    <div class="item"><img src="https://i.imgur.com/HmrkGxu.png" onclick="download(this)"><p>Happy</p></div>
-    <div class="item"><img src="https://i.imgur.com/2JjbAHJ.png" onclick="download(this)"><p>Normal</p></div>
-    <div class="item"><img src="https://i.imgur.com/bVZdn48.png" onclick="download(this)"><p>A little bit Angry</p></div>
-    <div class="item"><img src="https://i.imgur.com/3KQ2Zod.png" onclick="download(this)"><p>Angry</p></div>
-    <div class="item"><img src="https://i.imgur.com/SS0A09s.png" onclick="download(this)"><p>Very Angry</p></div>
-    <div class="item"><img src="https://i.imgur.com/kiLYcrE.png" onclick="download(this)"><p>Mega Angry</p></div>
-    <div class="item"><img src="https://i.imgur.com/kWCa2cc.png" onclick="download(this)"><p>F#ck!!</p></div>
-  </div>
+<h2>Maps</h2>
+<div class="grid" id="maps"></div>
 
-  <h2>Icons</h2>
-  <div class="section">
-    <!-- Inserido automaticamente no JS -->
-  </div>
+<h2>Icons</h2>
+<div class="grid" id="icons"></div>
 
-  <h2>Maps</h2>
-  <div class="section">
-    <!-- Inserido automaticamente no JS -->
-  </div>
+<h2>Geometry Dash Faces</h2>
+<div class="grid" id="faces"></div>
 
-  <script>
-    function download(img) {
-      const a = document.createElement('a');
-      a.href = img.src;
-      a.download = img.src.split('/').pop();
-      a.click();
-    }
+<script>
+const maps = [
+  ["https://i.imgur.com/0QbrXQK.png", "Defeated Brazil?"],
+  ["https://i.imgur.com/ePcFV7U.png", "Barcelona Player?"],
+  ["https://i.imgur.com/NE46OQK.png", "Brawler Inspired?"],
+  ["https://i.imgur.com/gx5EbYE.png", "Gaming Company?"],
+  ["https://i.imgur.com/DmZPpXN.png", "Top 10 Safest (2025)"],
+  ["https://i.imgur.com/1wkZCGw.png", "Top 10 Most Visited (2025)"]
+];
 
-    const icons = [
-      ["https://i.imgur.com/2RtAvsf.png", "European Union"],
-      ["https://i.imgur.com/gtnvu5s.png", "Sovietic Icon"],
-      ["https://i.imgur.com/aqtAEAG.png", "World Languages"],
-      ["https://i.imgur.com/BDiIMy2.png", "Dead"],
-      ["https://i.imgur.com/DJLlamR.png", "GDP Icon"],
-      ["https://i.imgur.com/flwrtQ7.png", "Follow Button"],
-      ["https://i.imgur.com/qprW4Nu.png", "Christian"],
-      ["https://i.imgur.com/78lPcuC.png", "Islam"],
-      ["https://i.imgur.com/B15QgPp.png", "Beer Time!"],
-      ["https://i.imgur.com/mOXiqGm.png", "Face Icon"],
-      ["https://i.imgur.com/NZYroaB.png", "Energy Icon"],
-      ["https://i.imgur.com/mpl5m0r.png", "Brawl Stars Finger Up!"],
-      ["https://i.imgur.com/1g5RtUh.png", "Brawl Stars Finger Down!"],
-      ["https://i.imgur.com/cbwmJlX.png", "GigaChad"],
-      ["https://i.imgur.com/3T9VJsS.png", "Deadly Icon"],
-      ["https://i.imgur.com/o30f1cM.png", "Happy Face"],
-      ["https://i.imgur.com/0G2odpT.png", "Books"],
-      ["https://i.imgur.com/SwSxVab.png", "Orthodox"],
-      ["https://i.imgur.com/bnmfJZv.png", "LGBT Flag"],
-      ["https://i.imgur.com/lbcMZK2.png", "The Quran"],
-      ["https://i.imgur.com/9aKNbrQ.png", "The Bible"],
-      ["https://i.imgur.com/hvNw6sT.png", "Atheism"],
-      ["https://i.imgur.com/0eCaYhL.png", "Chinese Man"],
-      ["https://i.imgur.com/C0yo78Y.png", "Gold"],
-      ["https://i.imgur.com/cMBsKi0.png", "Swords"],
-      ["https://i.imgur.com/Sq6RDNF.png", "Brain"]
-    ];
+const icons = [
+  ["https://i.imgur.com/2RtAvsf.png", "European Union"],
+  ["https://i.imgur.com/gtnvu5s.png", "Sovietic Icon"],
+  ["https://i.imgur.com/aqtAEAG.png", "World Languages"],
+  ["https://i.imgur.com/BDiIMy2.png", "Dead"],
+  ["https://i.imgur.com/DJLlamR.png", "GDP Icon"],
+  ["https://i.imgur.com/flwrtQ7.png", "Follow Button"],
+  ["https://i.imgur.com/qprW4Nu.png", "Christian"],
+  ["https://i.imgur.com/78lPcuC.png", "Islam"],
+  ["https://i.imgur.com/B15QgPp.png", "Beer Time!"],
+  ["https://i.imgur.com/mOXiqGm.png", "Face Icon"],
+  ["https://i.imgur.com/NZYroaB.png", "Energy Icon"],
+  ["https://i.imgur.com/mpl5m0r.png", "Brawl Stars 👍"],
+  ["https://i.imgur.com/1g5RtUh.png", "Brawl Stars 👎"],
+  ["https://i.imgur.com/cbwmJlX.png", "GigaChad"],
+  ["https://i.imgur.com/3T9VJsS.png", "Deadly Icon"],
+  ["https://i.imgur.com/o30f1cM.png", "Happy Face"],
+  ["https://i.imgur.com/0G2odpT.png", "Books"],
+  ["https://i.imgur.com/SwSxVab.png", "Orthodox"],
+  ["https://i.imgur.com/bnmfJZv.png", "LGBT Flag"],
+  ["https://i.imgur.com/lbcMZK2.png", "The Quran"],
+  ["https://i.imgur.com/9aKNbrQ.png", "The Bible"],
+  ["https://i.imgur.com/hvNw6sT.png", "Atheism"],
+  ["https://i.imgur.com/0eCaYhL.png", "Chinese Man"],
+  ["https://i.imgur.com/C0yo78Y.png", "Gold"],
+  ["https://i.imgur.com/cMBsKi0.png", "Swords"],
+  ["https://i.imgur.com/Sq6RDNF.png", "Brain"]
+];
 
-    const maps = [
-      ["https://i.imgur.com/0QbrXQK.png", "Has your country ever defeated Brazil at football? (2025)"],
-      ["https://i.imgur.com/ePcFV7U.png", "Has your country ever had a Barcelona player? (2025)"],
-      ["https://i.imgur.com/NE46OQK.png", "Does your country have a brawler inspired on it?"],
-      ["https://i.imgur.com/gx5EbYE.png", "Does your country have a famous gaming company?"],
-      ["https://i.imgur.com/DmZPpXN.png", "Is your country one of the #10 safest in the world? (2025)"],
-      ["https://i.imgur.com/1wkZCGw.png", "Is your country one of the #10 most visited in the world? (2025)"]
-    ];
+const faces = [
+  ["https://i.imgur.com/HXXafQq.png", "Mega Happy"],
+  ["https://i.imgur.com/229WN6u.png", "Mega Happy Blue"],
+  ["https://i.imgur.com/l5I7pWc.png", "Headphones Face"],
+  ["https://i.imgur.com/24ZG51o.png", "Very Very Happy"],
+  ["https://i.imgur.com/uqrWA1f.png", "Very Happy"],
+  ["https://i.imgur.com/HmrkGxu.png", "Happy"],
+  ["https://i.imgur.com/2JjbAHJ.png", "Normal"],
+  ["https://i.imgur.com/bVZdn48.png", "A little bit Angry"],
+  ["https://i.imgur.com/3KQ2Zod.png", "Angry"],
+  ["https://i.imgur.com/SS0A09s.png", "Very Angry"],
+  ["https://i.imgur.com/kiLYcrE.png", "Mega Angry"],
+  ["https://i.imgur.com/kWCa2cc.png", "F#ck!!"]
+];
 
-    const iconSection = document.querySelectorAll('.section')[2];
-    const mapSection = document.querySelectorAll('.section')[3];
+function renderSection(sectionId, items) {
+  const section = document.getElementById(sectionId);
+  items.forEach(([src, label]) => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+      <img src="${src}" alt="${label}">
+      <p>${label}</p>
+      <a class="download" href="${src}" download>Download</a>
+    `;
+    section.appendChild(div);
+  });
+}
 
-    icons.forEach(([src, label]) => {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `<img src="${src}" onclick="download(this)"><p>${label}</p>`;
-      iconSection.appendChild(div);
-    });
+renderSection('maps', maps);
+renderSection('icons', icons);
+renderSection('faces', faces);
+</script>
 
-    maps.forEach(([src, label]) => {
-      const div = document.createElement('div');
-      div.className = 'item';
-      div.innerHTML = `<img src="${src}" onclick="download(this)"><p>${label}</p>`;
-      mapSection.appendChild(div);
-    });
-  </script>
 </body>
 </html>
+
 
 
