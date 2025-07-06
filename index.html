@@ -105,7 +105,7 @@
       background: #333;
       margin: 5px;
     }
-    .no-sound, .is-video {
+    .no-sound {
       margin-top: 5px;
       background: #888;
       color: #fff;
@@ -119,18 +119,6 @@
       left: 10px;
       font-size: 20px;
       color: red;
-    }
-    .discord-button {
-      display: block;
-      margin: 40px auto;
-      padding: 12px 24px;
-      background: #5865F2;
-      color: white;
-      font-size: 16px;
-      border-radius: 10px;
-      text-align: center;
-      text-decoration: none;
-      width: max-content;
     }
   </style>
 </head>
@@ -150,11 +138,6 @@
 
   <h2>Backgrounds</h2>
   <div class="gallery" id="backgrounds"></div>
-
-  <h2>Flags</h2>
-  <div class="gallery" id="flags"></div>
-
-  <a class="discord-button" href="https://mapperhub.org/discord" target="_blank">Join our Discord Server</a>
 
   <div class="popup" id="popup">
     <div class="popup-content">
@@ -176,21 +159,70 @@
     </div>
   </div>
 
-  <script src="gallery-data.js"></script>
   <script>
+    const maps = [
+      {src:'0QbrXQK.png', title:'Has your country ever defeated Brazil at football? 2025'},
+      {src:'ePcFV7U.png', title:'Has your country ever had a Barcelona player? 2025'},
+      {src:'NE46OQK.png', title:'Does your country has a brawler inspired on it?'},
+      {src:'gx5EbYE.png', title:'Does your country have a famous gaming company?'},
+      {src:'DmZPpXN.png', title:'Is your country one of the #10 safest in the world? 2025'},
+      {src:'1wkZCGw.png', title:'Is your country one of the #10 most visited in the world? 2025'},
+      {src:'0oJmppv.png', title:'Largest stadium in each country (Credits: 🇧🇦YGA🗺)'}
+    ];
+    const icons = [
+      {src:'2RtAvsf.png', title:'European Union'}, {src:'gtnvu5s.png', title:'Sovietic Icon'},
+      {src:'aqtAEAG.png', title:'World Languages'}, {src:'BDiIMy2.png', title:'Dead'},
+      {src:'DJLlamR.png', title:'GDP Icon'}, {src:'flwrtQ7.png', title:'Follow Button'},
+      {src:'qprW4Nu.png', title:'Christian'}, {src:'78lPcuC.png', title:'Islam'},
+      {src:'B15QgPp.png', title:'Beer Time!'}, {src:'mOXiqGm.png', title:'Face Icon'},
+      {src:'NZYroaB.png', title:'Energy Icon'}, {src:'mpl5m0r.png', title:'Brawl Stars Finger Up!'},
+      {src:'1g5RtUh.png', title:'Brawl Stars Finger Down!'}, {src:'cbwmJlX.png', title:'GigaChad'},
+      {src:'3T9VJsS.png', title:'Deadly Icon'}, {src:'o30f1cM.png', title:'Happy Face'},
+      {src:'0G2odpT.png', title:'Books'}, {src:'SwSxVab.png', title:'Orthodox'},
+      {src:'bnmfJZv.png', title:'LGBT Flag'}, {src:'lbcMZK2.png', title:'The Quran'},
+      {src:'9aKNbrQ.png', title:'The Bible'}, {src:'hvNw6sT.png', title:'Atheism'},
+      {src:'0eCaYhL.png', title:'Chinese Man'}, {src:'C0yo78Y.png', title:'Gold'},
+      {src:'cMBsKi0.png', title:'Swords'}, {src:'Sq6RDNF.png', title:'Brain'},
+      {src:'EfDEP1t.png', title:'Student'}, {src:'b3qmh7r.png', title:'NATO'},
+      {src:'w0s7RZF.png', title:'Deal'}, {src:'zxyU0Nc.png', title:'Angry Fire Face'},
+      {src:'WtimfWW.png', title:'Discord Icon'}, {src:'udqXvqR.png', title:'Money'},
+      {src:'2kuUuNs.png', title:'World'}
+    ];
+    const faces = [
+      {src:'HXXafQq.png', title:'Mega Happy'}, {src:'5AVoz9g.png', title:'Perfect Face'},
+      {src:'229WN6u.png', title:'Mega Happy Blue Face'}, {src:'l5I7pWc.png', title:'Headphones Face'},
+      {src:'24ZG51o.png', title:'Very Very Happy'}, {src:'uqrWA1f.png', title:'Very Happy'},
+      {src:'HmrkGxu.png', title:'Happy'}, {src:'2JjbAHJ.png', title:'Normal'},
+      {src:'bVZdn48.png', title:'A little bit Angry'}, {src:'3KQ2Zod.png', title:'Angry'},
+      {src:'SS0A09s.png', title:'Very Angry'}, {src:'kiLYcrE.png', title:'Mega Angry'},
+      {src:'kWCa2cc.png', title:'F#ck!!'}, {src:'p8soC6j.png', title:'Medium Demon'},
+      {src:'Xc7Jv9u.png', title:'Impossiblle #404'}
+    ];
+    const backgrounds = [
+      {src:'eGZkcrj.mp4', title:'Nature', sound:true},
+      {src:'fzuFAVT.mp4', title:'Paris Eiffel Tower', sound:true},
+      {src:'ks0UIDS.mp4', title:'Arc de Triomphe', sound:true},
+      {src:'fwUwJNv.mp4', title:'Island', sound:false},
+      {src:'1EpEw0h.mp4', title:'Streets of France', sound:true},
+      {src:'1rWQQV5.mp4', title:'Nature #2', sound:true},
+      {src:'0vdYbWN.mp4', title:'JetSki Ride', sound:true},
+      {src:'TlRfrBT.mp4', title:'Nature #3', sound:true},
+      {src:'LEOHzLm.mp4', title:'Nature #4', sound:true}
+    ];
+
     let currentIndex = 0;
     let currentArray = [];
     let currentIsVideo = false;
 
-    function createGallery(id, data, isVideo = false) {
+    function createGallery(id, data, isVideo=false) {
       const container = document.getElementById(id);
       data.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = 'item';
-        div.onclick = () => openPopup(index, data, isVideo || item.src.endsWith('.mp4'));
-        const media = item.src.endsWith('.mp4') ? document.createElement('video') : document.createElement('img');
-        media.src = `https://i.imgur.com/${item.src}`;
-        if (media.tagName === 'VIDEO') media.muted = true;
+        div.onclick = () => openPopup(index, data, isVideo);
+        const media = isVideo ? document.createElement('video') : document.createElement('img');
+        media.src = https://i.imgur.com/${item.src};
+        if (isVideo) media.setAttribute('muted', true);
         div.appendChild(media);
         const title = document.createElement('div');
         title.innerText = item.title;
@@ -205,14 +237,12 @@
       currentIsVideo = isVideo;
       const item = arr[index];
       const media = isVideo
-        ? `<video controls autoplay><source src='https://i.imgur.com/${item.src}' type='video/mp4'></video>`
-        : `<img src='https://i.imgur.com/${item.src}' />`;
+        ? <video controls autoplay><source src='https://i.imgur.com/${item.src}' type='video/mp4'></video>
+        : <img src='https://i.imgur.com/${item.src}' />;
       document.getElementById('popup-media').innerHTML = media;
       document.getElementById('popup-title').innerText = item.title;
-      document.getElementById('popup-note').innerHTML =
-        item.sound === false ? "<div class='no-sound'>No Sound</div>" :
-        item.src.endsWith('.mp4') ? "<div class='is-video'>This is a video</div>" : "";
-      document.getElementById('popup-link').href = `https://i.imgur.com/${item.src}`;
+      document.getElementById('popup-note').innerHTML = item.sound === false ? "<div class='no-sound'>No Sound</div>" : "";
+      document.getElementById('popup-link').href = https://i.imgur.com/${item.src};
       document.getElementById('popup').style.display = 'flex';
       document.getElementById('favMark').style.display = isFavorite(item.src) ? 'block' : 'none';
     }
@@ -223,12 +253,15 @@
 
     function downloadCurrent() {
       const item = currentArray[currentIndex];
-      const url = `https://i.imgur.com/${item.src}`;
+      const url = https://i.imgur.com/${item.src};
       const fileExtension = item.src.split('.').pop();
-      const filename = `${item.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_mapperhub.${fileExtension}`;
+      const filename = ${item.title} - mapperhub.org.${fileExtension};
 
       fetch(url)
-        .then(res => res.blob())
+        .then(response => {
+          if (!response.ok) throw new Error("Network response was not ok");
+          return response.blob();
+        })
         .then(blob => {
           const blobUrl = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -272,7 +305,7 @@
 
     function sendFeedback() {
       const item = currentArray[currentIndex];
-      const mailto = `mailto:hypexservices0@gmail.com?subject=Feedback on ${encodeURIComponent(item.title)}&body=I have feedback about ${item.title} (${item.src})`;
+      const mailto = mailto:hypexservices0@gmail.com?subject=Feedback on ${encodeURIComponent(item.title)}&body=I have feedback about ${item.title} (${item.src});
       window.open(mailto);
     }
 
@@ -280,9 +313,7 @@
     createGallery('icons', icons);
     createGallery('faces', faces);
     createGallery('backgrounds', backgrounds, true);
-    createGallery('flags', flags);
   </script>
 </body>
 </html>
-
 
