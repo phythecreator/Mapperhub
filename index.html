@@ -1,156 +1,108 @@
+from flask import Flask, send_file
+import os
+
+app = Flask(__name__)
+
+# O nome exato do ficheiro que será descarregado
+FILE_NAME = "Radioactive Steal a Brainrot (fix spawnlocation).rbxl"
+FILE_PATH = os.path.join(app.root_path, FILE_NAME) 
+
+# --- Função que retorna o HTML ---
+def get_html_content():
+    # O HTML completo, com o botão e a caixa de texto
+    return f"""
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MapperHub</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-    header {
-      background: #1c1c1c;
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 20px;
-      color: #00d4ff;
-    }
-    select, button {
-      margin-left: 10px;
-      padding: 6px 10px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-    }
-    canvas {
-      flex: 1;
-      background: #fff;
-      cursor: crosshair;
-    }
-    footer {
-      background: #1c1c1c;
-      text-align: center;
-      padding: 5px;
-      font-size: 12px;
-      color: #aaa;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Download Simples</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; padding: 50px; background-color: #f4f4f9; }}
+        .container {{ 
+            max-width: 600px; 
+            margin: 0 auto; 
+            text-align: center; 
+            background-color: white; 
+            padding: 30px; 
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }}
+        .download-btn {{
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }}
+        .download-btn:hover {{
+            background-color: #c0392b;
+        }}
+        textarea {{
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 10px;
+        }}
+    </style>
 </head>
 <body>
-  <header>
-    <h1>🌍 MapperHub</h1>
-    <div>
-      <select id="mapSelect">
-        <option value="https://i.imgur.com/UJLGUSo.png">World</option>
-        <option value="https://i.imgur.com/Wtzfcjc.png">Europe Topographic</option>
-        <option value="https://i.imgur.com/wloWtLJ.png">Europe</option>
-        <option value="https://i.imgur.com/kSP0EzQ.png">Americas</option>
-        <option value="https://i.imgur.com/KXvKE6w.png">Africa</option>
-        <option value="https://i.imgur.com/huau6Bk.png">Balkans</option>
-        <option value="https://i.imgur.com/FiQw4Fy.png">USA States</option>
-        <option value="https://i.imgur.com/KPUPWQd.png">Asia</option>
-        <option value="https://i.imgur.com/1E10aFn.png">Middle East</option>
-        <option value="https://i.imgur.com/0doePKk.png">Middle East Extended</option>
-      </select>
-      <input type="color" id="colorPicker" value="#ff0000">
-      <button id="addText">Add Text</button>
-      <button id="downloadBtn">Download</button>
+    <div class="container">
+        <h1>Download do Jogo</h1>
+        <p>Clique no botão abaixo para descarregar o ficheiro **.rbxl**:</p>
+        
+        <a href="/download" class="download-btn">
+            Steal a Brainrot Download
+        </a>
+        
+        <p style="margin-top: 30px; color: #777;">
+            Ficheiro: *{FILE_NAME}*
+        </p>
+
+        <hr style="margin: 30px 0;">
+
+        <h2>Caixa de Texto</h2>
+        <textarea rows="10" placeholder="Cole o código aqui (este campo é apenas para demonstração e não aciona o download)"></textarea>
+        <br>
+        <button style="padding: 10px 20px; margin-top: 10px; background-color: #ccc; border: none; border-radius: 5px;">Processar (Inativo)</button>
     </div>
-  </header>
-
-  <canvas id="mapCanvas"></canvas>
-
-  <footer>
-    MapperHub MVP – Inspired by Periphern
-  </footer>
-
-  <script>
-    const canvas = document.getElementById("mapCanvas");
-    const ctx = canvas.getContext("2d");
-    const mapSelect = document.getElementById("mapSelect");
-    const colorPicker = document.getElementById("colorPicker");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const addTextBtn = document.getElementById("addText");
-
-    let img = new Image();
-    let drawing = false;
-
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight - 100;
-      drawMap();
-    }
-
-    window.addEventListener("resize", resizeCanvas);
-
-    function drawMap() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (img.complete) {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      }
-    }
-
-    mapSelect.addEventListener("change", () => {
-      img.src = mapSelect.value;
-    });
-
-    img.onload = () => {
-      drawMap();
-    };
-
-    // Drawing
-    canvas.addEventListener("mousedown", (e) => {
-      drawing = true;
-      ctx.beginPath();
-      ctx.moveTo(e.offsetX, e.offsetY);
-    });
-
-    canvas.addEventListener("mousemove", (e) => {
-      if (drawing) {
-        ctx.strokeStyle = colorPicker.value;
-        ctx.lineWidth = 3;
-        ctx.lineTo(e.offsetX, e.offsetY);
-        ctx.stroke();
-      }
-    });
-
-    canvas.addEventListener("mouseup", () => {
-      drawing = false;
-    });
-
-    // Add text
-    addTextBtn.addEventListener("click", () => {
-      const text = prompt("Enter text:");
-      if (text) {
-        ctx.fillStyle = colorPicker.value;
-        ctx.font = "20px Arial";
-        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-      }
-    });
-
-    // Download
-    downloadBtn.addEventListener("click", () => {
-      const link = document.createElement("a");
-      link.download = "mapperhub-map.png";
-      link.href = canvas.toDataURL();
-      link.click();
-    });
-
-    // Init
-    img.src = mapSelect.value;
-    resizeCanvas();
-  </script>
 </body>
 </html>
+"""
 
+# --- ROTAS ---
+
+# Rota principal: Retorna o HTML embutido
+@app.route('/')
+def index():
+    return get_html_content()
+
+# Rota de download: Envia o ficheiro
+@app.route('/download', methods=['GET'])
+def download_file():
+    try:
+        if not os.path.exists(FILE_PATH):
+            # Se o ficheiro não for encontrado, retorna uma mensagem de erro
+            return "Erro 404: O ficheiro não foi encontrado no servidor.", 404
+            
+        # Força o download do ficheiro
+        return send_file(
+            FILE_PATH,
+            as_attachment=True,
+            download_name=FILE_NAME, 
+            mimetype='application/octet-stream' 
+        )
+    except Exception as e:
+        return f"Ocorreu um erro: {str(e)}"
+
+if __name__ == '__main__':
+    app.run(debug=True)
