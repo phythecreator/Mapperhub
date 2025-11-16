@@ -11,15 +11,15 @@
         /* 1. VARIÁVEIS E REGRAS GLOBAIS */
         /* ==================================== */
         :root {
-            --color-bg-primary: #0a0a0a; /* Fundo mais escuro */
-            --color-bg-secondary: #1a1a1a;
+            --color-bg-primary: #0a0a0a;
+            --color-bg-secondary: #181818;
             --color-text-light: #f0f0f0;
             --color-text-faded: #b0b0b0;
-            --color-primary-green: #00e676; /* Verde mais vibrante (A700) */
-            --color-secondary-grey: #2b2b2b;
+            --color-primary-green: #00e676; /* Verde vibrante */
+            --color-secondary-input: #242424;
             --color-error-red: #ff3d00;
-            --color-info-blue: #2979ff; /* Azul vibrante (A700) */
-            --color-border: #333333;
+            --color-info-blue: #2979ff; /* Azul vibrante */
+            --color-border: #383838;
             --border-radius-smooth: 12px;
             --shadow-depth: 0 15px 40px rgba(0, 0, 0, 0.7);
             --transition-speed: 0.3s;
@@ -39,163 +39,114 @@
             box-sizing: border-box;
         }
         
-        /* Contenção Principal (O Card) */
+        /* Contenção Principal (O Card) - UI MAIS SMOOTH */
         .container {
             width: 100%;
             max-width: 550px;
             background-color: var(--color-bg-secondary);
-            padding: 0 40px 40px 40px; /* Padding ajustado para a imagem de topo */
+            padding: 0 40px 40px 40px;
             border-radius: var(--border-radius-smooth);
             box-shadow: var(--shadow-depth);
             text-align: left;
             border: 1px solid var(--color-border);
             animation: fadeIn 0.8s ease-out;
-            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-            overflow: hidden; /* Para conter a imagem de topo */
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease-out; /* Cubic-bezier para mais smooth */
+            overflow: hidden;
         }
         .container:hover {
-             transform: perspective(1000px) rotateY(1deg);
-             box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8);
+             transform: perspective(1000px) rotateY(1deg) scale(1.01); /* Pequeno scale no hover */
+             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
         }
 
-        /* Imagem de Topo */
+        /* Imagem de Topo (1ª Imagem) - Caminho Corrigido */
         .top-image {
-            width: calc(100% + 80px); /* 100% + o padding de 40px em cada lado */
-            margin: 0 -40px 30px -40px; /* Remove o padding do container apenas para a imagem */
+            width: calc(100% + 80px);
+            margin: 0 -40px 30px -40px;
             height: 150px;
             object-fit: cover;
             border-radius: 12px 12px 0 0;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            /* A primeira imagem deve ser definida como fundo de um div para melhor controlo de escala e posição */
+            /* CAMINHO CORRIGIDO: Nome do ficheiro da primeira imagem */
             background-image: url('Gemini_Generated_Image_yrcqt6yrcqt6yrcq (1).png');
             background-size: cover;
             background-position: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
 
         /* Tipografia */
-        h1 { font-size: 32px; font-weight: 700; color: var(--color-primary-green); margin-bottom: 10px; text-shadow: 0 0 5px rgba(0, 230, 118, 0.3); }
+        h1 { font-size: 32px; font-weight: 700; color: var(--color-primary-green); margin-bottom: 10px; text-shadow: 0 0 8px rgba(0, 230, 118, 0.5); }
         .subtitle { font-size: 16px; color: var(--color-text-faded); margin-bottom: 30px; display: block; }
         .divider { border: 0; border-top: 1px solid var(--color-border); margin: 30px 0; }
-
+        
         /* ==================================== */
-        /* 2. INPUTS E BOTÕES DE AÇÃO */
+        /* 2. INPUTS E ÍCONES DINÂMICOS (FOCO E GLOW) */
         /* ==================================== */
         .input-group { margin-bottom: 25px; position: relative; }
-        .input-field { /* ... (Estilos do input) ... */ }
-        .input-field:focus { outline: none; border-color: var(--color-primary-green); box-shadow: 0 0 0 1px var(--color-primary-green); }
-        .input-icon { /* ... (Estilos dos ícones) ... */ }
-        .clear-btn { /* ... (Estilos do botão de limpar) ... */ }
+        .input-field { 
+            width: 100%; 
+            padding: 15px 45px 15px 45px;
+            background-color: var(--color-secondary-input);
+            border: 2px solid var(--color-border);
+            border-radius: 10px; 
+            color: var(--color-text-light); 
+            font-size: 16px; 
+            box-sizing: border-box; 
+            transition: all 0.2s ease-out; 
+        }
+        .input-field:focus { 
+            outline: none; 
+            border-color: var(--color-primary-green);
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.7), 0 0 0 1px var(--color-primary-green); /* Glow mais intenso */
+        }
+        .input-icon { 
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%); 
+            color: #777777; font-size: 18px; transition: color 0.3s;
+        }
+        .clear-btn { /* ... */ }
+        .clear-btn:hover { color: var(--color-text-light); }
 
-        /* Estilos dos botões principais */
+        /* ==================================== */
+        /* 3. BOTÕES GERAIS */
+        /* ==================================== */
         #copy-button, .download-btn, #tutorial-button {
-             width: 100%; 
-             padding: 18px; 
-             border: none; 
-             border-radius: var(--border-radius-smooth); 
-             font-size: 18px; 
-             font-weight: bold; 
-             cursor: pointer; 
-             transition: all 0.2s ease; 
-             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); 
-             text-transform: uppercase;
-             margin-bottom: 15px;
+             width: 100%; padding: 18px; border: none; border-radius: var(--border-radius-smooth); 
+             font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; 
+             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); text-transform: uppercase; margin-bottom: 15px;
         }
         #copy-button { background-color: var(--color-text-light); color: var(--color-bg-primary); }
-        #copy-button:hover { background-color: #ffffff; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6); }
+        #copy-button:hover { background-color: #ffffff; transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6); }
 
         .download-btn { background-color: var(--color-primary-green); color: white; border-radius: var(--border-radius-smooth) var(--border-radius-smooth) 30px 30px; box-shadow: 0 5px 20px rgba(0, 230, 118, 0.5); }
         .download-btn:hover { background-color: #00c853; }
-        .download-link { margin-top: 30px; }
-
-        #tutorial-button { background-color: var(--color-info-blue); color: white; padding: 15px; font-size: 16px; }
-        #tutorial-button:hover { background-color: #1e88e5; }
         
-        /* Botões do Modal de Requisitos */
-        .modal-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-            margin-top: 25px;
-        }
-        .modal-buttons button {
-            flex-grow: 1;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        #play-it-btn {
-            background-color: var(--color-info-blue);
-            color: white;
-            border: none;
-        }
-        #play-it-btn:hover { background-color: #1e88e5; }
-
-        #check-btn {
-            background-color: var(--color-primary-green);
-            color: white;
-            border: none;
-            width: 150px; /* Largura definida para a animação */
-        }
-        #check-btn:hover:not(:disabled) { background-color: #00c853; }
-        #check-btn:disabled { background-color: #555; cursor: not-allowed; }
-
-        #skip-btn {
-            background-color: #333;
-            color: var(--color-text-faded);
-            border: none;
-            width: 80px;
-        }
-        #skip-btn:disabled { opacity: 0.5; cursor: wait; }
-        #skip-btn:hover:not(:disabled) { background-color: #444; color: var(--color-text-light); }
+        /* Botões do Modal */
+        .modal-buttons { display: flex; justify-content: space-between; gap: 15px; margin-top: 25px; }
+        .modal-buttons button { flex-grow: 1; padding: 12px; border-radius: 8px; font-weight: bold; transition: all 0.3s ease; }
+        
+        #play-it-btn { background-color: var(--color-info-blue); color: white; border: none; flex-grow: 2; }
+        #check-btn { background-color: var(--color-primary-green); color: white; border: none; width: 150px; }
+        .verified-success { background-color: var(--color-primary-green) !important; box-shadow: 0 0 15px rgba(0, 230, 118, 0.7); }
 
         /* ==================================== */
-        /* 3. MODAIS E ANIMAÇÕES */
+        /* 4. MODAL DE REQUISITOS E FEEDBACK */
         /* ==================================== */
-
-        /* Estilos base do modal */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
-        .modal-content { background-color: var(--color-bg-secondary); padding: 30px; border: 1px solid var(--color-border); border-radius: var(--border-radius-smooth); box-shadow: var(--shadow-depth); animation: modalFadeIn 0.3s ease-out; width: 80%; max-width: 450px;}
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
-        .close:hover { color: var(--color-text-light); }
         
-        /* Modal de Requisitos Específico */
-        #requirementsModal .modal-content {
-            padding: 0;
-            overflow: hidden;
-            text-align: center;
-        }
-        #requirementsModal .modal-body {
-            padding: 30px;
-        }
-        #requirementsModal h3 {
-            color: var(--color-primary-green);
-            margin-top: 0;
-            font-size: 24px;
-        }
+        #requirementsModal .modal-body { padding: 30px; }
         
-        /* Imagem de Requisitos */
+        /* Imagem de Requisitos (2ª Imagem) - Caminho Corrigido */
         #requirements-image {
             width: 100%;
-            height: 100px; /* Altura controlada */
+            height: 120px;
             object-fit: cover;
             border-radius: 12px 12px 0 0;
             margin-bottom: 20px;
         }
 
-        /* Animação de Loading Falsa (Check) */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .loading-icon {
-            animation: spin 0.6s linear infinite;
-        }
-        
-        /* Lista de Tutorial */
-        .tutorial-steps { /* ... (Estilos do tutorial) ... */ }
+        /* Caixa de Mensagens */
+        #message-box { margin-top: 20px; padding: 15px; border-radius: var(--border-radius-smooth); font-size: 14px; display: none; opacity: 0; transition: all 0.5s ease; border: 1px solid transparent;}
+        .error { background-color: var(--color-error-red); border: 1px solid rgba(255, 0, 0, 0.4); }
+        .success { background-color: var(--color-primary-green); border: 1px solid rgba(0, 230, 118, 0.4); color: white; }
     </style>
-    </head>
+</head>
 <body>
     <div class="container">
         <div class="top-image"></div>
@@ -226,7 +177,7 @@
 
     <div id="requirementsModal" class="modal">
         <div class="modal-content">
-            <img src="image_0d2ae6.png-20b11312-6e7f-493e-b79c-2c51fd5ffe8b" alt="Requirement Image" id="requirements-image">
+            <img src="image_0d2ae6.png" alt="Requirement Image" id="requirements-image">
             <div class="modal-body">
                 <span class="close requirements-close">&times;</span>
                 <h3>🔐 Requirements Check</h3>
@@ -234,7 +185,7 @@
                 <p style="font-weight:bold; color:var(--color-info-blue);">Requirements: Play the game and like it!</p>
 
                 <div class="modal-buttons">
-                    <a href="https://www.roblox.com/games/138286508083912/Steal-a-Brainrot-Uncopylocked" target="_blank" style="text-decoration:none; flex-grow:1;">
+                    <a href="https://www.roblox.com/games/138286508083912/Steal-a-Brainrot-Uncopylocked" target="_blank" style="text-decoration:none; flex-grow:2;">
                         <button id="play-it-btn"><i class="fas fa-play"></i> Play It!</button>
                     </a>
                     <button id="check-btn" disabled><i class="fas fa-sync-alt"></i> Check Requirements</button>
@@ -271,15 +222,12 @@
 
         const requirementsModal = document.getElementById('requirementsModal');
         const requirementsClose = document.querySelector('.requirements-close');
-        const playItBtn = document.getElementById('play-it-btn');
         const checkBtn = document.getElementById('check-btn');
         const skipBtn = document.getElementById('skip-btn');
         const verificationMessage = document.getElementById('verification-message');
-        
-        const ROBLOX_GAME_URL = "https://www.roblox.com/games/138286508083912/Steal-a-Brainrot-Uncopylocked";
 
-        // --- FUNÇÕES DE CONTROLO DE ESTADO ---
-        
+        // --- FUNÇÕES GERAIS ---
+
         function updateInputState() {
             const linkValue = gameLinkInput.value.trim();
             const isValidRobloxLink = linkValue.includes('roblox.com/games/') && linkValue.length > 30;
@@ -298,52 +246,56 @@
             }
         }
 
-        function showErrorMessage() {
-            inputIconLeft.className = 'fas fa-unlink input-icon';
-            inputIconLeft.style.color = 'var(--color-error-red)';
-
-            messageBox.style.display = 'block';
-            messageBox.style.opacity = '1';
-            messageBox.className = 'error'; 
-
-            let messageContent = `
-                <i class="fas fa-exclamation-triangle message-icon"></i>
-                <strong>Error: Extraction Failed!</strong><br>
-                The extraction server could not locate or copy the game link provided. 
-                If you are looking for the updated **Steal a Brainrot** asset, please use the dedicated green download button below.
-            `;
-            
-            messageBox.innerHTML = messageContent;
-
-            downloadLink.style.transform = 'scale(1.05)';
-            downloadLink.style.boxShadow = '0 0 20px rgba(0, 230, 118, 0.8)';
-            
-            setTimeout(() => {
-                downloadLink.style.transform = 'scale(1.0)';
-                downloadLink.style.boxShadow = '0 5px 20px rgba(0, 230, 118, 0.5)';
-            }, 1500); 
-        }
-
         function hideMessage() {
             if (messageBox.style.display === 'block') {
                 messageBox.style.opacity = '0';
                 setTimeout(() => {
                     messageBox.style.display = 'none';
+                    messageBox.className = '';
                 }, 500); 
             }
+        }
+        
+        function initiateDownload() {
+            // Limpa o timer quando a verificação ou o skip é concluído
+            const timerId = requirementsModal.getAttribute('data-timer-id');
+            if (timerId) {
+                clearInterval(parseInt(timerId));
+            }
+            requirementsModal.style.display = "none";
+            
+            // 1. Aciona o download
+            downloadLink.click();
+            
+            // 2. Mostra mensagem de sucesso
+            hideMessage();
+            setTimeout(() => {
+                 messageBox.style.display = 'block';
+                 messageBox.style.opacity = '1';
+                 messageBox.className = 'success';
+                 messageBox.innerHTML = `<i class="fas fa-check-circle message-icon"></i> **Download Iniciado!** Por favor, verifique a sua pasta de downloads.`;
+            }, 100);
         }
 
         // --- LÓGICA DO MODAL DE REQUISITOS ---
         function openRequirementsModal() {
             requirementsModal.style.display = "flex";
             verificationMessage.innerHTML = "";
-            checkBtn.disabled = false;
+            checkBtn.disabled = true;
+            checkBtn.classList.remove('verified-success');
             skipBtn.disabled = true;
             skipBtn.innerHTML = "Skip (5s)";
             checkBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Check Requirements';
             checkBtn.style.backgroundColor = 'var(--color-primary-green)';
             
-            // Ativa o botão Skip após 5 segundos
+            // 1. Ativa o botão Check após 2 segundos (Simulação de Play)
+            setTimeout(() => {
+                checkBtn.disabled = false;
+                verificationMessage.innerHTML = 'Ready to Check!';
+                verificationMessage.style.color = 'var(--color-primary-green)';
+            }, 2000);
+
+            // 2. Ativa o botão Skip após 5 segundos
             let skipCounter = 5;
             skipBtn.innerHTML = `Skip (${skipCounter}s)`;
             const skipTimer = setInterval(() => {
@@ -355,12 +307,11 @@
                     skipBtn.innerHTML = "Skip";
                 }
             }, 1000);
-            requirementsModal.setAttribute('data-timer-id', skipTimer); // Guarda o ID do timer
+            requirementsModal.setAttribute('data-timer-id', skipTimer);
         }
         
         function closeRequirementsModal() {
             requirementsModal.style.display = "none";
-            // Limpa o timer quando o modal é fechado
             const timerId = requirementsModal.getAttribute('data-timer-id');
             if (timerId) {
                 clearInterval(parseInt(timerId));
@@ -370,30 +321,21 @@
         function startVerification() {
             checkBtn.disabled = true;
             skipBtn.disabled = true;
-            skipBtn.innerHTML = "Skipped"; // Se clicarmos em verificar o skip já não interessa
+            skipBtn.innerHTML = "Skipped"; 
             checkBtn.innerHTML = '<i class="fas fa-spinner loading-icon"></i> Verifying...';
-            checkBtn.style.backgroundColor = '#ffc107'; // Amarelo para indicar processamento
+            checkBtn.style.backgroundColor = '#ffc107';
 
             // Simulação da verificação (0.9 segundos)
             setTimeout(() => {
                 checkBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verified!';
-                checkBtn.style.backgroundColor = 'var(--color-primary-green)';
-                verificationMessage.innerHTML = '<i class="fas fa-check-circle"></i> Verification Successful! Downloading...';
+                checkBtn.classList.add('verified-success');
+                verificationMessage.innerHTML = '<i class="fas fa-check-circle"></i> Verification Successful! Access Granted...';
                 verificationMessage.style.color = 'var(--color-primary-green)';
                 
-                // 1. Fecha o modal de requisitos
-                closeRequirementsModal();
-                
-                // 2. Aciona o download (o link de download já contém o atributo download)
-                downloadLink.click();
-                
-                // 3. Mostra mensagem de sucesso (opcional)
-                messageBox.style.display = 'block';
-                messageBox.style.opacity = '1';
-                messageBox.className = 'success'; // Pode criar um estilo 'success' no CSS
-                messageBox.innerHTML = `<i class="fas fa-check-circle message-icon"></i> **Download Iniciado!** Por favor, verifique a sua pasta de downloads.`;
+                // INICIA O DOWNLOAD
+                setTimeout(initiateDownload, 500); 
 
-            }, 900); // 0.9 segundos
+            }, 900);
         }
 
         // --- EVENT LISTENERS ---
@@ -401,30 +343,31 @@
         // Abre o modal de requisitos ao clicar em Copy Game ou Download
         copyButton.addEventListener('click', openRequirementsModal);
         downloadLink.addEventListener('click', (e) => {
-            e.preventDefault(); // Impede o download imediato
+            e.preventDefault(); 
             openRequirementsModal();
         });
         
         requirementsClose.addEventListener('click', closeRequirementsModal);
-        window.addEventListener('click', (event) => {
+        window.onclick = (event) => {
             if (event.target == requirementsModal) {
                 closeRequirementsModal();
             }
-        });
+        };
         
-        // Botão Play It!
-        playItBtn.addEventListener('click', (e) => {
-             // O target="_blank" no HTML já faz o trabalho, mas podemos adicionar um pequeno feedback.
-             console.log("Redirecionando para o jogo...");
-        });
-
         // Botão Check Requirements
         checkBtn.addEventListener('click', startVerification);
         
-        // Botão Skip
+        // Botão Skip (INICIA O DOWNLOAD)
         skipBtn.addEventListener('click', () => {
-            closeRequirementsModal();
-            showErrorMessage(); // Volta à mensagem de erro, pois o requisito não foi "cumprido"
+            if (!skipBtn.disabled) {
+                skipBtn.disabled = true;
+                skipBtn.innerHTML = '<i class="fas fa-download"></i> Downloading...';
+                skipBtn.style.backgroundColor = 'var(--color-primary-green)';
+                verificationMessage.innerHTML = 'Skipped. Initiating download...';
+                verificationMessage.style.color = 'var(--color-info-blue)';
+                
+                setTimeout(initiateDownload, 500);
+            }
         });
 
         // Lógica dos inputs (Limpar e Estado)
@@ -437,7 +380,7 @@
         });
         gameLinkInput.addEventListener('input', hideMessage);
 
-        // Lógica do Modal Tutorial (Mantida)
+        // Lógica do Modal Tutorial
         const tutorialModal = document.getElementById("tutorialModal");
         const tutorialBtn = document.getElementById("tutorial-button");
         const tutorialClose = document.querySelector('.tutorial-close');
@@ -448,9 +391,8 @@
           if (event.target == tutorialModal) { tutorialModal.style.display = "none"; }
         }
         
-        // Inicializa o estado do input ao carregar
         document.addEventListener('DOMContentLoaded', updateInputState);
 
     </script>
-    </body>
+</body>
 </html>
