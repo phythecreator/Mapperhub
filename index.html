@@ -50,11 +50,11 @@
             text-align: left;
             border: 1px solid var(--color-border);
             animation: fadeIn 0.8s ease-out;
-            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease-out; /* Cubic-bezier para mais smooth */
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease-out;
             overflow: hidden;
         }
         .container:hover {
-             transform: perspective(1000px) rotateY(1deg) scale(1.01); /* Pequeno scale no hover */
+             transform: perspective(1000px) rotateY(1deg) scale(1.01);
              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
         }
 
@@ -65,73 +65,71 @@
             height: 150px;
             object-fit: cover;
             border-radius: 12px 12px 0 0;
-            /* CAMINHO CORRIGIDO: Nome do ficheiro da primeira imagem */
+            /* NOME DO FICHEIRO ATUALIZADO */
             background-image: url('Gemini_Generated_Image_yrcqt6yrcqt6yrcq (1).png');
             background-size: cover;
             background-position: center;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
 
-        /* Tipografia */
+        /* Tipografia e Inputs */
         h1 { font-size: 32px; font-weight: 700; color: var(--color-primary-green); margin-bottom: 10px; text-shadow: 0 0 8px rgba(0, 230, 118, 0.5); }
         .subtitle { font-size: 16px; color: var(--color-text-faded); margin-bottom: 30px; display: block; }
         .divider { border: 0; border-top: 1px solid var(--color-border); margin: 30px 0; }
         
-        /* ==================================== */
-        /* 2. INPUTS E ÍCONES DINÂMICOS (FOCO E GLOW) */
-        /* ==================================== */
-        .input-group { margin-bottom: 25px; position: relative; }
         .input-field { 
-            width: 100%; 
-            padding: 15px 45px 15px 45px;
+            width: 100%; padding: 15px 45px 15px 45px;
             background-color: var(--color-secondary-input);
             border: 2px solid var(--color-border);
             border-radius: 10px; 
-            color: var(--color-text-light); 
-            font-size: 16px; 
-            box-sizing: border-box; 
-            transition: all 0.2s ease-out; 
+            color: var(--color-text-light); font-size: 16px; 
+            box-sizing: border-box; transition: all 0.2s ease-out; 
         }
         .input-field:focus { 
             outline: none; 
             border-color: var(--color-primary-green);
-            box-shadow: 0 0 15px rgba(0, 230, 118, 0.7), 0 0 0 1px var(--color-primary-green); /* Glow mais intenso */
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.7), 0 0 0 1px var(--color-primary-green); 
         }
-        .input-icon { 
-            position: absolute; left: 15px; top: 50%; transform: translateY(-50%); 
-            color: #777777; font-size: 18px; transition: color 0.3s;
-        }
-        .clear-btn { /* ... */ }
-        .clear-btn:hover { color: var(--color-text-light); }
 
         /* ==================================== */
-        /* 3. BOTÕES GERAIS */
+        /* 2. BOTÕES GERAIS E MODAL DE REQUISITOS */
         /* ==================================== */
-        #copy-button, .download-btn, #tutorial-button {
-             width: 100%; padding: 18px; border: none; border-radius: var(--border-radius-smooth); 
-             font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; 
-             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); text-transform: uppercase; margin-bottom: 15px;
+        
+        /* Botões Modais (Play It! e Skip) - MAIORES */
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 25px;
         }
-        #copy-button { background-color: var(--color-text-light); color: var(--color-bg-primary); }
-        #copy-button:hover { background-color: #ffffff; transform: translateY(-3px); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.6); }
+        .modal-buttons button {
+            width: 100%; /* Garantir que preenche */
+            padding: 18px 20px; /* Aumentado */
+            font-size: 18px; /* Aumentado */
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        #play-it-btn { 
+            background-color: var(--color-info-blue); 
+            color: white; 
+            border: none;
+            box-shadow: 0 4px 10px rgba(41, 121, 255, 0.5);
+        }
+        #play-it-btn:hover { background-color: #1e88e5; transform: translateY(-1px); }
 
-        .download-btn { background-color: var(--color-primary-green); color: white; border-radius: var(--border-radius-smooth) var(--border-radius-smooth) 30px 30px; box-shadow: 0 5px 20px rgba(0, 230, 118, 0.5); }
-        .download-btn:hover { background-color: #00c853; }
-        
-        /* Botões do Modal */
-        .modal-buttons { display: flex; justify-content: space-between; gap: 15px; margin-top: 25px; }
-        .modal-buttons button { flex-grow: 1; padding: 12px; border-radius: 8px; font-weight: bold; transition: all 0.3s ease; }
-        
-        #play-it-btn { background-color: var(--color-info-blue); color: white; border: none; flex-grow: 2; }
-        #check-btn { background-color: var(--color-primary-green); color: white; border: none; width: 150px; }
-        .verified-success { background-color: var(--color-primary-green) !important; box-shadow: 0 0 15px rgba(0, 230, 118, 0.7); }
+        #skip-btn { 
+            background-color: #333; 
+            color: var(--color-text-faded); 
+            border: none; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        #skip-btn:disabled { opacity: 0.5; cursor: wait; }
+        #skip-btn:hover:not(:disabled) { background-color: #444; color: var(--color-text-light); transform: translateY(-1px); }
 
-        /* ==================================== */
-        /* 4. MODAL DE REQUISITOS E FEEDBACK */
-        /* ==================================== */
-        
-        #requirementsModal .modal-body { padding: 30px; }
-        
+
         /* Imagem de Requisitos (2ª Imagem) - Caminho Corrigido */
         #requirements-image {
             width: 100%;
@@ -142,8 +140,11 @@
         }
 
         /* Caixa de Mensagens */
-        #message-box { margin-top: 20px; padding: 15px; border-radius: var(--border-radius-smooth); font-size: 14px; display: none; opacity: 0; transition: all 0.5s ease; border: 1px solid transparent;}
-        .error { background-color: var(--color-error-red); border: 1px solid rgba(255, 0, 0, 0.4); }
+        #message-box { 
+            margin-top: 20px; padding: 15px; 
+            border-radius: var(--border-radius-smooth); font-size: 14px; 
+            display: none; opacity: 0; transition: all 0.5s ease; border: 1px solid transparent;
+        }
         .success { background-color: var(--color-primary-green); border: 1px solid rgba(0, 230, 118, 0.4); color: white; }
     </style>
 </head>
@@ -185,10 +186,9 @@
                 <p style="font-weight:bold; color:var(--color-info-blue);">Requirements: Play the game and like it!</p>
 
                 <div class="modal-buttons">
-                    <a href="https://www.roblox.com/games/138286508083912/Steal-a-Brainrot-Uncopylocked" target="_blank" style="text-decoration:none; flex-grow:2;">
+                    <a href="https://www.roblox.com/games/138286508083912/Steal-a-Brainrot-Uncopylocked" target="_blank" style="text-decoration:none; flex-grow:1;">
                         <button id="play-it-btn"><i class="fas fa-play"></i> Play It!</button>
                     </a>
-                    <button id="check-btn" disabled><i class="fas fa-sync-alt"></i> Check Requirements</button>
                     <button id="skip-btn" disabled>Skip (5s)</button>
                 </div>
                 <div id="verification-message" style="margin-top:15px; color:var(--color-error-red); font-weight:bold;"></div>
@@ -222,7 +222,6 @@
 
         const requirementsModal = document.getElementById('requirementsModal');
         const requirementsClose = document.querySelector('.requirements-close');
-        const checkBtn = document.getElementById('check-btn');
         const skipBtn = document.getElementById('skip-btn');
         const verificationMessage = document.getElementById('verification-message');
 
@@ -257,7 +256,7 @@
         }
         
         function initiateDownload() {
-            // Limpa o timer quando a verificação ou o skip é concluído
+            // Limpa o timer
             const timerId = requirementsModal.getAttribute('data-timer-id');
             if (timerId) {
                 clearInterval(parseInt(timerId));
@@ -281,21 +280,10 @@
         function openRequirementsModal() {
             requirementsModal.style.display = "flex";
             verificationMessage.innerHTML = "";
-            checkBtn.disabled = true;
-            checkBtn.classList.remove('verified-success');
             skipBtn.disabled = true;
             skipBtn.innerHTML = "Skip (5s)";
-            checkBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Check Requirements';
-            checkBtn.style.backgroundColor = 'var(--color-primary-green)';
             
-            // 1. Ativa o botão Check após 2 segundos (Simulação de Play)
-            setTimeout(() => {
-                checkBtn.disabled = false;
-                verificationMessage.innerHTML = 'Ready to Check!';
-                verificationMessage.style.color = 'var(--color-primary-green)';
-            }, 2000);
-
-            // 2. Ativa o botão Skip após 5 segundos
+            // 1. Desbloqueia o Skip após 5 segundos
             let skipCounter = 5;
             skipBtn.innerHTML = `Skip (${skipCounter}s)`;
             const skipTimer = setInterval(() => {
@@ -304,7 +292,9 @@
                 if (skipCounter <= 0) {
                     clearInterval(skipTimer);
                     skipBtn.disabled = false;
-                    skipBtn.innerHTML = "Skip";
+                    skipBtn.innerHTML = "Skip (Download)";
+                    verificationMessage.innerHTML = 'You can now skip the requirement check.';
+                    verificationMessage.style.color = 'var(--color-info-blue)';
                 }
             }, 1000);
             requirementsModal.setAttribute('data-timer-id', skipTimer);
@@ -318,26 +308,6 @@
             }
         }
         
-        function startVerification() {
-            checkBtn.disabled = true;
-            skipBtn.disabled = true;
-            skipBtn.innerHTML = "Skipped"; 
-            checkBtn.innerHTML = '<i class="fas fa-spinner loading-icon"></i> Verifying...';
-            checkBtn.style.backgroundColor = '#ffc107';
-
-            // Simulação da verificação (0.9 segundos)
-            setTimeout(() => {
-                checkBtn.innerHTML = '<i class="fas fa-check-circle"></i> Verified!';
-                checkBtn.classList.add('verified-success');
-                verificationMessage.innerHTML = '<i class="fas fa-check-circle"></i> Verification Successful! Access Granted...';
-                verificationMessage.style.color = 'var(--color-primary-green)';
-                
-                // INICIA O DOWNLOAD
-                setTimeout(initiateDownload, 500); 
-
-            }, 900);
-        }
-
         // --- EVENT LISTENERS ---
         
         // Abre o modal de requisitos ao clicar em Copy Game ou Download
@@ -347,6 +317,7 @@
             openRequirementsModal();
         });
         
+        // Fechar Modal
         requirementsClose.addEventListener('click', closeRequirementsModal);
         window.onclick = (event) => {
             if (event.target == requirementsModal) {
@@ -354,10 +325,7 @@
             }
         };
         
-        // Botão Check Requirements
-        checkBtn.addEventListener('click', startVerification);
-        
-        // Botão Skip (INICIA O DOWNLOAD)
+        // Botão Skip (AGORA INICIA O DOWNLOAD)
         skipBtn.addEventListener('click', () => {
             if (!skipBtn.disabled) {
                 skipBtn.disabled = true;
@@ -366,11 +334,12 @@
                 verificationMessage.innerHTML = 'Skipped. Initiating download...';
                 verificationMessage.style.color = 'var(--color-info-blue)';
                 
+                // INICIA O DOWNLOAD APÓS UMA PEQUENA PAUSA VISUAL
                 setTimeout(initiateDownload, 500);
             }
         });
 
-        // Lógica dos inputs (Limpar e Estado)
+        // Lógica dos inputs
         gameLinkInput.addEventListener('input', updateInputState);
         clearButton.addEventListener('click', () => {
             gameLinkInput.value = '';
