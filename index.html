@@ -3,131 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uncopylocked Games Extractor</title>
+    <title>Roblox Game Extractor Utility</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
-        /* Dark Mode Theme */
+        /* ==================================== */
+        /* 1. VARIÁVEIS E REGRAS GLOBAIS */
+        /* ==================================== */
+        :root {
+            --color-bg-primary: #121212; /* Fundo principal escuro */
+            --color-bg-secondary: #1e1e1e; /* Fundo do card/container */
+            --color-text-light: #f0f0f0; /* Texto claro */
+            --color-text-faded: #b0b0b0; /* Texto subtil */
+            --color-primary-green: #4CAF50; /* Cor de destaque (Verde) */
+            --color-secondary-grey: #2b2b2b; /* Fundo de input */
+            --color-error-red: #9a2020; /* Cor de erro */
+            --color-border: #333333; /* Cor da borda */
+            --border-radius-smooth: 8px; /* Raio de borda padrão */
+            --shadow-depth: 0 10px 30px rgba(0, 0, 0, 0.5); /* Sombra para profundidade */
+            --transition-speed: 0.3s; /* Velocidade de transição padrão */
+        }
+
+        /* Base do Corpo (Dark Mode) */
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #1a1a1a; /* Very dark background */
-            color: #e0e0e0; /* Light grey text */
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-light);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            box-sizing: border-box; /* Include padding in element's total width and height */
+            box-sizing: border-box;
+            transition: background-color var(--transition-speed) ease;
         }
+        
+        /* Contenção Principal (O Card) */
         .container {
             width: 100%;
-            max-width: 650px; /* Wider to match image */
-            background-color: #242424; /* Slightly lighter dark for the container */
+            max-width: 550px;
+            background-color: var(--color-bg-secondary);
             padding: 40px;
-            border-radius: 10px; /* Slightly rounded corners */
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Deeper shadow for depth */
-            text-align: left; /* Align text to left as in the image */
-        }
-        h1 {
-            font-size: 38px; /* Larger title */
-            font-weight: 700; /* Bolder */
-            color: #f0f0f0; /* Whiter for heading */
-            margin-bottom: 15px;
-        }
-        p {
-            font-size: 16px;
-            line-height: 1.6;
-            color: #b0b0b0; /* Softer grey for description */
-            margin-bottom: 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow-depth);
+            text-align: left;
+            border: 1px solid var(--color-border);
+            animation: fadeIn 0.8s ease-out; /* Animação suave ao carregar */
         }
 
-        /* Input Field Styling */
+        /* Animação de Entrada */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos para Títulos e Subtítulos */
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--color-primary-green);
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+        .subtitle {
+            font-size: 16px;
+            color: var(--color-text-faded);
+            margin-bottom: 30px;
+            display: block;
+        }
+
+        /* ==================================== */
+        /* 2. INPUTS E ÍCONES */
+        /* ==================================== */
         .input-group {
             margin-bottom: 25px;
             position: relative;
         }
         .input-field {
             width: 100%;
-            padding: 15px 15px 15px 45px; /* Padding for icon and text */
-            background-color: #333333; /* Darker input background */
-            border: 1px solid #444444; /* Darker border */
-            border-radius: 8px; /* Smooth corners */
-            color: #f0f0f0;
+            padding: 15px 15px 15px 45px;
+            background-color: var(--color-secondary-grey);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius-smooth);
+            color: var(--color-text-light);
             font-size: 16px;
             box-sizing: border-box;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: all var(--transition-speed) ease;
+        }
+        .input-field::placeholder {
+            color: #777777;
         }
         .input-field:focus {
             outline: none;
-            border-color: #555555; /* Lighter border on focus */
-            box-shadow: 0 0 0 2px rgba(85, 85, 85, 0.3); /* Subtle glow on focus */
+            border-color: var(--color-primary-green);
+            box-shadow: 0 0 0 1px var(--color-primary-green);
         }
-        .input-field::placeholder {
-            color: #777777; /* Placeholder color */
-        }
-        /* Icon for the input field (simulating the location pin) */
         .input-icon {
             position: absolute;
             left: 15px;
             top: 50%;
             transform: translateY(-50%);
-            color: #777777; /* Icon color */
+            color: #777777;
             font-size: 18px;
         }
 
-        /* Button Styling */
-        .extract-button {
+        /* ==================================== */
+        /* 3. BOTÃO DE AÇÃO PRINCIPAL (Copy Game) */
+        /* ==================================== */
+        #copy-button {
             width: 100%;
             padding: 18px;
-            background-color: #ffffff; /* White button as in image */
-            color: #1a1a1a; /* Dark text for button */
+            background-color: var(--color-text-light);
+            color: var(--color-bg-primary);
             border: none;
-            border-radius: 8px; /* Smooth corners */
+            border-radius: var(--border-radius-smooth);
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+            transition: all 0.2s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            text-transform: uppercase;
         }
-        .extract-button:hover {
-            background-color: #f0f0f0; /* Slightly off-white on hover */
-            transform: translateY(-1px); /* Slight lift effect */
+        #copy-button:hover {
+            background-color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
         }
-        .extract-button:active {
-            transform: translateY(0); /* Press effect */
+        #copy-button:active {
+            transform: translateY(0);
         }
 
-        /* Responsive adjustments */
+        /* ==================================== */
+        /* 4. BOTÃO DE DOWNLOAD (Curvo) */
+        /* ==================================== */
+        .download-link {
+            display: block;
+            margin-top: 30px;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .download-link:hover {
+            transform: scale(1.02);
+        }
+        .download-btn {
+            width: 100%;
+            padding: 20px;
+            background-color: var(--color-primary-green);
+            color: white;
+            border: none;
+            /* Curva Acentuada na Base */
+            border-radius: 10px 10px 30px 30px; 
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 5px 20px rgba(76, 175, 80, 0.5);
+            text-transform: uppercase;
+        }
+        .download-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* ==================================== */
+        /* 5. MENSAGENS E FEEDBACK */
+        /* ==================================== */
+        #message-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: var(--border-radius-smooth);
+            font-size: 14px;
+            display: none;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        .error {
+            background-color: var(--color-error-red);
+            border: 1px solid rgba(255, 0, 0, 0.4);
+        }
+        .message-icon {
+            margin-right: 10px;
+            color: white;
+        }
+        .divider {
+            border: 0; 
+            border-top: 1px solid var(--color-border); 
+            margin: 30px 0;
+        }
+
+        /* ==================================== */
+        /* 6. RESPONSIVIDADE (Ajustes para mobile) */
+        /* ==================================== */
         @media (max-width: 600px) {
             .container {
                 padding: 25px;
+                border-radius: 10px;
             }
             h1 {
-                font-size: 30px;
+                font-size: 28px;
             }
-            p {
-                font-size: 14px;
+            .input-field, #copy-button, .download-btn {
+                padding: 14px;
+                font-size: 16px;
             }
-            .input-field, .extract-button {
-                padding: 12px;
-                font-size: 15px;
+            .download-btn {
+                 border-radius: 8px 8px 20px 20px; /* Curva menor em mobile */
             }
         }
+        
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
+    </head>
 <body>
     <div class="container">
-        <h1>Uncopylocked Games Extractor</h1>
-        <p>Paste game link in the box below, then click "Extract Game!" Extract and analyze uncopylocked Roblox games for learning purposes.</p>
+        <h1>Roblox Copy Games</h1>
+        <span class="subtitle">Securely download and analyze exclusive uncopylocked experiences.</span>
 
         <div class="input-group">
-            <i class="fas fa-map-marker-alt input-icon"></i> <input type="text" class="input-field" placeholder="Enter game link">
+            <i class="fas fa-link input-icon"></i>
+            <input type="text" id="game-link" class="input-field" placeholder="Enter game link (e.g., https://www.roblox.com/games/...)">
         </div>
         
-        <a href="Radioactive Steal a Brainrot (fix spawnlocation).rbxl" download="Radioactive Steal a Brainrot (fix spawnlocation).rbxl" class="extract-button">
-            Extract Game!
-        </a>
+        <button id="copy-button">Copy Game</button>
+        
+        <div id="message-box"></div>
+        
+        <hr class="divider">
 
-        </div>
-</body>
+        <a href="Radioactive Steal a Brainrot (fix spawnlocation).rbxl" download="Radioactive Steal a Brainrot (fix spawnlocation).rbxl" class="download-link">
+            <button class="download-btn">
+                Click here to download Steal a Brainrot UPDATED
+            </button>
+        </a>
+    </div>
+
+    <script>
+        document.getElementById('copy-button').onclick = function() {
+            const messageBox = document.getElementById('message-box');
+            const downloadLink = document.querySelector('.download-link');
+
+            // 1. Configura a Caixa de Mensagem de Erro
+            messageBox.style.display = 'block';
+            messageBox.style.opacity = '1';
+            messageBox.className = 'error'; 
+
+            // 2. Insere a Mensagem de Erro e Redirecionamento
+            let messageContent = `
+                <i class="fas fa-exclamation-triangle message-icon"></i>
+                <strong>Error: Game Not Found!</strong><br>
+                The extraction server could not locate the game linked in the input field. 
+                If you are looking for the updated **Steal a Brainrot** asset, please use the dedicated green download button below.
+            `;
+            
+            messageBox.innerHTML = messageContent;
+
+            // 3. Aplica o Destaque ao Botão de Download Real para chamar a atenção
+            downloadLink.style.transform = 'scale(1.05)';
+            downloadLink.style.boxShadow = '0 0 20px rgba(76, 175, 80, 0.8)';
+            
+            // 4. Remove o Destaque após 1.5 segundos
+            setTimeout(() => {
+                downloadLink.style.transform = 'scale(1.0)';
+                downloadLink.style.boxShadow = '0 5px 20px rgba(76, 175, 80, 0.5)';
+            }, 1500); 
+        };
+
+        // Função para esconder a mensagem de erro quando o utilizador começa a digitar
+        document.getElementById('game-link').oninput = function() {
+            const messageBox = document.getElementById('message-box');
+            if (messageBox.style.display === 'block') {
+                messageBox.style.opacity = '0';
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 500); 
+            }
+        };
+    </script>
+    </body>
 </html>
