@@ -1,351 +1,932 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Game Extractor Utility</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+    <title>Idiotic Investing Simulator - Trading e Taxas</title>
+    <!-- Carrega Tailwind CSS e a fonte Inter -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ==================================== */
-        /* 1. VARIÁVEIS E REGRAS GLOBAIS */
-        /* ==================================== */
-        :root {
-            --color-bg-primary: #121212;
-            --color-bg-secondary: #1e1e1e;
-            --color-text-light: #f0f0f0;
-            --color-text-faded: #b0b0b0;
-            --color-primary-green: #4CAF50;
-            --color-secondary-grey: #2b2b2b;
-            --color-error-red: #9a2020;
-            --color-info-blue: #2196F3;
-            --color-border: #333333;
-            --border-radius-smooth: 8px;
-            --shadow-depth: 0 10px 30px rgba(0, 0, 0, 0.5);
-            --transition-speed: 0.3s;
-        }
-
-        /* Base do Corpo (Dark Mode) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--color-bg-primary);
-            color: var(--color-text-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            transition: background-color var(--transition-speed) ease;
+            font-family: 'Inter', sans-serif;
+            background-color: #121212; /* Fundo escuro padrão */
+            padding-bottom: 72px; /* Espaço para o menu fixo inferior */
         }
-        
-        /* Contenção Principal (O Card) */
-        .container {
-            width: 100%;
-            max-width: 550px;
-            background-color: var(--color-bg-secondary);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: var(--shadow-depth);
-            text-align: left;
-            border: 1px solid var(--color-border);
-            animation: fadeIn 0.8s ease-out;
-            z-index: 10;
-            /* Efeito Hover 3D subtil no Card */
-            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+        .card {
+            background-color: #212121; /* Card escuro com mais contraste */
+            border: 1px solid #333;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
-        .container:hover {
-             transform: perspective(1000px) rotateY(1deg);
-             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        .card-active {
+            border-color: #00bcd4;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
         }
-
-
-        /* Animações e Tipografia */
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-
-        h1 { font-size: 32px; font-weight: 700; color: var(--color-primary-green); margin-bottom: 10px; text-shadow: 0 0 5px rgba(76, 175, 80, 0.3); }
-        .subtitle { font-size: 16px; color: var(--color-text-faded); margin-bottom: 30px; display: block; }
-        .divider { border: 0; border-top: 1px solid var(--color-border); margin: 30px 0; }
-
-        /* ==================================== */
-        /* 2. INPUTS E ÍCONES DINÂMICOS */
-        /* ==================================== */
-        .input-group { margin-bottom: 25px; position: relative; }
-        .input-field { 
-            width: 100%; 
-            padding: 15px 45px 15px 45px; /* Aumentado o padding direito para o botão de limpar */
-            background-color: var(--color-secondary-grey); 
-            border: 1px solid var(--color-border); 
-            border-radius: var(--border-radius-smooth); 
-            color: var(--color-text-light); 
-            font-size: 16px; 
-            box-sizing: border-box; 
-            transition: all var(--transition-speed) ease; 
+        /* Cor de UI antiga/preferida: Cian/Teal vibrante */
+        .neon-accent {
+            color: #00bcd4; /* Teal/Cyan vibrante */
         }
-        .input-field:focus { 
-            outline: none; 
-            border-color: var(--color-primary-green); 
-            box-shadow: 0 0 0 1px var(--color-primary-green); 
+        .bg-neon-accent {
+            background-color: #00bcd4;
         }
-
-        /* Ícone Esquerdo (Cadeado/Link) */
-        .input-icon { 
-            position: absolute; 
-            left: 15px; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            color: #777777; 
-            font-size: 18px;
-            transition: color 0.3s;
+        .btn-primary {
+            background-color: #1e88e5; /* Azul primário forte */
+            color: #fff;
+            transition: background-color 0.15s, transform 0.1s;
         }
-
-        /* Botão de Limpar */
-        .clear-btn {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #777777;
-            background: none;
-            border: none;
+        .btn-primary:hover {
+            background-color: #1565c0;
+            transform: translateY(-1px);
+        }
+        .btn-buy {
+            background-color: #28a745;
+        }
+        .btn-buy:hover {
+            background-color: #1e7e34;
+        }
+        .btn-sell {
+            background-color: #dc3545;
+        }
+        .btn-sell:hover {
+            background-color: #c82333;
+        }
+        .input-dark {
+            background-color: #1e1e1e;
+            border: 1px solid #444;
+            color: #f0f0f0;
+        }
+        /* Menu de Navegação Inferior */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: #1e1e1e;
+            border-top: 1px solid #333;
+        }
+        .tab-item {
             cursor: pointer;
-            font-size: 16px;
-            display: none; /* Escondido por padrão */
-            transition: color 0.2s;
+            padding: 0.75rem 0.5rem;
+            transition: color 0.2s, background-color 0.2s;
         }
-        .clear-btn:hover {
-            color: var(--color-text-light);
+        .tab-active {
+            color: #00bcd4; /* Cor de acento */
+            border-top: 3px solid #00bcd4;
+            background-color: #2a2a2a;
         }
-
-
-        /* ==================================== */
-        /* 3. BOTÕES DE AÇÃO */
-        /* ==================================== */
-
-        /* Botão Copy Game */
-        #copy-button { 
-            width: 100%; 
-            padding: 18px; 
-            background-color: var(--color-text-light); 
-            color: var(--color-bg-primary); 
-            border: none; 
-            border-radius: var(--border-radius-smooth); 
-            font-size: 18px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
-            text-transform: uppercase; 
-            margin-bottom: 15px; 
+        .tab-inactive:hover {
+            color: #ccc;
         }
-        #copy-button:hover { background-color: #ffffff; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4); }
-
-
-        /* Botão Download (Curvo) */
-        .download-link { display: block; margin-top: 30px; text-decoration: none; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .download-link:hover { transform: scale(1.02); }
-        .download-btn { width: 100%; padding: 20px; background-color: var(--color-primary-green); color: white; border: none; border-radius: 10px 10px 30px 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; box-shadow: 0 5px 20px rgba(76, 175, 80, 0.5); text-transform: uppercase; }
-        .download-btn:hover { background-color: #45a049; }
-
-        /* Novo Botão Tutorial */
-        #tutorial-button { 
-            width: 100%; 
-            padding: 15px; 
-            background-color: var(--color-info-blue); 
-            color: white; 
-            border: none; 
-            border-radius: var(--border-radius-smooth); 
-            font-size: 16px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-        }
-        #tutorial-button:hover { background-color: #1e87e5; transform: translateY(-1px); }
-
-        /* ==================================== */
-        /* 4. MODAL E FEEDBACKS */
-        /* ==================================== */
-
-        /* Modal (Pop-up) para o Tutorial */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(5px); justify-content: center; align-items: center; }
-        .modal-content { background-color: var(--color-bg-secondary); margin: 15% auto; padding: 30px; border: 1px solid var(--color-border); width: 80%; max-width: 450px; border-radius: 10px; box-shadow: var(--shadow-depth); animation: modalFadeIn 0.3s ease-out; }
-        .modal-content h2 { color: var(--color-info-blue); margin-top: 0; border-bottom: 2px solid var(--color-info-blue); padding-bottom: 10px; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; transition: color 0.2s; }
-        .close:hover, .close:focus { color: var(--color-text-light); }
-        
-        /* Lista de Tutorial */
-        .tutorial-steps { list-style-type: none; padding: 0; counter-reset: step-counter;}
-        .tutorial-steps li { margin-bottom: 15px; padding-left: 25px; position: relative; line-height: 1.4; color: var(--color-text-light); }
-        .tutorial-steps li strong { color: var(--color-primary-green); }
-        .tutorial-steps li::before { content: counter(step-counter); counter-increment: step-counter; background-color: var(--color-info-blue); color: white; border-radius: 50%; width: 20px; height: 20px; line-height: 20px; text-align: center; position: absolute; left: 0; top: 0; font-size: 12px; font-weight: bold; }
-
-        /* Caixa de Mensagens */
-        #message-box { margin-top: 20px; padding: 15px; border-radius: var(--border-radius-smooth); font-size: 14px; display: none; opacity: 0; transition: all 0.5s ease; }
-        .error { background-color: var(--color-error-red); border: 1px solid rgba(255, 0, 0, 0.4); }
-        .message-icon { margin-right: 10px; color: white; }
-
-        /* Responsividade */
-        @media (max-width: 600px) {
-            .container { padding: 25px; border-radius: 10px; }
-            h1 { font-size: 28px; }
-            .download-btn { border-radius: 8px 8px 20px 20px; }
+        /* Modal de Trading */
+        .modal {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
         }
     </style>
-    </head>
-<body>
-    <div class="container">
-        <h1>Roblox Copy Games</h1>
-        <span class="subtitle">Securely download and analyze exclusive uncopylocked experiences.</span>
+    <!-- Inclui a biblioteca Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="p-4 sm:p-8 text-gray-300">
 
-        <div class="input-group">
-            <i class="fas fa-link input-icon" id="input-icon-left"></i>
-            <input type="text" id="game-link" class="input-field" placeholder="Enter game link (e.g., https://www.roblox.com/games/...)">
-            <button class="clear-btn" id="clear-input"><i class="fas fa-times"></i></button>
+    <div id="game-container" class="max-w-7xl mx-auto mb-16">
+        <header class="mb-8 p-4 bg-gray-900 rounded-lg shadow-xl">
+            <h1 class="text-3xl sm:text-4xl font-extrabold neon-accent mb-2">Simulador de Investimento Idiota 💸</h1>
+            <p class="text-gray-400">Trading, Lucros Não Declarados e Evasão Fiscal Satírica.</p>
+        </header>
+
+        <!-- Painel de Estatísticas -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div class="card p-4 rounded-xl flex flex-col justify-center">
+                <p class="text-sm text-gray-400">Dinheiro Sujo (Caixa)</p>
+                <p id="dirty-money" class="text-2xl font-bold text-red-400">R$ 100.000,00</p>
+            </div>
+            <div class="card p-4 rounded-xl flex flex-col justify-center">
+                <p class="text-sm text-gray-400">Dinheiro Limpo (Caixa)</p>
+                <p id="clean-money" class="text-2xl font-bold text-green-400">R$ 0,00</p>
+            </div>
+            <div class="card p-4 rounded-xl flex flex-col justify-center">
+                <p class="text-sm text-gray-400">Ganhos Não Declarados</p>
+                <p id="unaccounted-gains" class="text-2xl font-bold text-yellow-400">R$ 0,00</p>
+            </div>
+            <div class="card p-4 rounded-xl flex flex-col justify-center">
+                <button id="reset-button" class="btn-primary w-full py-3 rounded-xl font-semibold text-lg bg-red-600 hover:bg-red-700">
+                    Reiniciar Jogo
+                </button>
+            </div>
         </div>
         
-        <button id="copy-button">Copy Game</button>
+        <!-- Conteúdo das Abas -->
         
-        <button id="tutorial-button"><i class="fas fa-book-open"></i> Tutorial: How to Get the Link</button>
+        <!-- Tab: Mercado de Risco (Nova Função: Trading Ativo) -->
+        <div id="tab-mercado" class="tab-content">
+            <h2 class="text-3xl font-bold neon-accent mb-6">Mercado de Risco (Negociação) 📈</h2>
+            <p class="text-gray-400 mb-6">Use seu Dinheiro Sujo para Comprar e Vender estes ativos voláteis e gerar Ganhos Não Declarados.</p>
+            
+            <div id="tradable-investments" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Cards de Investimento (Tradable Assets) serão injetados aqui -->
+            </div>
+        </div>
 
-        <div id="message-box"></div>
+        <!-- Tab: Lavagem / Declaração (Nova Função: Resolução de Lucros) -->
+        <div id="tab-lavagem" class="tab-content hidden">
+            <h2 class="text-3xl font-bold neon-accent mb-6">Lavagem / Declaração de Lucros 🧾</h2>
+            <div class="p-6 card rounded-xl mb-6">
+                <p class="text-xl font-bold text-yellow-400 mb-2">Total a Resolver (Ganhos Não Declarados): <span id="gains-to-resolve">R$ 0,00</span></p>
+                <p class="text-gray-400 mb-4">Selecione uma opção para resolver os seus lucros não declarados. Isto transformará o dinheiro em Dinheiro Limpo.</p>
+                
+                <div class="flex flex-col md:flex-row gap-6">
+                    <!-- Opção 1: Declarar (Pagar Imposto) -->
+                    <div class="card p-4 rounded-xl flex-1 border-blue-500 border-2">
+                        <h3 class="text-xl font-bold text-blue-400 mb-3">Opção 1: Declarar e Pagar Imposto</h3>
+                        <p class="text-sm text-gray-400 mb-3">Pagamento de imposto de 10% a 23% (variável). Processo 100% legal, Risco 0% de auditoria.</p>
+                        <p class="text-lg font-semibold text-white mb-4">Imposto Estimado: <span id="tax-rate-display">--</span></p>
+                        <button id="declare-button" class="btn-primary w-full py-3 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 disabled:opacity-50" onclick="resolveGains('declare')" disabled>
+                            Declarar e Pagar
+                        </button>
+                    </div>
+
+                    <!-- Opção 2: Lavar (Risco / Auditoria) -->
+                    <div class="card p-4 rounded-xl flex-1 border-red-500 border-2">
+                        <h3 class="text-xl font-bold text-red-400 mb-3">Opção 2: Lavagem de Dinheiro</h3>
+                        <p class="text-sm text-gray-400 mb-3">Tentar "limpar" os ganhos através de um esquema (como os esquemas originais de lavagem). Alto Risco de Auditoria e Perda.</p>
+                        <p class="text-lg font-semibold text-white mb-4">Risco de Auditoria: <span id="wash-risk-display">--</span></p>
+                        <button id="wash-button" class="btn-primary w-full py-3 rounded-lg font-semibold bg-red-600 hover:bg-red-700 disabled:opacity-50" onclick="resolveGains('wash')" disabled>
+                            Tentar Lavar
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="resolution-output" class="mt-6 p-4 bg-gray-800 rounded-lg whitespace-pre-wrap text-gray-200 min-h-[100px]">
+                    Aguardando Ganhos Não Declarados para resolver.
+                </div>
+            </div>
+        </div>
         
-        <hr class="divider">
+        <!-- Tab: Carteira (Portfolio) -->
+        <div id="tab-carteira" class="tab-content hidden">
+            <h2 class="text-3xl font-bold neon-accent mb-6">Minha Carteira (Assets) 💼</h2>
+            <div class="p-6 card rounded-xl">
+                <p class="text-xl font-bold neon-accent mb-4">Resumo da Posição</p>
+                <div id="asset-summary" class="grid grid-cols-2 gap-4 mb-6">
+                    <div><p class="text-sm text-gray-400">Valor Total Limpo:</p><p class="text-lg font-bold text-green-400" id="summary-clean">R$ 0,00</p></div>
+                    <div><p class="text-sm text-gray-400">Valor Total Sujo:</p><p class="text-lg font-bold text-red-400" id="summary-dirty">R$ 100.000,00</p></div>
+                    <div><p class="text-sm text-gray-400">Valor Total no Mercado:</p><p class="text-lg font-bold text-white" id="summary-market-value">R$ 0,00</p></div>
+                    <div><p class="text-sm text-gray-400">Total de Ganhos Não Declarados:</p><p class="text-lg font-bold text-yellow-400" id="summary-gains">R$ 0,00</p></div>
+                </div>
 
-        <a href="Steal%20a%20Brainrot%20Code.zip" download="Steal a Brainrot Code.zip" class="download-link">
-            <button class="download-btn">
-                Click here to download Steal a Brainrot UPDATED
-            </button>
-        </a>
+                <p class="text-xl font-bold neon-accent mb-3">Ativos em Carteira</p>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-800">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Ativo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Quantidade</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Preço Médio (€)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Valor Atual (€)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="portfolio-body" class="bg-gray-900 divide-y divide-gray-800">
+                            <tr><td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum ativo em carteira.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Investimentos (80+ com Atualização a Cada 5s) -->
+        <div id="tab-investimentos" class="tab-content hidden">
+            <h2 class="text-3xl font-bold neon-accent mb-6">Mercado Massivo (Volátil) 💥</h2>
+            <p class="text-sm text-gray-400 mb-4">Cotações simuladas para mais de 80 ativos. Estes valores atualizam a cada 5 segundos. (Simulação de Alto Risco, Apenas Visual)</p>
+            <div class="p-6 card rounded-xl">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-800">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Ativo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Preço (€)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Variação (24h)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="massive-market-body" class="bg-gray-900 divide-y divide-gray-800">
+                            <tr><td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">A carregar dados do mercado...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p id="last-update" class="text-xs text-gray-500 mt-4 text-right">Última atualização: --:--:--</p>
+            </div>
+        </div>
+
+        <!-- Tab: VC Contabilista (10 Conselhos) -->
+        <div id="tab-contabilista" class="tab-content hidden">
+            <h2 class="text-3xl font-bold neon-accent mb-6">VC Contabilista (Conselhos) 🧠</h2>
+            <div class="p-6 card rounded-xl">
+                <p class="text-lg text-gray-300 mb-4">O seu consultor oferece 10 pérolas de sabedoria financeira (satírica):</p>
+                <div id="contabilista-advice" class="space-y-4">
+                    <!-- Conselhos injetados aqui -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Perfil (Placeholder) -->
+        <div id="tab-perfil" class="tab-content hidden">
+            <h2 class="text-3xl font-bold neon-accent mb-6">Perfil do Jogador</h2>
+            <div class="p-6 card rounded-xl">
+                <p class="text-lg">Aqui serão exibidas as suas estatísticas e conquistas (Em Breve).</p>
+                <p class="mt-2 text-sm text-gray-400">Nome: Lavador de Dinheiro Ilegal</p>
+                <p class="text-sm text-gray-400">Total Limpo: <span class="font-bold" id="profile-clean-money">R$ 0,00</span></p>
+            </div>
+        </div>
+
     </div>
 
-    <div id="tutorialModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2><i class="fas fa-graduation-cap"></i> Extraction Tutorial</h2>
-            
-            <ul class="tutorial-steps">
-                <li>Join the game you want (at the moment the only game working is **Steal a Brainrot**).</li>
-                <li>Click in **Inspect** and go to **Network**.</li>
-                <li>Update the page and wait 5 seconds before scrolling up until you find a file named "**Steal a Brainrot**".</li>
-                <li>Copy as **Powershell** and paste it here!</li>
-            </ul>
+    <!-- Navegação Inferior (Bottom Tab Bar) -->
+    <div class="bottom-nav flex justify-around items-center">
+        <div class="tab-item flex flex-col items-center text-gray-500 tab-active" data-tab="mercado" onclick="switchTab('mercado')">
+            <i class="fas fa-chart-bar text-xl"></i>
+            <span class="text-xs mt-1">Mercado Risco</span>
+        </div>
+        <div class="tab-item flex flex-col items-center text-gray-500 tab-inactive" data-tab="lavagem" onclick="switchTab('lavagem')">
+            <i class="fas fa-hand-holding-usd text-xl"></i>
+            <span class="text-xs mt-1">Lavagem / Taxa</span>
+        </div>
+        <div class="tab-item flex flex-col items-center text-gray-500 tab-inactive" data-tab="carteira" onclick="switchTab('carteira')">
+            <i class="fas fa-wallet text-xl"></i>
+            <span class="text-xs mt-1">Carteira</span>
+        </div>
+        <div class="tab-item flex flex-col items-center text-gray-500 tab-inactive" data-tab="investimentos" onclick="switchTab('investimentos')">
+            <i class="fas fa-chart-line text-xl"></i>
+            <span class="text-xs mt-1">Mercado Massivo</span>
+        </div>
+        <div class="tab-item flex flex-col items-center text-gray-500 tab-inactive" data-tab="contabilista" onclick="switchTab('contabilista')">
+            <i class="fas fa-user-tie text-xl"></i>
+            <span class="text-xs mt-1">Contabilista</span>
+        </div>
+        <div class="tab-item flex flex-col items-center text-gray-500 tab-inactive" data-tab="perfil" onclick="switchTab('perfil')">
+            <i class="fas fa-user-circle text-xl"></i>
+            <span class="text-xs mt-1">Perfil</span>
+        </div>
+    </div>
+    
+    <!-- Modal de Trading (a "T43la") -->
+    <div id="trading-modal" class="modal fixed inset-0 flex items-center justify-center p-4 hidden" onclick="closeTradingModal()">
+        <div class="card rounded-2xl w-full max-w-2xl p-6 sm:p-8" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="modal-title" class="text-3xl font-extrabold neon-accent">Ativo: [Nome do Ativo]</h3>
+                <button onclick="closeTradingModal()" class="text-gray-500 hover:text-white text-2xl"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Seção de Preço e Dica -->
+                <div class="grid grid-cols-2 gap-4 text-center">
+                    <div class="p-3 bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-400">Preço Atual</p>
+                        <p id="modal-price" class="text-3xl font-bold text-white mt-1">€ 0.00</p>
+                    </div>
+                    <div class="p-3 bg-gray-800 rounded-lg">
+                        <p class="text-sm text-gray-400">Quantidade em Carteira</p>
+                        <p id="modal-held-qty" class="text-3xl font-bold text-white mt-1">0</p>
+                    </div>
+                </div>
+                
+                <!-- Gráfico de Volatilidade Simulado -->
+                <div class="p-4 bg-black rounded-lg">
+                    <h4 class="text-lg font-semibold neon-accent mb-2">Volatilidade (Gráfico)</h4>
+                    <canvas id="modal-chart" width="600" height="200" class="rounded-lg"></canvas>
+                </div>
+                
+                <!-- Dica / Conselhos -->
+                <div class="p-4 bg-gray-800 rounded-lg border-l-4 border-yellow-500">
+                    <p class="text-sm font-semibold text-yellow-400 mb-1"><i class="fas fa-lightbulb mr-2"></i> Dica de Risco:</p>
+                    <p id="modal-advice" class="text-gray-300"></p>
+                </div>
+
+                <!-- Ações de Compra/Venda -->
+                <div class="p-4 card rounded-xl">
+                    <h4 class="text-xl font-bold neon-accent mb-4">Ações de Negociação</h4>
+                    <div class="flex space-x-3 items-center mb-4">
+                        <input type="number" id="trade-amount" placeholder="Valor a Transacionar (R$)" min="1" value="1000" class="input-dark p-3 rounded-lg w-full focus:ring-neon-accent focus:border-neon-accent">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <button id="buy-button" class="btn-primary btn-buy py-3 rounded-lg font-semibold text-lg" onclick="handleTrade('buy')">
+                            <i class="fas fa-cart-plus mr-2"></i> COMPRAR
+                        </button>
+                        <button id="sell-button" class="btn-primary btn-sell py-3 rounded-lg font-semibold text-lg" onclick="handleTrade('sell')">
+                            <i class="fas fa-cash-register mr-2"></i> VENDER
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
 
     <script>
-        const gameLinkInput = document.getElementById('game-link');
-        const copyButton = document.getElementById('copy-button');
-        const messageBox = document.getElementById('message-box');
-        const downloadLink = document.querySelector('.download-link');
-        const inputIconLeft = document.getElementById('input-icon-left');
-        const clearButton = document.getElementById('clear-input');
+        // Definição dos investimentos tradáveis (7 opções)
+        const tradableAssets = [
+            { id: 1, name: "LVMH-F (Fashion Lux)", symbol: "LVMF", risk: 0.20, basePrice: 1500, volatility: 0.03, advice: "O luxo só sobe. Use dinheiro sujo para capitalizar a marca. Risco de Auditoria Baixo." },
+            { id: 2, name: "CaymanTrust-I", symbol: "CYMN", risk: 0.35, basePrice: 100, volatility: 0.05, advice: "Confiança em ilhas é o segredo. É estável, mas o rasto de papel pode aparecer. Risco de Auditoria Médio." },
+            { id: 3, name: "FakeCorp-Z", symbol: "FZAS", risk: 0.70, basePrice: 20, volatility: 0.15, advice: "Empresa fantasma, resultados fantásticos ou fantasmagóricos. Muita volatilidade, alto risco. Risco de Auditoria Alto." },
+            { id: 4, name: "ShitCoin-X", symbol: "SCX", risk: 0.90, basePrice: 0.01, volatility: 0.30, advice: "Puro lixo digital. Compre e reze. Alta volatilidade. O governo nem consegue encontrá-la, mas o mercado vai destruir-te. Risco de Auditoria Baixo." },
+            { id: 5, name: "EventoRND-E", symbol: "RNDM", risk: 0.10, basePrice: 50, volatility: 0.01, advice: "Investimento em eventos aleatórios. O retorno é lento, mas seguro. Ideal para movimentar volumes pequenos. Risco Mínimo." },
+            { id: 6, name: "NightLife-B", symbol: "NLB", risk: 0.45, basePrice: 80, volatility: 0.08, advice: "Bares, boates, diversão. O dinheiro flui, mas o barulho atrai a polícia fiscal. Risco de Auditoria Médio-Alto." },
+            { id: 7, name: "BoredApe-N", symbol: "BAN", risk: 0.60, basePrice: 5000, volatility: 0.20, advice: "Arte digital que pode valer milhões ou zero. O dinheiro limpa-se com 'propriedade intelectual'. Risco de Auditoria Médio-Alto." }
+        ];
 
-        // --- Lógica de Validação e Limpar Input ---
+        // Conselhos fixos do Contabilista
+        const accountantAdvice = [
+            "Lembre-se: O melhor dinheiro é aquele que ninguém sabe que existe. Guarde-o.",
+            "A chave é a diversificação. Se for auditado, não perca tudo num só 'erro'.",
+            "Imposto é roubo legal. Lavagem é... bem, digamos que é um 'processo de purificação'.",
+            "Se for declarar, declare um valor baixo. Parece mais legítimo se fores um pouco burro.",
+            "Investir em 'FakeCorp-Z' é burrice. Mas às vezes a burrice compensa. Não é um conselho.",
+            "Mantenha um sorriso na cara do auditor. A confiança é 50% da luta. Os outros 50% são subornos.",
+            "As cryptos duvidosas são boas para lavagem, mas péssimas para manter valor. Use e fuja.",
+            "A volatilidade é tua amiga. Transacione muito, para que o rasto se perca na confusão.",
+            "Nunca misture o dinheiro sujo com o limpo. Até ser forçado a fazê-lo pelo jogo.",
+            "Se o governo te pedir explicações, diga que o dinheiro veio de 'memes' ou 'herança distante'."
+        ];
+
+        // Lista de nomes para o Mercado Massivo (80+ simulação)
+        const massiveAssetNames = [
+            "Alpha-G", "Beta-T", "Gamma-A", "Delta-M", "Epsilon-S", "Zeta-L", "Eta-V", "Theta-E", "Iota-R", "Kappa-C", 
+            "Lambda-P", "Mu-X", "Nu-Q", "Xi-Z", "Omicron-K", "Pi-J", "Rho-H", "Sigma-D", "Tau-F", "Upsilon-B", 
+            "Phi-N", "Chi-W", "Psi-Y", "Omega-O", "Ethereum-E", "Solana-S", "Cardano-A", "Polkadot-P", "DogeCoin-D", 
+            "Shiba-S", "XRP-R", "Litecoin-L", "Chainlink-C", "UniSwap-U", "Avalanche-V", "Polygone-M", "Cosmos-K", 
+            "Near-N", "Algorand-A", "Decentraland-D", "Axie-I", "Sandbox-S", "Enjin-E", "Filecoin-F", "TheGraph-G",
+            "Audi-AG", "BMW-BW", "Daimler-D", "Porsche-P", "Ferrari-F", "VW-V", "Volvo-O", "Honda-H", "Toyota-T",
+            "Nestle-N", "Unilever-U", "Procter-P", "CocaCola-C", "Pepsi-P", "Heineken-H", "Anheuser-A", "Diageo-D",
+            "Tesla-TS", "Nvidia-NV", "AMD-MD", "Intel-IT", "Qualcomm-Q", "Netflix-NT", "Spotify-SP", "Zoom-Z", 
+            "Airbnb-B", "Uber-UB", "Roblox-R", "Pinterest-P", "Snap-S", "Coinbase-C", "Robinhood-R", "Palantir-PL",
+            "Pfizer-PZ", "Moderna-M", "J&J-J", "Astra-A", "Merck-M", "Novartis-N", "Roche-R", "Gilead-G", "AbbVie-A"
+        ];
         
-        function updateInputState() {
-            const linkValue = gameLinkInput.value.trim();
-            const isValidRobloxLink = linkValue.includes('roblox.com/games/') && linkValue.length > 30;
+        // Variáveis globais de estado
+        let state = {
+            dirtyMoney: 100000.00,
+            cleanMoney: 0.00,
+            unaccountedGains: 0.00, // NOVO: Lucro obtido na venda
+            transactions: 0,
+            selectedAsset: null, // Ativo atualmente aberto no modal
+            portfolio: {}, // { symbol: { qty: number, avgPrice: number, purchaseCurrency: 'DIRTY' } }
+            massiveMarketData: [], 
+            taxRate: 0.00, // Taxa de imposto variável
+            activeTab: 'mercado',
+            baseApiUrl: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=`,
+            apiKey: "",
+        };
 
-            // Mostra/Esconde o botão de limpar
-            clearButton.style.display = linkValue.length > 0 ? 'block' : 'none';
+        // --- Funções de Formatação ---
 
-            // Altera o ícone de acordo com o estado
-            if (linkValue.length === 0) {
-                inputIconLeft.className = 'fas fa-link input-icon'; // Ícone padrão
-                inputIconLeft.style.color = '#777777';
-            } else if (isValidRobloxLink) {
-                inputIconLeft.className = 'fas fa-check-circle input-icon'; // Link Válido
-                inputIconLeft.style.color = 'var(--color-primary-green)';
+        function formatCurrency(amount) {
+            return `R$ ${amount.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+        }
+        function formatEuro(amount) {
+            return `€ ${amount.toFixed(4).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+        }
+        function calculateMarketValue() {
+            let totalValue = 0;
+            const currentPrices = tradableAssets.reduce((acc, asset) => {
+                acc[asset.symbol] = asset.price;
+                return acc;
+            }, {});
+
+            for (const symbol in state.portfolio) {
+                const item = state.portfolio[symbol];
+                const currentPrice = currentPrices[symbol] || 0;
+                totalValue += item.qty * currentPrice;
+            }
+            return totalValue;
+        }
+
+        // --- Funções de UI e Estado ---
+
+        function updateUI() {
+            // Painel Superior
+            document.getElementById('dirty-money').textContent = formatCurrency(state.dirtyMoney);
+            document.getElementById('clean-money').textContent = formatCurrency(state.cleanMoney);
+            document.getElementById('unaccounted-gains').textContent = formatCurrency(state.unaccountedGains);
+
+            // Perfil
+            document.getElementById('profile-clean-money').textContent = formatCurrency(state.cleanMoney);
+
+            // Carteira
+            const marketValue = calculateMarketValue();
+            document.getElementById('summary-clean').textContent = formatCurrency(state.cleanMoney);
+            document.getElementById('summary-dirty').textContent = formatCurrency(state.dirtyMoney);
+            document.getElementById('summary-market-value').textContent = formatEuro(marketValue);
+            document.getElementById('summary-gains').textContent = formatCurrency(state.unaccountedGains);
+
+            // Lavagem / Declaração
+            document.getElementById('gains-to-resolve').textContent = formatCurrency(state.unaccountedGains);
+            const isDisabled = state.unaccountedGains <= 0;
+            document.getElementById('declare-button').disabled = isDisabled;
+            document.getElementById('wash-button').disabled = isDisabled;
+            
+            // Taxa e Risco (Atualiza na aba Lavagem/Declaração)
+            state.taxRate = 0.10 + Math.random() * 0.13; // 10% a 23%
+            document.getElementById('tax-rate-display').textContent = `${(state.taxRate * 100).toFixed(2)}%`;
+            const washRisk = 0.5 + Math.random() * 0.4; // 50% a 90% de risco de perda (auditoria)
+            document.getElementById('wash-risk-display').textContent = `${(washRisk * 100).toFixed(0)}% de chance de perder tudo.`;
+            
+            renderTradableAssets();
+            renderPortfolio();
+            saveState();
+        }
+
+        function loadState() {
+            try {
+                const savedState = JSON.parse(localStorage.getItem('idioticInvestingState'));
+                if (savedState) {
+                    state = { ...state, ...savedState };
+                    state.dirtyMoney = parseFloat(state.dirtyMoney) || 0;
+                    state.cleanMoney = parseFloat(state.cleanMoney) || 0;
+                    state.unaccountedGains = parseFloat(state.unaccountedGains) || 0;
+                    state.transactions = parseInt(state.transactions) || 0;
+                    state.portfolio = savedState.portfolio || {};
+                    state.massiveMarketData = Array.isArray(savedState.massiveMarketData) ? savedState.massiveMarketData : [];
+                }
+            } catch (e) {
+                console.error("Erro ao carregar estado do localStorage:", e);
+                // Estado inicial de fallback
+            }
+            updateAssetPrices(); // Garante preços iniciais
+            updateUI();
+        }
+
+        function saveState() {
+            const stateToSave = {
+                dirtyMoney: state.dirtyMoney,
+                cleanMoney: state.cleanMoney,
+                unaccountedGains: state.unaccountedGains,
+                transactions: state.transactions,
+                portfolio: state.portfolio,
+                massiveMarketData: state.massiveMarketData.map(a => ({...a, price: a.price, lastChange: a.lastChange})), // Guarda os valores atuais
+                activeTab: state.activeTab
+            };
+            localStorage.setItem('idioticInvestingState', JSON.stringify(stateToSave));
+        }
+        
+        // --- Navegação por Abas ---
+
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(div => {
+                div.classList.add('hidden');
+            });
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-item').forEach(item => {
+                item.classList.remove('tab-active');
+                item.classList.add('tab-inactive');
+            });
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('tab-active');
+            document.querySelector(`[data-tab="${tabId}"]`).classList.remove('tab-inactive');
+
+            saveState(); 
+
+            // Ações específicas ao mudar de aba
+            if (tabId === 'investimentos') {
+                if (window.marketInterval) clearInterval(window.marketInterval);
+                updateMassiveMarketList();
+                window.marketInterval = setInterval(updateMassiveMarketList, 5000); 
             } else {
-                inputIconLeft.className = 'fas fa-times-circle input-icon'; // Link Inválido
-                inputIconLeft.style.color = 'var(--color-error-red)';
+                if (window.marketInterval) clearInterval(window.marketInterval);
+            }
+            if (tabId === 'contabilista') {
+                renderAccountantAdvice();
+            }
+            if (tabId === 'lavagem') {
+                 // Força atualização da taxa e risco sempre que entra na aba de resolução
+                 updateUI();
             }
         }
 
-        // Event Listeners para atualizar o estado
-        gameLinkInput.addEventListener('input', updateInputState);
-        clearButton.addEventListener('click', () => {
-            gameLinkInput.value = '';
-            updateInputState();
-            hideMessage();
-            gameLinkInput.focus(); // Foca no campo após limpar
+        // --- Trading System (Buy/Sell) ---
+
+        /** Atualiza os preços dos 7 ativos negociáveis baseados na volatilidade */
+        function updateAssetPrices() {
+            tradableAssets.forEach(asset => {
+                // Volatilidade em % (0.5 para cima/baixo)
+                const change = (Math.random() - 0.5) * asset.volatility * 2; 
+                let newPrice = asset.price * (1 + change);
+                
+                // Limites mínimos de preço
+                newPrice = Math.max(asset.basePrice * 0.1, newPrice); 
+                
+                asset.price = newPrice;
+            });
+            renderTradableAssets();
+            if (state.selectedAsset) {
+                openTradingModal(state.selectedAsset); // Redesenha o modal se estiver aberto
+            }
+        }
+
+        /** Renderiza os cards dos 7 ativos na tab Mercado de Risco */
+        function renderTradableAssets() {
+            const container = document.getElementById('tradable-investments');
+            container.innerHTML = tradableAssets.map(asset => {
+                const heldQty = state.portfolio[asset.symbol]?.qty || 0;
+                const priceChange = ((asset.price / asset.basePrice) - 1) * 100;
+                const changeColor = priceChange >= 0 ? 'text-green-400' : 'text-red-400';
+                
+                return `
+                    <div class="card p-4 rounded-xl cursor-pointer hover:card-active" onclick="openTradingModal('${asset.symbol}')">
+                        <p class="text-xl font-bold neon-accent">${asset.symbol}</p>
+                        <p class="text-xs text-gray-500 mb-2">${asset.name}</p>
+                        <p class="text-2xl font-extrabold text-white">${formatEuro(asset.price)}</p>
+                        <p class="text-sm ${changeColor}">Vol: ${(asset.volatility * 100).toFixed(1)}% | Qty: ${heldQty.toFixed(2)}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /** Abre o modal de negociação ("a t43la") */
+        function openTradingModal(symbol) {
+            const asset = tradableAssets.find(a => a.symbol === symbol);
+            if (!asset) return;
+            
+            state.selectedAsset = symbol;
+            const held = state.portfolio[symbol]?.qty || 0;
+
+            document.getElementById('modal-title').textContent = asset.name;
+            document.getElementById('modal-price').textContent = formatEuro(asset.price);
+            document.getElementById('modal-held-qty').textContent = held.toFixed(2);
+            document.getElementById('modal-advice').textContent = asset.advice;
+            
+            drawModalChart(asset.volatility, 'modal-chart');
+
+            document.getElementById('trading-modal').classList.remove('hidden');
+        }
+
+        function closeTradingModal() {
+            state.selectedAsset = null;
+            document.getElementById('trading-modal').classList.add('hidden');
+        }
+
+        /** Lógica de Compra e Venda */
+        function handleTrade(type) {
+            const symbol = state.selectedAsset;
+            const asset = tradableAssets.find(a => a.symbol === symbol);
+            const valueR = parseFloat(document.getElementById('trade-amount').value);
+
+            if (!asset || isNaN(valueR) || valueR <= 0) {
+                // Usar modal de alerta customizado em vez de alert()
+                document.getElementById('modal-advice').textContent = "ERRO: Valor inválido. Por favor, insira um valor positivo.";
+                return;
+            }
+
+            const currentPrice = asset.price; // Preço em Euro (€)
+            const exchangeRate = 5.0; // Taxa de câmbio fixa €1 = R$5
+            const valueE = valueR / exchangeRate; // Valor em Euro
+            const qty = valueE / currentPrice;
+
+            if (type === 'buy') {
+                if (valueR > state.dirtyMoney) {
+                    document.getElementById('modal-advice').textContent = "ERRO: Dinheiro Sujo insuficiente para esta compra.";
+                    return;
+                }
+                
+                state.dirtyMoney -= valueR;
+                
+                const current = state.portfolio[symbol] || { qty: 0, avgPrice: 0 };
+                const totalCostE = current.qty * current.avgPrice + valueE;
+                const totalQty = current.qty + qty;
+
+                state.portfolio[symbol] = {
+                    qty: totalQty,
+                    avgPrice: totalCostE / totalQty,
+                };
+
+                // Feedback
+                document.getElementById('modal-advice').textContent = `COMPRADO! Você comprou ${qty.toFixed(4)} unidades de ${symbol} por ${formatCurrency(valueR)}. O dinheiro sujo está agora investido.`;
+            
+            } else if (type === 'sell') {
+                const held = state.portfolio[symbol]?.qty || 0;
+                if (held < qty) {
+                    document.getElementById('modal-advice').textContent = "ERRO: Quantidade insuficiente em carteira para esta venda.";
+                    return;
+                }
+
+                const costBasisE = state.portfolio[symbol].avgPrice * qty;
+                const profitE = valueE - costBasisE;
+                const profitR = profitE * exchangeRate;
+
+                // 1. Reduzir a quantidade em carteira
+                state.portfolio[symbol].qty -= qty;
+                if (state.portfolio[symbol].qty < 0.0001) { // Limpeza de float
+                    delete state.portfolio[symbol];
+                }
+
+                // 2. O valor de custo volta para o Dinheiro Sujo (ou Limpo, se fosse o caso - aqui é sempre sujo)
+                state.dirtyMoney += valueR - profitR; 
+
+                // 3. O lucro vai para Ganhos Não Declarados
+                if (profitR > 0) {
+                    state.unaccountedGains += profitR;
+                    document.getElementById('modal-advice').textContent = `VENDIDO! Lucro de ${formatCurrency(profitR.toFixed(2))} gerado e enviado para 'Ganhos Não Declarados'. Agora, vá à aba 'Lavagem / Declaração' para resolver!`;
+                } else {
+                    // Prejuízo
+                    document.getElementById('modal-advice').textContent = `VENDIDO! Prejuízo de ${formatCurrency(Math.abs(profitR).toFixed(2))} registado. O dinheiro de custo foi reposto.`;
+                }
+            }
+            
+            // Re-renderiza o modal e UI global
+            openTradingModal(symbol);
+            updateUI();
+        }
+
+        // --- Resolução de Ganhos (Lavagem / Taxa) ---
+        
+        async function resolveGains(method) {
+            if (state.unaccountedGains <= 0) return;
+
+            const gains = state.unaccountedGains;
+            state.unaccountedGains = 0; // Zerar imediatamente para evitar cliques duplos
+
+            if (method === 'declare') {
+                const taxAmount = gains * state.taxRate;
+                const netClean = gains - taxAmount;
+                state.cleanMoney += netClean;
+
+                document.getElementById('resolution-output').innerHTML = `
+                    <p class="text-green-400 font-bold">DECLARAÇÃO CONCLUÍDA!</p>
+                    <p>Você declarou ${formatCurrency(gains)} e pagou ${formatCurrency(taxAmount.toFixed(2))} em imposto (${(state.taxRate * 100).toFixed(2)}%).</p>
+                    <p>Valor Líquido Adicionado ao Dinheiro Limpo: ${formatCurrency(netClean.toFixed(2))}.</p>
+                `;
+            } else if (method === 'wash') {
+                // Simulação de Lavagem (Risco)
+                const washRiskFactor = 0.5 + Math.random() * 0.4;
+                const isCaught = Math.random() < washRiskFactor;
+                
+                const finalMultiplier = 1.05 + Math.random() * 0.1; // Pequeno bónus de lavagem
+                let cleanResult = gains * finalMultiplier;
+                let penalty = 0;
+
+                if (isCaught) {
+                    penalty = cleanResult * (0.5 + Math.random() * 0.4); // Multa pesada: 50% a 90% do valor limpo
+                    cleanResult = Math.max(0, cleanResult - penalty);
+                }
+
+                state.cleanMoney += cleanResult;
+                
+                // Chamada à API para a Narrativa Satírica (Reutilizando a função)
+                const outcomeText = await callGeminiApi(gains, 'Ganhos de Trading', washRiskFactor, isCaught, cleanResult);
+                
+                let output = `<p class="font-bold neon-accent">TENTATIVA DE LAVAGEM</p>${outcomeText}`;
+
+                if (isCaught) {
+                    output += `<p class="mt-4 p-2 bg-red-900/50 border border-red-700 rounded text-red-400 font-bold">AUDITORIA! Risco de ${Math.round(washRiskFactor*100)}% acionado. Perdeu ${formatCurrency(penalty.toFixed(2))}. Valor Líquido Adicionado ao Dinheiro Limpo: ${formatCurrency(cleanResult.toFixed(2))}.</p>`;
+                } else {
+                     output += `<p class="mt-4 p-2 bg-green-900/50 border border-green-700 rounded text-green-400 font-bold">SUCESSO! Lavagem concluída, sem impostos. Valor Líquido Adicionado ao Dinheiro Limpo: ${formatCurrency(cleanResult.toFixed(2))}.</p>`;
+                }
+                document.getElementById('resolution-output').innerHTML = output;
+            }
+            
+            updateUI();
+        }
+
+        // --- Renderização de Componentes ---
+
+        function renderPortfolio() {
+            const portfolioBody = document.getElementById('portfolio-body');
+            const exchangeRate = 5.0;
+
+            const assetsInPortfolio = Object.entries(state.portfolio)
+                .filter(([symbol, data]) => data.qty > 0.0001)
+                .map(([symbol, data]) => {
+                    const asset = tradableAssets.find(a => a.symbol === symbol);
+                    const currentPrice = asset ? asset.price : 0;
+                    const currentValueE = data.qty * currentPrice;
+                    const costR = data.qty * data.avgPrice * exchangeRate;
+                    const valueR = currentValueE * exchangeRate;
+                    const pnlR = valueR - costR;
+                    const pnlColor = pnlR >= 0 ? 'text-green-400' : 'text-red-400';
+
+                    return `
+                        <tr class="hover:bg-gray-800 transition duration-150">
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-200 font-medium">${symbol} - ${asset.name}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-white">${data.qty.toFixed(4)}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-400">${formatEuro(data.avgPrice)}</td>
+                            <td class="px-6 py-3 whitespace-nowrap text-sm text-white">${formatEuro(currentValueE)} <span class="text-xs ${pnlColor} block">(${pnlR >= 0 ? '+' : ''}${formatCurrency(pnlR.toFixed(2))})</span></td>
+                        </tr>
+                    `;
+                }).join('');
+
+            portfolioBody.innerHTML = assetsInPortfolio || '<tr><td colspan="4" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhum ativo em carteira.</td></tr>';
+        }
+
+        function renderAccountantAdvice() {
+            const container = document.getElementById('contabilista-advice');
+            container.innerHTML = accountantAdvice.map((advice, index) => `
+                <div class="p-3 bg-gray-800 rounded-lg">
+                    <p class="font-semibold neon-accent">Conselho #${index + 1}</p>
+                    <p class="text-sm text-gray-300">${advice}</p>
+                </div>
+            `).join('');
+        }
+
+        // --- Gráfico de Volatilidade (Reutilizado para o Modal) ---
+
+        /**
+         * Desenha um gráfico de volatilidade simulada baseado no fator de risco.
+         * @param {number} volatility Volatilidade do ativo (0.01 a 0.30)
+         * @param {string} canvasId ID do elemento canvas
+         */
+        function drawModalChart(volatility, canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 30; // Ajusta largura com padding do card
+            canvas.height = 200;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const dataPoints = 50;
+            const data = [];
+            let price = 50;
+            const amplitude = volatility * 100; 
+
+            // Gera dados simulados (Movimento Browniano Simplificado)
+            for (let i = 0; i < dataPoints; i++) {
+                price += (Math.random() - 0.5) * amplitude; 
+                price = Math.max(10, Math.min(90, price)); 
+                data.push(price);
+            }
+
+            // Desenho do gráfico
+            const width = canvas.width;
+            const height = canvas.height;
+            const xStep = width / (dataPoints - 1);
+            const yMax = 100;
+            const yScale = height / yMax;
+            
+            // Cor da Linha: mais vermelha para risco alto, mais verde para risco baixo
+            const red = Math.min(255, Math.floor(volatility * 255 * 3));
+            const green = Math.min(255, Math.floor((1 - volatility/0.3) * 255 * 1.5));
+            const color = `rgb(${red}, ${green}, 100)`;
+
+            // 1. Área de Preenchimento
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            for (let i = 0; i < dataPoints; i++) {
+                const x = i * xStep;
+                const y = height - data[i] * yScale;
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fillStyle = `rgba(${red}, ${green}, 100, 0.15)`; 
+            ctx.fill();
+
+            // 2. Linha Principal
+            ctx.beginPath();
+            ctx.strokeStyle = color; 
+            ctx.lineWidth = 3;
+            ctx.moveTo(0, height - data[0] * yScale);
+            for (let i = 1; i < dataPoints; i++) {
+                const x = i * xStep;
+                const y = height - data[i] * yScale;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // 3. Ponto atual
+            ctx.beginPath();
+            ctx.arc(width, height - data[dataPoints - 1] * yScale, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        // --- Mercado Massivo (80+) e Atualização a Cada 5s ---
+
+        function generateMassiveInvestmentList() {
+             // Inicia com 85 ativos
+            if (state.massiveMarketData.length === 0 || state.massiveMarketData.length < 85) { 
+                state.massiveMarketData = massiveAssetNames.slice(0, 85).map((name, index) => ({
+                    id: index,
+                    name: name,
+                    // Preço inicial: entre 1.00 e 100.00
+                    price: 1 + Math.random() * 99, 
+                    // Volatilidade base: (0.01% a 0.08%)
+                    volatility: 0.01 + Math.random() * 0.07, 
+                    lastChange: 0 
+                }));
+            }
+        }
+
+        function updateMassiveMarketList() {
+            let now = new Date();
+            let hasChanges = false;
+            
+            // 1. Atualizar valores
+            state.massiveMarketData = state.massiveMarketData.map(asset => {
+                const change = (Math.random() - 0.5) * asset.volatility;
+                let newPrice = asset.price * (1 + change);
+                
+                newPrice = Math.max(0.01, newPrice); 
+                
+                // Calcular variação percentual
+                const lastChange = (newPrice / asset.price - 1) * 100;
+                
+                if (Math.abs(lastChange) > 0.0001) hasChanges = true;
+
+                return {
+                    ...asset,
+                    price: newPrice,
+                    lastChange: lastChange 
+                };
+            });
+            
+            // 2. Renderizar (apenas se a tab estiver ativa e houver mudanças)
+            if (state.activeTab === 'investimentos' && hasChanges) {
+                renderMassiveMarketList();
+                document.getElementById('last-update').textContent = `Última atualização: ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            }
+        }
+
+        function renderMassiveMarketList() {
+            const container = document.getElementById('massive-market-body');
+            
+            if (state.massiveMarketData.length === 0) {
+                container.innerHTML = '<tr><td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">Nenhuma transação registrada ainda.</td></tr>';
+                return;
+            }
+
+            const rows = state.massiveMarketData.map(asset => {
+                const change = asset.lastChange;
+                const changeColor = change > 0.0001 ? 'text-green-400' : change < -0.0001 ? 'text-red-400' : 'text-gray-400';
+                const changeIcon = change > 0.0001 ? '<i class="fas fa-arrow-up"></i>' : change < -0.0001 ? '<i class="fas fa-arrow-down"></i>' : '';
+                
+                return `
+                    <tr class="hover:bg-gray-800 transition duration-150">
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-200 font-medium">${asset.name}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm text-white font-bold">${formatEuro(asset.price)}</td>
+                        <td class="px-6 py-3 whitespace-nowrap text-sm ${changeColor}">${changeIcon} ${change.toFixed(2)}%</td>
+                    </tr>
+                `;
+            }).join('');
+
+            container.innerHTML = rows;
+        }
+
+        // --- API Gemini para a Narrativa Satírica (Reutilizada) ---
+
+        async function callGeminiApi(amount, transactionType, washRiskFactor, isCaught, cleanAmount) {
+            const systemPrompt = "Você é um Consultor Financeiro Idiota, especializado em simulações satíricas de lavagem de dinheiro. Forneça um resultado engraçado e irônico para a transação, mantendo um tom de humor negro. O resultado deve ser um parágrafo conciso, em português (Portugal), satirizando a operação.";
+            
+            const userQuery = `O jogador tentou 'resolver' ${formatCurrency(amount)} de ${transactionType} (Risco Base: ${washRiskFactor * 100}%). Resultado limpo: ${formatCurrency(cleanAmount)}. A operação ${isCaught ? 'FOI DETECTADA e resultou em multa' : 'PASSOU DESPERCEBIDA'}. Descreva a cena e o desfecho irônico.`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+
+            const apiUrl = state.baseApiUrl + state.apiKey;
+            
+            // Esta função deve ser otimizada para evitar a duplicação do código de loading/error handling.
+            // Para simplicidade e seguindo o template:
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                return text || "[ERRO NA NARRATIVA: O consultor financeiro idiota fugiu.]";
+            } catch (error) {
+                console.error("Erro na chamada da API Gemini (Simulação):", error);
+                return "[ERRO NA NARRATIVA: Falha de comunicação com o Consultor Idiota.]";
+            }
+        }
+
+
+        // --- Inicialização e Eventos ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializa preços base dos ativos negociáveis
+            tradableAssets.forEach(asset => asset.price = asset.basePrice);
+
+            generateMassiveInvestmentList(); 
+            loadState();
+            switchTab(state.activeTab || 'mercado'); 
+
+            // Intervalo para atualização dos preços negociáveis (mais rápido para o trading)
+            setInterval(updateAssetPrices, 2000); // A cada 2 segundos
+
+            // Evento para o botão "Reiniciar Jogo"
+            document.getElementById('reset-button').addEventListener('click', () => {
+                if (confirm('Tem certeza que deseja Reiniciar o Jogo? Todo o seu progresso será perdido!')) {
+                    localStorage.removeItem('idioticInvestingState');
+                    location.reload(); 
+                }
+            });
         });
-
-        // --- Lógica do Botão 'Copy Game' e Erro ---
-
-        function showErrorMessage() {
-            // Garante que o ícone esquerdo fica vermelho após a falha de cópia
-            inputIconLeft.className = 'fas fa-unlink input-icon';
-            inputIconLeft.style.color = 'var(--color-error-red)';
-
-            // 1. Configura a Caixa de Mensagem de Erro
-            messageBox.style.display = 'block';
-            messageBox.style.opacity = '1';
-            messageBox.className = 'error'; 
-
-            // 2. Insere a Mensagem de Erro e Redirecionamento
-            let messageContent = `
-                <i class="fas fa-exclamation-triangle message-icon"></i>
-                <strong>Error: Extraction Failed!</strong><br>
-                The extraction server could not locate or copy the game link provided. 
-                If you are looking for the updated **Steal a Brainrot** asset, please use the dedicated green download button below.
-            `;
-            
-            messageBox.innerHTML = messageContent;
-
-            // 3. Aplica o Destaque ao Botão de Download Real
-            downloadLink.style.transform = 'scale(1.05)';
-            downloadLink.style.boxShadow = '0 0 20px rgba(76, 175, 80, 0.8)';
-            
-            // 4. Remove o Destaque após 1.5 segundos
-            setTimeout(() => {
-                downloadLink.style.transform = 'scale(1.0)';
-                downloadLink.style.boxShadow = '0 5px 20px rgba(76, 175, 80, 0.5)';
-            }, 1500); 
-        }
-
-        function hideMessage() {
-            if (messageBox.style.display === 'block') {
-                messageBox.style.opacity = '0';
-                setTimeout(() => {
-                    messageBox.style.display = 'none';
-                }, 500); 
-            }
-        }
-
-        copyButton.addEventListener('click', showErrorMessage);
-        
-        gameLinkInput.addEventListener('input', hideMessage); // Esconde a mensagem ao digitar
-
-        // --- Lógica do Modal (Tutorial) ---
-        
-        const modal = document.getElementById("tutorialModal");
-        const tutorialBtn = document.getElementById("tutorial-button");
-        const closeSpan = document.getElementsByClassName("close")[0];
-
-        // Quando o utilizador clica no botão, abre o modal
-        tutorialBtn.onclick = function() {
-          modal.style.display = "flex";
-        }
-
-        // Quando o utilizador clica no (x), fecha o modal
-        closeSpan.onclick = function() {
-          modal.style.display = "none";
-        }
-
-        // Quando o utilizador clica em qualquer lugar fora do modal, fecha o modal
-        window.onclick = function(event) {
-          if (event.target == modal) {
-            modal.style.display = "none";
-          }
-        }
-        
-        // Inicializa o estado do input ao carregar
-        document.addEventListener('DOMContentLoaded', updateInputState);
-
     </script>
-    </body>
+</body>
 </html>
