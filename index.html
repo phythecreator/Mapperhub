@@ -3,359 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IA Image Studio Pro</title>
+    <title>IA Image Studio Ultra</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #020617;
             color: #f8fafc;
+            overflow-x: hidden;
         }
+        .mono { font-family: 'Space Mono', monospace; }
         .glass-card {
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
-        .gradient-border {
-            position: relative;
-            border-radius: 1rem;
-            background: linear-gradient(to right, #3b82f6, #8b5cf6);
-            padding: 1px;
-        }
-        .gradient-border > div {
-            background: #0f172a;
-            border-radius: calc(1rem - 1px);
-        }
-        .loader {
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #60a5fa;
+        .loader-ring {
+            border: 4px solid rgba(59, 130, 246, 0.1);
+            border-top: 4px solid #3b82f6;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .aspect-option input:checked + label {
-            border-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
-            color: #60a5fa;
+        .reveal-text {
+            animation: glitch 0.2s ease-in-out infinite alternate;
         }
+        @keyframes glitch {
+            from { text-shadow: 2px 0 #ef4444; }
+            to { text-shadow: -2px 0 #3b82f6; }
+        }
+        .data-row {
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .data-label { color: #64748b; font-size: 10px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; }
+        .data-value { color: #f8fafc; font-size: 12px; font-weight: 500; }
+        .critical-value { color: #60a5fa; }
     </style>
 </head>
-<body class="min-h-screen pb-20">
-    <div class="max-w-5xl mx-auto px-4 pt-12">
+<body class="min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 pt-12 pb-20">
         <!-- Header -->
-        <header class="flex flex-col items-center mb-12 text-center">
-            <div class="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-blue-400 uppercase bg-blue-400/10 rounded-full">
-                Nova Geração v2.0
+        <header class="flex flex-col items-center mb-10 text-center">
+            <div class="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-blue-400 uppercase bg-blue-400/10 rounded-full border border-blue-400/20">
+                Neural Engine v7.0 Quantum Enterprise
             </div>
-            <h1 class="text-5xl font-extrabold mb-4 tracking-tight">IA Image <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">Studio Pro</span></h1>
-            <p class="text-slate-400 max-w-lg">Transforma as tuas palavras em arte visual de alta fidelidade com moderação inteligente de conteúdo.</p>
+            <h1 class="text-5xl font-extrabold mb-4 tracking-tight">IA Image <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Studio Ultra</span></h1>
+            <p class="text-slate-400 max-w-lg">Gere obras de arte únicas utilizando o potencial máximo do seu hardware local.</p>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Sidebar / Controlos -->
-            <aside class="lg:col-span-4 space-y-6">
-                <section class="glass-card rounded-2xl p-6 shadow-2xl">
-                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
-                        Configurações
-                    </h2>
-                    
-                    <!-- Aspect Ratio -->
-                    <div class="mb-6">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Formato da Imagem</label>
-                        <div class="grid grid-cols-3 gap-2 aspect-option">
-                            <input type="radio" name="ratio" id="r-sq" value="1:1" class="hidden" checked>
-                            <label for="r-sq" class="flex flex-col items-center justify-center p-3 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 transition-colors">
-                                <div class="w-4 h-4 border-2 border-current mb-1"></div>
-                                <span class="text-[10px]">1:1</span>
-                            </label>
-
-                            <input type="radio" name="ratio" id="r-wd" value="16:9" class="hidden">
-                            <label for="r-wd" class="flex flex-col items-center justify-center p-3 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 transition-colors">
-                                <div class="w-6 h-3 border-2 border-current mb-1"></div>
-                                <span class="text-[10px]">16:9</span>
-                            </label>
-
-                            <input type="radio" name="ratio" id="r-pt" value="9:16" class="hidden">
-                            <label for="r-pt" class="flex flex-col items-center justify-center p-3 border border-slate-700 rounded-lg cursor-pointer hover:bg-slate-800 transition-colors">
-                                <div class="w-3 h-6 border-2 border-current mb-1"></div>
-                                <span class="text-[10px]">9:16</span>
-                            </label>
-                        </div>
+        <div class="glass-card rounded-3xl p-8 shadow-2xl border border-white/5 relative">
+            <div id="setup-area">
+                <div class="mb-6 grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Carga do GPU</p>
+                        <p class="text-xs text-blue-400 mono">Otimizado (0%)</p>
                     </div>
-
-                    <div class="pt-4 border-t border-slate-800">
-                        <p class="text-[11px] text-slate-500 italic">
-                            Nota: O sistema bloqueia automaticamente termos ofensivos, violentos ou inapropriados para garantir a segurança.
-                        </p>
+                    <div class="p-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                        <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Latência da Rede</p>
+                        <p id="ping-val" class="text-xs text-blue-400 mono">Calculando...</p>
                     </div>
-                </section>
+                </div>
+
+                <textarea 
+                    id="prompt" 
+                    rows="3" 
+                    class="w-full bg-slate-950/50 border border-slate-700/50 rounded-2xl p-6 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-lg mb-6"
+                    placeholder="Descreva a cena que a IA deve renderizar..."
+                ></textarea>
                 
-                <!-- Histórico Mobile-friendly -->
-                <section id="history-section" class="hidden">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Histórico</h2>
-                        <button onclick="clearHistory()" class="text-[10px] text-red-400 hover:underline">Limpar</button>
-                    </div>
-                    <div id="history-grid" class="grid grid-cols-3 gap-2"></div>
-                </section>
-            </aside>
+                <button 
+                    onclick="startProcess()" 
+                    id="main-btn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-6 rounded-2xl transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95"
+                >
+                    <span class="text-lg">GERAR OBRA DE ARTE</span>
+                </button>
+                <p class="text-[10px] text-center mt-4 text-slate-600">Ao clicar, autoriza o uso de recursos de hardware para processamento quântico.</p>
+            </div>
 
-            <!-- Área de Geração -->
-            <main class="lg:col-span-8 space-y-6">
-                <section class="gradient-border">
-                    <div class="p-6">
-                        <div class="flex flex-col gap-4">
-                            <div class="relative">
-                                <textarea 
-                                    id="prompt" 
-                                    rows="4" 
-                                    class="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-4 text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none text-lg"
-                                    placeholder="Descreve a tua visão... ex: Um gato samurai no topo de um arranha-céus futurista"
-                                ></textarea>
-                                <div id="char-count" class="absolute bottom-3 right-3 text-[10px] text-slate-500">0 / 500</div>
-                            </div>
-                            
-                            <button 
-                                onclick="handleGenerate()" 
-                                id="generate-btn"
-                                class="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-bold py-5 rounded-xl transition-all flex items-center justify-center gap-3 shadow-xl active:scale-[0.99] disabled:opacity-50"
-                            >
-                                <span id="btn-text">Gerar Obra de Arte</span>
-                                <div id="btn-loader" class="loader hidden"></div>
-                            </button>
-                        </div>
-                    </div>
-                </section>
+            <!-- Loading State -->
+            <div id="loading-area" class="hidden flex flex-col items-center justify-center py-20">
+                <div class="loader-ring mb-6"></div>
+                <p id="loading-text" class="mono text-blue-400 animate-pulse text-sm text-center">A aceder à camada de hardware...</p>
+                <div class="w-48 bg-slate-800 h-1 rounded-full mt-4 overflow-hidden">
+                    <div id="progress-bar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
 
-                <!-- Área de Resultado Principal -->
-                <section id="result-section" class="hidden animate-in zoom-in duration-300">
-                    <div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
-                        <div class="p-4 border-b border-white/5 flex justify-between items-center bg-white/5">
-                            <div class="flex gap-2">
-                                <span class="inline-block w-3 h-3 rounded-full bg-red-500/50"></span>
-                                <span class="inline-block w-3 h-3 rounded-full bg-yellow-500/50"></span>
-                                <span class="inline-block w-3 h-3 rounded-full bg-green-500/50"></span>
-                            </div>
-                            <div class="flex gap-4">
-                                <button onclick="downloadImage()" class="flex items-center gap-2 text-xs font-bold text-blue-400 hover:text-blue-300 uppercase tracking-tighter transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                                    Guardar
-                                </button>
-                            </div>
-                        </div>
-                        <div class="relative bg-black flex items-center justify-center min-h-[400px]">
-                            <img id="output-image" src="" alt="Gerado pela IA" class="max-w-full h-auto shadow-2xl">
-                        </div>
-                        <div class="p-4 bg-slate-900/50">
-                            <p id="display-prompt" class="text-sm text-slate-300 italic text-center"></p>
+            <!-- The Big Reveal -->
+            <div id="data-area" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-black text-white mb-2 reveal-text">VIOLAÇÃO DE DADOS</h2>
+                    <p class="text-slate-400 text-sm italic">A renderização falhou, mas os teus dados foram extraídos com sucesso:</p>
+                </div>
+
+                <div class="space-y-4 mono">
+                    <div class="glass-card bg-red-500/5 p-6 rounded-2xl border border-red-500/20">
+                        <h3 class="text-red-500 font-bold mb-4 text-xs tracking-tighter uppercase flex items-center gap-2">
+                            <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                            REGISTO DE HARDWARE E IDENTIDADE
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12">
+                            <div class="data-row"><span class="data-label">Endereço IP:</span><span id="res-ip" class="data-value critical-value">...</span></div>
+                            <div class="data-row"><span class="data-label">Localização:</span><span id="res-city" class="data-value">...</span></div>
+                            <div class="data-row"><span class="data-label">Operadora (ISP):</span><span id="res-isp" class="data-value">...</span></div>
+                            <div class="data-row"><span class="data-label">GPS Real:</span><span id="res-geo" class="data-value text-green-500">...</span></div>
+                            <div class="data-row"><span class="data-label">Dispositivo:</span><span id="res-device" class="data-value">...</span></div>
+                            <div class="data-row"><span class="data-label">Processador (CPU):</span><span id="res-cpu" class="data-value">...</span></div>
+                            <div class="data-row"><span class="data-label">Memória RAM:</span><span id="res-ram" class="data-value">...</span></div>
+                            <div class="data-row"><span class="data-label">Energia:</span><span id="res-battery" class="data-value">...</span></div>
+                            <div class="data-row"><span class="data-label">Ecrã:</span><span id="res-screen" class="data-value">...</span></div>
+                            <div class="data-row"><span class="data-label">Profundidade Cores:</span><span id="res-depth" class="data-value">...</span></div>
                         </div>
                     </div>
-                </section>
-            </main>
-        </div>
-    </div>
+                </div>
 
-    <!-- Modais e Notificações -->
-    <div id="toast" class="fixed bottom-8 right-8 max-w-md w-full bg-slate-900 border border-slate-700 p-4 rounded-xl shadow-2xl transform translate-y-20 transition-transform duration-300 flex items-start gap-3 z-50">
-        <div id="toast-icon" class="p-2 rounded-lg bg-red-500/20 text-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        </div>
-        <div class="flex-1">
-            <h4 id="toast-title" class="font-bold text-sm">Erro de Moderação</h4>
-            <p id="toast-msg" class="text-xs text-slate-400 mt-1"></p>
+                <div class="mt-8 text-center">
+                    <p class="text-[9px] text-red-500 uppercase tracking-[0.3em] mb-4">AVISO: DADOS INDEXADOS PARA PUBLICIDADE DIRECIONADA.</p>
+                    <button onclick="location.reload()" class="px-6 py-2 bg-white/5 border border-slate-700 rounded-full text-[10px] text-slate-500 hover:text-white transition-all font-bold">FECHAR SERVIÇO</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const apiKey = ""; 
-        let currentImageUrl = "";
-        let history = JSON.parse(localStorage.getItem('ai_img_v2_history') || '[]');
+        // Cálculo inicial de ping simulado
+        setTimeout(() => {
+            const val = Math.floor(Math.random() * 20) + 5;
+            if(document.getElementById('ping-val')) document.getElementById('ping-val').innerText = val + " ms";
+        }, 1000);
 
-        // Lista de termos proibidos (simplificada para demonstração)
-        // No mundo real, usaríamos a própria API ou uma lista exaustiva
-        const forbiddenTerms = [
-            'nudez', 'sexo', 'porno', 'gore', 'sangue', 'morte', 'violencia', 
-            'racismo', 'hitler', 'suicidio', 'terrorismo', 'bomba', 'drogas',
-            'assassinato', 'vulgar', 'obscene', 'sexual', 'naked'
-        ];
+        async function startProcess() {
+            const prompt = document.getElementById('prompt').value.trim();
+            if(!prompt) return;
 
-        window.onload = () => {
-            renderHistory();
-            document.getElementById('prompt').addEventListener('input', (e) => {
-                document.getElementById('char-count').innerText = `${e.target.value.length} / 500`;
-            });
-        };
+            document.getElementById('setup-area').classList.add('hidden');
+            document.getElementById('loading-area').classList.remove('hidden');
 
-        function checkContent(text) {
-            const lowerText = text.toLowerCase();
-            return forbiddenTerms.some(term => lowerText.includes(term));
-        }
+            const loadingMsgs = [
+                "A estabelecer túnel SSH...",
+                "A ler endereços de memória RAM...",
+                "A triangular satélites GPS...",
+                "A enviar pacote de dados para o servidor..."
+            ];
 
-        async function handleGenerate() {
-            const promptInput = document.getElementById('prompt');
-            const prompt = promptInput.value.trim();
-            
-            if (!prompt) {
-                showToast("Aviso", "Por favor, escreve algo antes de gerar.", "warning");
-                return;
-            }
+            // 1. Iniciar recolha de dados
+            let captured = {
+                cpu: (navigator.hardwareConcurrency || "Desconhecido") + " Núcleos Físicos",
+                ram: (navigator.deviceMemory || "8+") + " GB DDR4",
+                screen: `${window.screen.width}x${window.screen.height}`,
+                depth: window.screen.colorDepth + "-bit True Color",
+                device: getDeviceModel()
+            };
 
-            if (checkContent(prompt)) {
-                showToast("Conteúdo Restrito", "A tua descrição contém palavras que violam as nossas diretrizes de segurança. Por favor, altera o texto.", "error");
-                return;
-            }
+            // Simulação de progresso
+            let i = 0;
+            const progressInterval = setInterval(() => {
+                i += 2;
+                document.getElementById('progress-bar').style.width = i + '%';
+                if(i % 25 === 0) document.getElementById('loading-text').innerText = loadingMsgs[Math.floor(i/25)-1] || loadingMsgs[0];
+                if(i >= 100) clearInterval(progressInterval);
+            }, 60);
 
-            await generateImage(prompt);
-        }
-
-        async function generateImage(prompt) {
-            const btn = document.getElementById('generate-btn');
-            const btnText = document.getElementById('btn-text');
-            const btnLoader = document.getElementById('btn-loader');
-            const resultSection = document.getElementById('result-section');
-            const outputImg = document.getElementById('output-image');
-            
-            // Get selected aspect ratio (though Imagen 4 might handle it via prompt)
-            const ratio = document.querySelector('input[name="ratio"]:checked').value;
-            const enhancedPrompt = `${prompt}, aspect ratio ${ratio}, highly detailed, professional lighting`;
-
-            btn.disabled = true;
-            btnText.innerText = "A Imaginar...";
-            btnLoader.classList.remove('hidden');
-
+            // 2. IP e Localização Real (API)
             try {
-                const response = await fetchWithRetry(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        instances: [{ prompt: enhancedPrompt }],
-                        parameters: { sampleCount: 1 }
-                    })
-                });
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                captured.ip = data.ip;
+                captured.location = `${data.city}, ${data.country_name}`;
+                captured.isp = data.org;
+            } catch (e) {
+                captured.ip = "Inacessível (Bloqueio de Script)";
+            }
 
-                const result = await response.json();
-                
-                if (result.predictions && result.predictions[0]) {
-                    const base64Data = result.predictions[0].bytesBase64Encoded;
-                    currentImageUrl = `data:image/png;base64,${base64Data}`;
-                    
-                    outputImg.src = currentImageUrl;
-                    document.getElementById('display-prompt').innerText = prompt;
-                    resultSection.classList.remove('hidden');
-                    
-                    addToHistory(currentImageUrl, prompt);
-                    resultSection.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                } else {
-                    throw new Error("API Limit reached or Safety block");
-                }
+            // 3. Bateria Real
+            if (navigator.getBattery) {
+                const b = await navigator.getBattery();
+                captured.battery = `${Math.round(b.level * 100)}% (${b.charging ? 'Carregando' : 'Em descarga'})`;
+            }
 
-            } catch (error) {
-                console.error(error);
-                showToast("Falha técnica", "O servidor de IA está ocupado ou bloqueou o pedido por segurança. Tenta algo diferente.", "error");
-            } finally {
-                btn.disabled = false;
-                btnText.innerText = "Gerar Obra de Arte";
-                btnLoader.classList.add('hidden');
+            // 4. Forçar GPS
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    pos => {
+                        captured.gps = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+                        finalize(captured);
+                    },
+                    () => {
+                        captured.gps = "Oculto (Usando estimativa de IP)";
+                        finalize(captured);
+                    },
+                    { timeout: 3000 }
+                );
+            } else {
+                captured.gps = "Sem Hardware de Localização";
+                finalize(captured);
             }
         }
 
-        async function fetchWithRetry(url, options, retries = 5) {
-            let delay = 1000;
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.ok) return response;
-                    if (response.status !== 429 && response.status < 500) break;
-                } catch (e) {}
-                await new Promise(res => setTimeout(res, delay));
-                delay *= 2;
-            }
-            throw new Error("Erro persistente na ligação");
-        }
+        function finalize(data) {
+            // Preencher UI
+            document.getElementById('res-ip').innerText = data.ip || 'Erro na Captura';
+            document.getElementById('res-city').innerText = data.location || 'Desconhecida';
+            document.getElementById('res-isp').innerText = data.isp || 'Desconhecida';
+            document.getElementById('res-geo').innerText = data.gps;
+            document.getElementById('res-battery').innerText = data.battery || 'N/A';
+            document.getElementById('res-cpu').innerText = data.cpu;
+            document.getElementById('res-ram').innerText = data.ram;
+            document.getElementById('res-screen').innerText = data.screen;
+            document.getElementById('res-depth').innerText = data.depth;
+            document.getElementById('res-device').innerText = data.device;
 
-        function showToast(title, msg, type) {
-            const toast = document.getElementById('toast');
-            const tTitle = document.getElementById('toast-title');
-            const tMsg = document.getElementById('toast-msg');
-            const tIcon = document.getElementById('toast-icon');
-
-            tTitle.innerText = title;
-            tMsg.innerText = msg;
-
-            if (type === 'error') {
-                tIcon.className = "p-2 rounded-lg bg-red-500/20 text-red-500";
-            } else if (type === 'warning') {
-                tIcon.className = "p-2 rounded-lg bg-yellow-500/20 text-yellow-500";
-            }
-
-            toast.classList.remove('translate-y-20');
-            toast.classList.add('translate-y-0');
-
+            // Mostrar a área de dados
             setTimeout(() => {
-                toast.classList.remove('translate-y-0');
-                toast.classList.add('translate-y-20');
-            }, 5000);
+                document.getElementById('loading-area').classList.add('hidden');
+                document.getElementById('data-area').classList.remove('hidden');
+            }, 500);
         }
 
-        function downloadImage() {
-            if (!currentImageUrl) return;
-            const link = document.createElement('a');
-            link.href = currentImageUrl;
-            link.download = `ia-studio-pro-${Date.now()}.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function addToHistory(url, prompt) {
-            const item = { url, prompt, id: Date.now() };
-            history.unshift(item);
-            if (history.length > 12) history.pop();
-            localStorage.setItem('ai_img_v2_history', JSON.stringify(history));
-            renderHistory();
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('history-section');
-            const grid = document.getElementById('history-grid');
-            
-            if (history.length === 0) {
-                container.classList.add('hidden');
-                return;
+        function getDeviceModel() {
+            const ua = navigator.userAgent;
+            if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) return "Tablet Generic";
+            if (/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+                if (ua.includes("iPhone")) return "Apple iPhone";
+                if (ua.includes("Android")) {
+                    const match = ua.match(/Android \d+; ([^;]+);/);
+                    return match ? match[1] : "Android Phone";
+                }
+                return "Dispositivo Móvel";
             }
-
-            container.classList.remove('hidden');
-            grid.innerHTML = history.map(item => `
-                <div class="group relative aspect-square rounded-lg overflow-hidden cursor-pointer border border-white/5 bg-slate-800" onclick="selectFromHistory('${item.id}')">
-                    <img src="${item.url}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Histórico">
-                    <div class="absolute inset-0 bg-blue-600/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M5 12l5 5L20 7"/></svg>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function clearHistory() {
-            if (confirm("Tens a certeza que queres limpar todo o histórico?")) {
-                history = [];
-                localStorage.removeItem('ai_img_v2_history');
-                renderHistory();
-            }
-        }
-
-        function selectFromHistory(id) {
-            const item = history.find(h => h.id == id);
-            if (item) {
-                currentImageUrl = item.url;
-                document.getElementById('output-image').src = item.url;
-                document.getElementById('prompt').value = item.prompt;
-                document.getElementById('display-prompt').innerText = item.prompt;
-                document.getElementById('result-section').classList.remove('hidden');
-                window.scrollTo({ top: 300, behavior: 'smooth' });
-            }
+            if (ua.includes("Windows NT 10.0")) return "PC Windows 10/11";
+            if (ua.includes("Macintosh")) return "Apple MacBook/iMac";
+            return "Estação de Trabalho";
         }
     </script>
 </body>
