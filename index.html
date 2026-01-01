@@ -127,7 +127,7 @@
 
         <div id="preview-panel" class="flex-1 bg-slate-100 flex flex-col items-center relative overflow-hidden">
             <div id="controls-ui" class="absolute top-6 flex bg-white/80 backdrop-blur-md p-1.5 rounded-2xl shadow-xl z-20">
-                <button onclick="setDevice('mobile')" id="btn-m" class="px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white">Mobile</button>
+                <button onclick="setDevice('mobile')" id="btn-m" class="px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white">Telemóvel</button>
                 <button onclick="setDevice('desktop')" id="btn-d" class="px-5 py-2 text-xs font-bold rounded-xl">Desktop</button>
             </div>
             <div class="flex-1 flex items-center justify-center w-full p-4 pt-24">
@@ -159,34 +159,34 @@
             posts: []
         };
 
-        window.onload = async () => {
+        // Função de inicialização
+        const init = async () => {
             document.body.classList.add('is-loading');
-            await signInAnonymously(auth);
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const profileId = urlParams.get('id');
+            try {
+                await signInAnonymously(auth);
+                const urlParams = new URLSearchParams(window.location.search);
+                const profileId = urlParams.get('id');
 
-            if (profileId) {
-                // MODO PÚBLICO: Carregar dados pequenos do Firestore
-                try {
+                if (profileId) {
                     const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', profileId);
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
                         state = docSnap.data();
                         document.body.classList.add('public-view');
                     }
-                } catch (e) { console.error(e); }
-            } else {
-                // MODO EDITOR
-                const saved = localStorage.getItem('lp_cloud_v5');
-                if (saved) state = JSON.parse(saved);
-                syncInputs();
+                } else {
+                    const saved = localStorage.getItem('lp_cloud_v5');
+                    if (saved) state = JSON.parse(saved);
+                    syncInputs();
+                }
+            } catch (e) {
+                console.error("Erro no carregamento:", e);
             }
-            
             updateUI();
             document.body.classList.remove('is-loading');
         };
 
+        // Expor funções ao contexto Global (window) para os botões HTML
         window.updateState = () => {
             state.username = document.getElementById('input-username').value || 'utilizador';
             state.displayName = document.getElementById('input-name').value || 'O Teu Nome';
@@ -194,13 +194,6 @@
             updateUI();
             localStorage.setItem('lp_cloud_v5', JSON.stringify(state));
         };
-
-        function syncInputs() {
-            document.getElementById('input-username').value = state.username;
-            document.getElementById('input-name').value = state.displayName;
-            document.getElementById('input-bio').value = state.bio;
-            if (state.photo) document.getElementById('edit-avatar').src = state.photo;
-        }
 
         window.addLink = () => {
             const t = document.getElementById('link-title');
@@ -250,7 +243,6 @@
 
         window.publishToCloud = async () => {
             document.body.classList.add('is-loading');
-            // Gera um ID de apenas 7 caracteres
             const shortId = Math.random().toString(36).substring(2, 9);
             try {
                 const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', shortId);
@@ -258,7 +250,10 @@
                 const finalUrl = `${window.location.origin}${window.location.pathname}?id=${shortId}`;
                 document.getElementById('share-url-input').value = finalUrl;
                 document.body.classList.add('modal-active');
-            } catch (e) { alert("Erro ao publicar na nuvem."); }
+            } catch (e) { 
+                console.error(e);
+                alert("Erro ao publicar na nuvem."); 
+            }
             document.body.classList.remove('is-loading');
         };
 
@@ -266,18 +261,16 @@
             const renderTarget = document.getElementById('render-target');
             if (!renderTarget) return;
 
-            // Render Editor Links
             const list = document.getElementById('links-list');
             if (list) {
                 list.innerHTML = state.links.map(l => `
-                    <div class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl">
+                    <div class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl animate-slide">
                         <span class="flex-1 text-xs font-bold truncate">${l.title}</span>
-                        <button onclick="removeLink(${l.id})" class="text-red-400">Remover</button>
+                        <button onclick="removeLink(${l.id})" class="text-red-400 p-1 font-bold text-[10px]">Remover</button>
                     </div>
                 `).join('');
             }
 
-            // Render Preview
             const textColor = 'text-white';
             const cardStyle = 'bg-white/10 backdrop-blur-md border-white/20 text-white shadow-lg';
 
@@ -301,7 +294,7 @@
                 <div class="w-full max-w-sm space-y-6 pb-32">
                     <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40">Galeria</h3>
                     ${state.posts.map(p => `
-                        <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 mb-6">
                             <img src="${p.image}" class="w-full h-56 object-cover">
                             <div class="p-5">
                                 <p class="text-sm font-semibold text-slate-700 leading-tight">${p.description}</p>
@@ -321,10 +314,32 @@
         };
 
         window.closeShareModal = () => document.body.classList.remove('modal-active');
+
         window.setDevice = (mode) => {
             const frame = document.getElementById('device-frame');
-            frame.className = mode === 'mobile' ? 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden' : 'preview-container bg-white shadow-2xl overflow-hidden w-full h-full border-none rounded-none';
+            const btnM = document.getElementById('btn-m');
+            const btnD = document.getElementById('btn-d');
+            
+            if (mode === 'mobile') {
+                frame.className = 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden';
+                btnM.classList.add('bg-indigo-600', 'text-white');
+                btnD.classList.remove('bg-indigo-600', 'text-white');
+            } else {
+                frame.className = 'preview-container bg-white shadow-2xl overflow-hidden w-full h-full border-none rounded-none';
+                btnD.classList.add('bg-indigo-600', 'text-white');
+                btnM.classList.remove('bg-indigo-600', 'text-white');
+            }
         };
+
+        function syncInputs() {
+            document.getElementById('input-username').value = state.username;
+            document.getElementById('input-name').value = state.displayName;
+            document.getElementById('input-bio').value = state.bio;
+            if (state.photo) document.getElementById('edit-avatar').src = state.photo;
+        }
+
+        // Iniciar aplicação
+        init();
     </script>
 </body>
 </html>
