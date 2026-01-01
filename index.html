@@ -3,206 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkPlus - Editor Profissional</title>
+    <title>LinkPlus - Editor & Publicador</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.3s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Animações */
-        @keyframes slideIn {
+        @keyframes slideUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .animate-slide { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-slide { animation: slideUp 0.4s ease-out forwards; }
         
-        /* Simulador */
-        .preview-container {
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .mode-mobile { width: 375px; height: 667px; border-radius: 40px; border: 12px solid #1e293b; }
-        .mode-desktop { width: 100%; height: 100%; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .preview-container { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .mode-mobile { width: 375px; height: 750px; border-radius: 40px; border: 12px solid #1e293b; position: relative; }
         
-        .device-btn.active {
-            background-color: #4f46e5;
-            color: white;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
+        /* Modos de Visão */
+        .public-view #editor-panel { display: none; }
+        .public-view #preview-panel { width: 100%; height: 100vh; padding: 0; background: white; }
+        .public-view #device-frame { width: 100%; height: 100%; border: none; border-radius: 0; max-width: 100%; }
+        .public-view #controls-ui { display: none; }
+        .public-view #exit-public { display: block; }
+        
+        #exit-public { display: none; }
+        .modal-active #share-modal { display: flex; }
+        #share-modal { display: none; }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 overflow-hidden">
+<body id="main-body" class="bg-[#f8fafc] text-slate-900 overflow-hidden">
 
-    <div class="h-screen flex flex-col md:flex-row">
+    <!-- Modal de Partilha -->
+    <div id="share-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-slide">
+            <h3 class="text-xl font-black mb-2">Link Otimizado! 🚀</h3>
+            <p class="text-slate-500 text-sm mb-4">Geramos um link leve que funciona no WhatsApp.</p>
+            
+            <div class="bg-amber-50 border border-amber-100 p-3 rounded-xl mb-6">
+                <p class="text-[10px] text-amber-700 leading-tight font-medium">
+                    <strong>Nota:</strong> Para manter o link curto e evitar erros (502), as fotos não são incluídas no link de partilha. O destinatário verá o teu perfil com as cores e links escolhidos.
+                </p>
+            </div>
+
+            <div class="relative mb-6">
+                <input type="text" id="share-url-input" readonly class="w-full bg-slate-50 border border-slate-200 p-4 pr-12 rounded-2xl text-xs font-mono text-indigo-600 focus:outline-none">
+                <button onclick="copyShareUrl()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-2 rounded-xl shadow-lg hover:bg-indigo-700">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
+            </div>
+            <button onclick="closeShareModal()" class="w-full py-4 bg-slate-100 text-slate-900 rounded-2xl font-bold text-sm hover:bg-slate-200 transition-all">Fechar</button>
+        </div>
+    </div>
+
+    <!-- Botão Flutuante para Sair -->
+    <button id="exit-public" onclick="togglePublicMode()" class="fixed bottom-6 right-6 z-50 bg-white text-slate-900 px-6 py-3 rounded-full shadow-2xl font-bold text-sm border border-slate-200 hover:bg-slate-50">
+        ← Voltar ao Editor
+    </button>
+
+    <div id="app-container" class="h-screen flex flex-col md:flex-row">
         
-        <!-- PAINEL DE EDIÇÃO (ESQUERDA) -->
-        <div class="w-full md:w-[450px] lg:w-[500px] h-full overflow-y-auto bg-white border-r border-slate-200 z-10 shadow-xl">
+        <!-- PAINEL DE EDIÇÃO -->
+        <div id="editor-panel" class="w-full md:w-[450px] h-full overflow-y-auto bg-white border-r border-slate-200 z-10 shadow-xl">
             <div class="p-6 md:p-8 space-y-8">
                 
-                <!-- Header -->
                 <header class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <div class="bg-indigo-600 p-2 rounded-xl text-white">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                         </div>
                         <h1 class="text-xl font-extrabold tracking-tight italic">LinkPlus<span class="text-indigo-600">.</span></h1>
                     </div>
-                    <button onclick="copyLink()" class="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 transition-all group">
-                        <span id="display-link" class="text-xs font-bold text-slate-600">linkplus.me/user</span>
-                        <div id="copy-icon" class="text-indigo-600">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-                        </div>
+                    <button onclick="generateShareLink()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-lg flex items-center gap-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                        Partilhar
                     </button>
                 </header>
 
-                <!-- Seletor de Modo (Mobile) -->
-                <div class="flex bg-slate-100 p-1 rounded-2xl md:hidden">
-                    <button onclick="setPreviewMode('edit')" id="btn-edit" class="flex-1 py-2 text-xs font-bold rounded-xl active-tab bg-white shadow-sm">Editar</button>
-                    <button onclick="setPreviewMode('preview')" id="btn-preview" class="flex-1 py-2 text-xs font-bold rounded-xl">Ver Site</button>
-                </div>
-
-                <div id="edit-fields" class="space-y-8">
+                <div class="space-y-8">
                     <!-- Perfil -->
                     <section>
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Configuração de Perfil</h2>
-                        <div class="bg-slate-50 rounded-[2.5rem] p-6 space-y-6 border border-slate-100">
-                            <div class="flex items-center gap-5">
-                                <div class="relative group cursor-pointer" onclick="document.getElementById('profile-upload').click()">
-                                    <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg bg-slate-200">
-                                        <img id="profile-img-edit" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" class="w-full h-full object-cover">
-                                    </div>
-                                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <svg class="text-white" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                                    </div>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Perfil</h2>
+                        <div class="bg-slate-50 rounded-3xl p-5 space-y-4 border border-slate-100">
+                            <div class="flex items-center gap-4">
+                                <div class="relative cursor-pointer" onclick="document.getElementById('profile-upload').click()">
+                                    <img id="edit-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md">
                                     <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleImage(this, 'profile')">
                                 </div>
-                                <div class="flex-1 space-y-3">
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400 font-bold text-sm">@</span>
-                                        <input type="text" id="input-username" oninput="updateUI()" class="w-full pl-8 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl outline-none focus:ring-2 ring-indigo-500/20 font-bold text-sm" value="utilizador">
-                                    </div>
-                                    <input type="text" id="input-name" oninput="updateUI()" class="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl outline-none focus:ring-2 ring-indigo-500/20 text-sm font-semibold" value="O Teu Nome">
+                                <div class="flex-1 space-y-2">
+                                    <input type="text" id="input-username" oninput="updateUI()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold" value="utilizador">
+                                    <input type="text" id="input-name" oninput="updateUI()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm" value="O Teu Nome">
                                 </div>
                             </div>
-                            <textarea id="input-bio" oninput="updateUI()" class="w-full px-4 py-3 bg-white border border-slate-100 rounded-xl outline-none focus:ring-2 ring-indigo-500/20 text-sm resize-none h-24" placeholder="Escreve aqui a tua bio...">Bem-vindo ao meu LinkPlus!</textarea>
+                            <textarea id="input-bio" oninput="updateUI()" class="w-full p-3 bg-white border border-slate-200 rounded-lg text-sm resize-none h-20" placeholder="A tua biografia...">Bem-vindo ao meu LinkPlus!</textarea>
                         </div>
                     </section>
 
                     <!-- Links -->
                     <section>
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Meus Links</h2>
-                        <div class="space-y-3">
-                            <div class="bg-indigo-50/50 p-4 rounded-3xl border border-indigo-100/50 space-y-3">
-                                <input type="text" id="link-title" placeholder="Título (ex: Instagram)" class="w-full px-4 py-3 rounded-xl border-none outline-none font-bold text-sm shadow-sm">
-                                <input type="text" id="link-url" placeholder="URL (ex: instagram.com/teunome)" class="w-full px-4 py-3 rounded-xl border-none outline-none text-sm shadow-sm">
-                                <button onclick="addLink()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 active:scale-95">ADICIONAR LINK</button>
-                            </div>
-                            <div id="links-list" class="space-y-2"></div>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Links</h2>
+                        <div id="links-list" class="space-y-2 mb-3"></div>
+                        <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 space-y-2">
+                            <input type="text" id="link-title" placeholder="Título (ex: Instagram)" class="w-full px-3 py-2 rounded-lg border-none text-sm font-bold">
+                            <input type="text" id="link-url" placeholder="URL (https://...)" class="w-full px-3 py-2 rounded-lg border-none text-sm">
+                            <button onclick="addLink()" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-xs uppercase tracking-wider">Adicionar Link</button>
                         </div>
                     </section>
 
-                    <!-- Posts -->
+                    <!-- Feed -->
                     <section>
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Feed de Momentos</h2>
-                        <div class="bg-slate-50 p-5 rounded-[2.5rem] border border-slate-100 space-y-4">
-                            <div onclick="document.getElementById('post-upload').click()" class="w-full h-32 bg-white rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30 transition-all overflow-hidden relative">
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Feed (Apenas Local)</h2>
+                        <div class="bg-slate-50 p-4 rounded-3xl border border-slate-100 space-y-3">
+                            <p class="text-[9px] text-slate-400 leading-tight">Fotos no feed são guardadas apenas no teu dispositivo para garantir que o link de partilha funciona.</p>
+                            <div onclick="document.getElementById('post-upload').click()" class="h-24 bg-white rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center cursor-pointer overflow-hidden relative">
                                 <img id="post-preview-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
-                                <div id="post-placeholder" class="text-center">
-                                    <svg class="mx-auto text-slate-300 mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Escolher da Galeria</span>
-                                </div>
+                                <span class="text-[9px] font-black text-slate-400">UPLOAD FOTO</span>
                                 <input type="file" id="post-upload" class="hidden" accept="image/*" onchange="handleImage(this, 'post')">
                             </div>
-                            <textarea id="post-desc" placeholder="Legenda do post..." class="w-full p-4 rounded-xl bg-white border border-slate-100 outline-none text-sm resize-none" rows="2"></textarea>
-                            <button onclick="addPost()" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-all">PUBLICAR NO FEED</button>
+                            <textarea id="post-desc" placeholder="Legenda..." class="w-full p-3 rounded-xl bg-white border border-slate-200 text-sm h-16"></textarea>
+                            <button onclick="addPost()" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase">Publicar no Feed</button>
                         </div>
                     </section>
 
                     <!-- Temas -->
                     <section class="pb-10">
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Estilo Visual</h2>
-                        <div class="grid grid-cols-4 gap-3">
-                            <button onclick="setTheme('bg-slate-900')" class="h-10 rounded-lg bg-slate-900 border-2 border-transparent"></button>
-                            <button onclick="setTheme('bg-indigo-600')" class="h-10 rounded-lg bg-indigo-600 border-2 border-transparent"></button>
-                            <button onclick="setTheme('bg-rose-500')" class="h-10 rounded-lg bg-rose-500 border-2 border-transparent"></button>
-                            <button onclick="setTheme('bg-gradient-to-br from-indigo-600 to-purple-700')" class="h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-700 border-2 border-indigo-600"></button>
-                            <button onclick="setTheme('bg-emerald-600')" class="h-10 rounded-lg bg-emerald-600 border-2 border-transparent"></button>
-                            <button onclick="setTheme('bg-gradient-to-tr from-orange-400 to-rose-500')" class="h-10 rounded-lg bg-gradient-to-tr from-orange-400 to-rose-500 border-2 border-transparent"></button>
-                            <button onclick="setTheme('bg-[#f1f5f9]')" class="h-10 rounded-lg bg-[#f1f5f9] border-2 border-transparent shadow-inner"></button>
-                            <button onclick="setTheme('bg-black')" class="h-10 rounded-lg bg-black border-2 border-transparent"></button>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Temas</h2>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="setTheme('bg-slate-900')" class="h-10 rounded-xl bg-slate-900"></button>
+                            <button onclick="setTheme('bg-indigo-600')" class="h-10 rounded-xl bg-indigo-600"></button>
+                            <button onclick="setTheme('bg-rose-500')" class="h-10 rounded-xl bg-rose-500"></button>
+                            <button onclick="setTheme('bg-gradient-to-br from-indigo-600 to-purple-700')" class="h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700"></button>
                         </div>
                     </section>
                 </div>
             </div>
         </div>
 
-        <!-- VISUALIZAÇÃO (DIREITA) -->
-        <div id="preview-panel" class="flex-1 bg-slate-100 relative overflow-hidden flex flex-col items-center">
-            
-            <!-- Controlo de Dispositivos -->
-            <div class="absolute top-6 left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-200 flex gap-1 z-20">
-                <button onclick="setDevice('mobile')" id="dev-mobile" class="device-btn active px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-                    Telemóvel
-                </button>
-                <button onclick="setDevice('desktop')" id="dev-desktop" class="device-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                    PC
-                </button>
+        <!-- VISUALIZAÇÃO -->
+        <div id="preview-panel" class="flex-1 bg-slate-100 flex flex-col items-center relative overflow-hidden">
+            <div id="controls-ui" class="absolute top-6 flex bg-white/80 backdrop-blur-md p-1.5 rounded-2xl shadow-xl z-20">
+                <button onclick="setDevice('mobile')" id="btn-m" class="px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white transition-all">Mobile</button>
+                <button onclick="setDevice('desktop')" id="btn-d" class="px-5 py-2 text-xs font-bold rounded-xl transition-all">Desktop</button>
             </div>
 
-            <!-- Frame do Simulador -->
-            <div class="flex-1 flex items-center justify-center w-full p-8 pt-20">
-                <div id="device-frame" class="preview-container mode-mobile bg-white shadow-2xl overflow-hidden relative">
-                    <div id="mobile-content" class="w-full h-full flex flex-col items-center overflow-y-auto no-scrollbar">
-                        <!-- O conteúdo do LinkPlus será injetado aqui -->
-                    </div>
+            <div class="flex-1 flex items-center justify-center w-full p-4 pt-24">
+                <div id="device-frame" class="preview-container mode-mobile bg-white shadow-2xl overflow-hidden">
+                    <div id="render-target" class="w-full h-full overflow-y-auto no-scrollbar"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let state = {
-            username: 'utilizador',
-            displayName: 'O Teu Nome',
-            bio: 'Bem-vindo ao meu LinkPlus!',
-            photo: null,
-            theme: 'bg-gradient-to-br from-indigo-600 to-purple-700',
-            links: [],
-            posts: [],
-            device: 'mobile'
-        };
-
-        // --- Lógica de Imagem ---
-        function handleImage(input, type) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    if (type === 'profile') {
-                        state.photo = e.target.result;
-                        document.getElementById('profile-img-edit').src = e.target.result;
-                    } else {
-                        document.getElementById('post-preview-img').src = e.target.result;
-                        document.getElementById('post-preview-img').classList.remove('hidden');
-                        document.getElementById('post-placeholder').classList.add('hidden');
-                    }
-                    updateUI();
-                }
-                reader.readAsDataURL(file);
+        // --- GESTÃO DE DADOS ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedData = urlParams.get('p');
+        
+        let state;
+        if (sharedData) {
+            try {
+                // Decode de forma segura
+                state = JSON.parse(decodeURIComponent(escape(atob(sharedData))));
+                document.body.classList.add('public-view');
+            } catch(e) {
+                console.error("Link corrompido ou demasiado longo.");
             }
         }
 
-        // --- Gestão de Conteúdo ---
+        if (!state) {
+            state = JSON.parse(localStorage.getItem('linkplus_v3')) || {
+                username: 'utilizador',
+                displayName: 'O Teu Nome',
+                bio: 'Bem-vindo à minha bio!',
+                photo: null,
+                theme: 'bg-gradient-to-br from-indigo-600 to-purple-700',
+                links: [],
+                posts: [] // Posts ficam apenas no localstorage
+            };
+        }
+
+        function save() {
+            localStorage.setItem('linkplus_v3', JSON.stringify(state));
+        }
+
+        // --- PARTILHA OTIMIZADA ---
+        function generateShareLink() {
+            // Criamos uma versão "light" sem as fotos (Base64 de fotos mata o URL)
+            const lightState = {
+                username: state.username,
+                displayName: state.displayName,
+                bio: state.bio,
+                theme: state.theme,
+                links: state.links,
+                photo: null // Removemos a foto para o link caber no WhatsApp
+            };
+
+            const dataString = btoa(unescape(encodeURIComponent(JSON.stringify(lightState))));
+            const shareUrl = `${window.location.origin}${window.location.pathname}?p=${dataString}`;
+            
+            document.getElementById('share-url-input').value = shareUrl;
+            document.body.classList.add('modal-active');
+        }
+
+        function copyShareUrl() {
+            const input = document.getElementById('share-url-input');
+            input.select();
+            document.execCommand('copy');
+            alert("Copiado! Este link é curto e funciona em qualquer lugar.");
+        }
+
+        function closeShareModal() {
+            document.body.classList.remove('modal-active');
+        }
+
+        // --- INTERFACE ---
+        function handleImage(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (type === 'profile') {
+                    state.photo = e.target.result;
+                    document.getElementById('edit-avatar').src = e.target.result;
+                } else {
+                    document.getElementById('post-preview-img').src = e.target.result;
+                    document.getElementById('post-preview-img').classList.remove('hidden');
+                }
+                updateUI();
+            };
+            reader.readAsDataURL(file);
+        }
+
         function addLink() {
-            const title = document.getElementById('link-title').value;
-            const url = document.getElementById('link-url').value;
-            if (!title || !url) return;
-            state.links.push({ id: Date.now(), title, url });
-            document.getElementById('link-title').value = '';
-            document.getElementById('link-url').value = '';
+            const t = document.getElementById('link-title');
+            const u = document.getElementById('link-url');
+            if (!t.value || !u.value) return;
+            let url = u.value;
+            if (!url.startsWith('http')) url = 'https://' + url;
+            state.links.push({ id: Date.now(), title: t.value, url: url });
+            t.value = ''; u.value = '';
             updateUI();
         }
 
@@ -214,50 +253,11 @@
         function addPost() {
             const img = document.getElementById('post-preview-img').src;
             const desc = document.getElementById('post-desc').value;
-            if (!img || img.startsWith('window')) return;
-            state.posts.unshift({
-                id: Date.now(),
-                image: img,
-                description: desc,
-                date: new Date().toLocaleDateString('pt-PT')
-            });
-            document.getElementById('post-preview-img').src = '';
+            if (!img || img.includes('index.html')) return;
+            state.posts.unshift({ id: Date.now(), image: img, description: desc, date: 'Hoje' });
             document.getElementById('post-preview-img').classList.add('hidden');
-            document.getElementById('post-placeholder').classList.remove('hidden');
             document.getElementById('post-desc').value = '';
             updateUI();
-        }
-
-        // --- Controlos de Visualização ---
-        function setDevice(mode) {
-            state.device = mode;
-            const frame = document.getElementById('device-frame');
-            const btnMobile = document.getElementById('dev-mobile');
-            const btnDesktop = document.getElementById('dev-desktop');
-
-            if (mode === 'mobile') {
-                frame.className = 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden relative';
-                btnMobile.classList.add('active');
-                btnDesktop.classList.remove('active');
-            } else {
-                frame.className = 'preview-container mode-desktop bg-white shadow-2xl overflow-hidden relative max-w-5xl mx-auto';
-                btnDesktop.classList.add('active');
-                btnMobile.classList.remove('active');
-            }
-        }
-
-        function setPreviewMode(mode) {
-            const editor = document.getElementById('edit-fields');
-            const preview = document.getElementById('preview-panel');
-            if (mode === 'preview') {
-                preview.classList.remove('hidden');
-                document.getElementById('btn-preview').classList.add('bg-white', 'shadow-sm');
-                document.getElementById('btn-edit').classList.remove('bg-white', 'shadow-sm');
-            } else {
-                preview.classList.add('hidden');
-                document.getElementById('btn-edit').classList.add('bg-white', 'shadow-sm');
-                document.getElementById('btn-preview').classList.remove('bg-white', 'shadow-sm');
-            }
         }
 
         function setTheme(t) {
@@ -265,83 +265,82 @@
             updateUI();
         }
 
-        // --- Renderização ---
+        function setDevice(mode) {
+            const frame = document.getElementById('device-frame');
+            const bm = document.getElementById('btn-m');
+            const bd = document.getElementById('btn-d');
+            frame.className = mode === 'mobile' ? 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden' : 'preview-container bg-white shadow-2xl overflow-hidden w-full h-full border-none rounded-none';
+            bm.className = mode === 'mobile' ? 'px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white shadow-lg' : 'px-5 py-2 text-xs font-bold rounded-xl';
+            bd.className = mode === 'desktop' ? 'px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white shadow-lg' : 'px-5 py-2 text-xs font-bold rounded-xl';
+        }
+
+        function togglePublicMode() {
+            document.body.classList.toggle('public-view');
+        }
+
         function updateUI() {
-            state.username = document.getElementById('input-username').value;
-            state.displayName = document.getElementById('input-name').value;
-            state.bio = document.getElementById('input-bio').value;
-            document.getElementById('display-link').innerText = `linkplus.me/${state.username}`;
+            if (!document.body.classList.contains('public-view')) {
+                state.username = document.getElementById('input-username').value;
+                state.displayName = document.getElementById('input-name').value;
+                state.bio = document.getElementById('input-bio').value;
+                save();
+            }
 
-            // Cores do Tema
-            const isLight = state.theme.includes('#f1f5f9') || state.theme.includes('gray-100');
+            // Lista editor
+            const list = document.getElementById('links-list');
+            if (list) {
+                list.innerHTML = state.links.map(l => `
+                    <div class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl animate-slide">
+                        <span class="flex-1 text-xs font-bold truncate">${l.title}</span>
+                        <button onclick="removeLink(${l.id})" class="text-red-400 p-1 hover:bg-red-50 rounded">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            // Render
+            const isLight = state.theme.includes('slate-50') || state.theme.includes('white');
             const textColor = isLight ? 'text-slate-900' : 'text-white';
-            const cardBg = isLight ? 'bg-white' : 'bg-white/10 backdrop-blur-md border border-white/20';
-            const postText = isLight ? 'text-slate-700' : 'text-white/90';
+            const cardStyle = isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-white/10 backdrop-blur-md border-white/20 text-white';
 
-            // Render Links Editor
-            document.getElementById('links-list').innerHTML = state.links.map(l => `
-                <div class="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-2xl animate-slide shadow-sm">
-                    <div class="p-2 bg-slate-50 rounded-lg text-slate-400"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
-                    <div class="flex-1 truncate"><p class="text-xs font-bold">${l.title}</p></div>
-                    <button onclick="removeLink(${l.id})" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
-                </div>
-            `).join('');
-
-            // Render Mobile Content
-            const mobileContent = document.getElementById('mobile-content');
-            mobileContent.className = `w-full h-full ${state.theme} flex flex-col items-center p-8 pt-12 overflow-y-auto no-scrollbar`;
-            
-            mobileContent.innerHTML = `
-                <div class="w-24 h-24 rounded-full border-4 border-white/30 shadow-2xl mb-5 overflow-hidden bg-white/20 flex-shrink-0">
+            document.getElementById('render-target').className = `w-full h-full ${state.theme} p-8 flex flex-col items-center`;
+            document.getElementById('render-target').innerHTML = `
+                <div class="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl mb-5 overflow-hidden bg-white/10 flex-shrink-0 animate-slide">
                     <img src="${state.photo || 'https://ui-avatars.com/api/?name='+state.displayName+'&background=6366f1&color=fff'}" class="w-full h-full object-cover">
                 </div>
-                <h3 class="text-xl font-extrabold ${textColor}">@${state.username}</h3>
-                <p class="text-xs font-medium mt-1 mb-8 text-center opacity-80 ${textColor} px-4 leading-relaxed">${state.bio}</p>
+                <h1 class="text-2xl font-black ${textColor}">@${state.username}</h1>
+                <p class="text-xs font-medium opacity-80 mt-2 mb-10 text-center ${textColor} max-w-xs">${state.bio}</p>
 
-                <div class="w-full space-y-3 mb-12 max-w-sm">
+                <div class="w-full space-y-4 max-w-sm mb-16">
                     ${state.links.map(l => `
-                        <a href="${l.url}" target="_blank" class="block w-full py-4 ${cardBg} rounded-2xl text-center font-bold text-xs hover:scale-[1.02] active:scale-95 transition-all shadow-lg ${textColor}">
+                        <a href="${l.url}" target="_blank" class="block w-full py-4.5 ${cardStyle} border rounded-2xl text-center font-bold text-sm hover:scale-[1.02] active:scale-95 transition-all shadow-lg">
                             ${l.title}
                         </a>
                     `).join('')}
                 </div>
 
-                <div class="w-full space-y-6 max-w-sm pb-10">
-                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] ${isLight ? 'text-slate-400' : 'text-white/40'}">Momentos</h4>
+                ${state.posts.length > 0 ? `
+                <div class="w-full max-w-sm space-y-6 pb-32">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest ${isLight ? 'text-slate-400' : 'text-white/40'}">Galeria</h3>
                     ${state.posts.map(p => `
-                        <div class="bg-white rounded-[2rem] overflow-hidden shadow-2xl animate-slide">
-                            <img src="${p.image}" class="w-full h-52 object-cover">
-                            <div class="p-5 space-y-3">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[9px] font-black bg-indigo-50 text-indigo-500 px-2 py-1 rounded-md uppercase">${p.date}</span>
-                                </div>
-                                <p class="text-xs font-semibold text-slate-700 leading-relaxed">${p.description}</p>
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-2xl animate-slide border border-slate-100">
+                            <img src="${p.image}" class="w-full h-56 object-cover">
+                            <div class="p-5">
+                                <p class="text-sm font-semibold text-slate-700 leading-tight">${p.description}</p>
                             </div>
                         </div>
                     `).join('')}
-                    ${state.posts.length === 0 ? '<div class="text-center py-10 opacity-20"><svg class="mx-auto mb-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 16a2 2 0 0 1-2-2"/></svg><p class="text-[10px] font-bold">Sem posts ainda</p></div>' : ''}
                 </div>
+                ` : ''}
             `;
         }
 
-        function copyLink() {
-            const text = `linkplus.me/${state.username}`;
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            
-            const btn = document.getElementById('copy-icon');
-            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-green-500"><polyline points="20 6 9 17 4 12"/></svg>';
-            setTimeout(() => {
-                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
-            }, 2000);
-        }
-
+        // Init
+        document.getElementById('edit-avatar').src = state.photo || 'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff';
+        document.getElementById('input-username').value = state.username;
+        document.getElementById('input-name').value = state.displayName;
+        document.getElementById('input-bio').value = state.bio;
         updateUI();
     </script>
 </body>
