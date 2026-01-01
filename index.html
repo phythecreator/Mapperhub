@@ -3,38 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkPlus - Links Curtos Cloud</title>
+    <title>LinkPlus - Editor Independente</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.3s ease; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-slide { animation: slideUp 0.4s ease-out forwards; }
         
         .preview-container { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .mode-mobile { width: 375px; height: 700px; border-radius: 40px; border: 12px solid #1e293b; position: relative; }
         
-        .public-view #editor-panel { display: none; }
-        .public-view #preview-panel { width: 100%; height: 100vh; padding: 0; background: white; }
-        .public-view #device-frame { width: 100%; height: 100%; border: none; border-radius: 0; max-width: 100%; }
-        .public-view #controls-ui { display: none; }
-        .public-view #exit-public { display: block; }
-        
-        #exit-public { display: none; }
         #share-modal { display: none; }
         .modal-active #share-modal { display: flex; }
         
         .loading-screen { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 200; align-items: center; justify-content: center; flex-direction: column; }
         .is-loading .loading-screen { display: flex; }
+
+        .theme-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px #e2e8f0; }
+        .theme-dot.active { box-shadow: 0 0 0 2px #6366f1; }
     </style>
 </head>
-<body id="main-body" class="bg-[#f8fafc] text-slate-900 overflow-hidden">
+<body class="bg-[#f8fafc] text-slate-900 overflow-hidden">
 
     <div class="loading-screen">
         <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -43,96 +33,84 @@
 
     <!-- Modal de Partilha -->
     <div id="share-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-slide">
-            <h3 class="text-xl font-black mb-2">Link Ultra Curto! 🚀</h3>
-            <p class="text-slate-500 text-sm mb-6">Este link agora é minúsculo e carrega todas as tuas fotos no WhatsApp.</p>
-            
+        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl">
+            <h3 class="text-xl font-black mb-2">Link Pronto! 🚀</h3>
+            <p class="text-slate-500 text-sm mb-6">Copia o link abaixo para partilhar no WhatsApp.</p>
             <div class="relative mb-6">
-                <input type="text" id="share-url-input" readonly class="w-full bg-slate-50 border border-slate-200 p-4 pr-12 rounded-2xl text-sm font-bold text-indigo-600 focus:outline-none">
-                <button onclick="copyShareUrl()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-2 rounded-xl shadow-lg hover:bg-indigo-700">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                <input type="text" id="share-url-input" readonly class="w-full bg-slate-50 border border-slate-200 p-4 pr-12 rounded-2xl text-sm font-bold text-indigo-600">
+                <button onclick="copyShareUrl()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 text-white px-3 py-2 rounded-xl text-xs font-bold">
+                    Copiar
                 </button>
             </div>
-            <button onclick="closeShareModal()" class="w-full py-4 bg-slate-100 text-slate-900 rounded-2xl font-bold text-sm hover:bg-slate-200">Fechar</button>
+            <button onclick="closeShareModal()" class="w-full py-4 bg-slate-100 text-slate-900 rounded-2xl font-bold">Fechar</button>
         </div>
     </div>
 
-    <button id="exit-public" onclick="window.location.href = window.location.pathname" class="fixed bottom-6 right-6 z-50 bg-white text-slate-900 px-6 py-3 rounded-full shadow-2xl font-bold text-sm border border-slate-200">
-        ← Criar o Meu Perfil
-    </button>
-
-    <div id="app-container" class="h-screen flex flex-col md:flex-row">
-        
-        <div id="editor-panel" class="w-full md:w-[450px] h-full overflow-y-auto bg-white border-r border-slate-200 z-10 shadow-xl">
-            <div class="p-6 md:p-8 space-y-8">
-                
+    <div class="h-screen flex flex-col md:flex-row">
+        <!-- Painel Esquerdo: Editor -->
+        <div id="editor-panel" class="w-full md:w-[450px] h-full overflow-y-auto bg-white border-r border-slate-200 z-10">
+            <div class="p-6 space-y-8">
                 <header class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                        </div>
-                        <h1 class="text-xl font-extrabold tracking-tight italic">LinkPlus<span class="text-indigo-600">.</span></h1>
-                    </div>
-                    <button onclick="publishToCloud()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-lg flex items-center gap-2">
-                        Publicar Link Curto
+                    <h1 class="text-xl font-extrabold italic">LinkPlus<span class="text-indigo-600">.</span></h1>
+                    <button onclick="publishToCloud()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-lg">
+                        Publicar Cloud
                     </button>
                 </header>
 
-                <div class="space-y-8">
-                    <!-- Perfil -->
+                <div class="space-y-6">
+                    <!-- Escolher Tema -->
                     <section>
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Perfil</h2>
-                        <div class="bg-slate-50 rounded-3xl p-5 space-y-4 border border-slate-100">
-                            <div class="flex items-center gap-4">
-                                <div class="relative cursor-pointer" onclick="document.getElementById('profile-upload').click()">
-                                    <img id="edit-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md">
-                                    <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleImage(this, 'profile')">
-                                </div>
-                                <div class="flex-1 space-y-2">
-                                    <input type="text" id="input-username" oninput="updateState()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold" placeholder="username">
-                                    <input type="text" id="input-name" oninput="updateState()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm" placeholder="Nome Exibido">
-                                </div>
-                            </div>
-                            <textarea id="input-bio" oninput="updateState()" class="w-full p-3 bg-white border border-slate-200 rounded-lg text-sm resize-none h-20" placeholder="A tua biografia..."></textarea>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Tema de Fundo</h2>
+                        <div class="flex gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                            <div onclick="setTheme('bg-gradient-to-br from-indigo-600 to-purple-700')" class="theme-dot bg-gradient-to-br from-indigo-600 to-purple-700"></div>
+                            <div onclick="setTheme('bg-gradient-to-br from-rose-500 to-orange-400')" class="theme-dot bg-gradient-to-br from-rose-500 to-orange-400"></div>
+                            <div onclick="setTheme('bg-slate-900')" class="theme-dot bg-slate-900"></div>
+                            <div onclick="setTheme('bg-gradient-to-br from-emerald-400 to-cyan-500')" class="theme-dot bg-gradient-to-br from-emerald-400 to-cyan-500"></div>
+                            <div onclick="setTheme('bg-white')" class="theme-dot bg-white border-slate-300"></div>
                         </div>
+                    </section>
+
+                    <!-- Perfil -->
+                    <section class="space-y-4">
+                        <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-3xl">
+                            <div class="relative cursor-pointer" onclick="document.getElementById('profile-upload').click()">
+                                <img id="edit-avatar" src="https://ui-avatars.com/api/?name=User" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md">
+                                <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleImage(this, 'profile')">
+                            </div>
+                            <div class="flex-1 space-y-2">
+                                <input type="text" id="input-username" oninput="updateState()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold" placeholder="username">
+                                <input type="text" id="input-name" oninput="updateState()" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm" placeholder="Nome Exibido">
+                            </div>
+                        </div>
+                        <textarea id="input-bio" oninput="updateState()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm h-20" placeholder="A tua biografia..."></textarea>
                     </section>
 
                     <!-- Links -->
                     <section>
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Links</h2>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Teus Links</h2>
                         <div id="links-list" class="space-y-2 mb-3"></div>
-                        <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 space-y-2">
-                            <input type="text" id="link-title" placeholder="Título (ex: Instagram)" class="w-full px-3 py-2 rounded-lg text-sm font-bold">
-                            <input type="text" id="link-url" placeholder="URL (ex: instagram.com/teu)" class="w-full px-3 py-2 rounded-lg text-sm">
-                            <button onclick="addLink()" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-xs uppercase">Adicionar Link</button>
-                        </div>
-                    </section>
-
-                    <!-- Feed -->
-                    <section>
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Galeria de Fotos</h2>
-                        <div class="bg-slate-50 p-4 rounded-3xl border border-slate-100 space-y-3">
-                            <div onclick="document.getElementById('post-upload').click()" class="h-24 bg-white rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center cursor-pointer relative overflow-hidden">
-                                <img id="post-preview-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
-                                <span class="text-[9px] font-black text-slate-400">UPLOAD FOTO</span>
-                                <input type="file" id="post-upload" class="hidden" accept="image/*" onchange="handleImage(this, 'post')">
-                            </div>
-                            <textarea id="post-desc" placeholder="Legenda..." class="w-full p-3 rounded-xl text-sm h-16 border-none"></textarea>
-                            <button onclick="addPost()" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase">Adicionar Post</button>
+                        <div class="bg-indigo-50 p-4 rounded-3xl space-y-2">
+                            <input type="text" id="link-title" placeholder="Título do Link" class="w-full px-3 py-2 rounded-lg text-sm font-bold">
+                            <input type="text" id="link-url" placeholder="URL (ex: google.com)" class="w-full px-3 py-2 rounded-lg text-sm">
+                            <button onclick="addLink()" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-xs">ADICIONAR LINK</button>
                         </div>
                     </section>
                 </div>
             </div>
         </div>
 
+        <!-- Painel Direito: Preview -->
         <div id="preview-panel" class="flex-1 bg-slate-100 flex flex-col items-center relative overflow-hidden">
-            <div id="controls-ui" class="absolute top-6 flex bg-white/80 backdrop-blur-md p-1.5 rounded-2xl shadow-xl z-20">
+            <div id="controls-ui" class="absolute top-6 flex bg-white/80 backdrop-blur-md p-1 rounded-2xl shadow-xl z-20">
                 <button onclick="setDevice('mobile')" id="btn-m" class="px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 text-white">Telemóvel</button>
                 <button onclick="setDevice('desktop')" id="btn-d" class="px-5 py-2 text-xs font-bold rounded-xl">Desktop</button>
             </div>
-            <div class="flex-1 flex items-center justify-center w-full p-4 pt-24">
+            
+            <div class="flex-1 flex items-center justify-center w-full p-4 pt-20">
                 <div id="device-frame" class="preview-container mode-mobile bg-white shadow-2xl overflow-hidden">
-                    <div id="render-target" class="w-full h-full overflow-y-auto no-scrollbar"></div>
+                    <div id="render-target" class="w-full h-full overflow-y-auto no-scrollbar">
+                        <!-- Conteúdo gerado aqui -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,13 +119,39 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        let db = null;
+        let auth = null;
+        let currentUser = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'linkplus-v5';
+
+        const setupFirebase = async () => {
+            try {
+                if (typeof __firebase_config !== 'undefined') {
+                    const config = JSON.parse(__firebase_config);
+                    const app = initializeApp(config);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    // Regra 3: Autenticação antes de queries
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
+                    return new Promise((resolve) => {
+                        onAuthStateChanged(auth, (user) => {
+                            currentUser = user;
+                            resolve(user);
+                        });
+                    });
+                }
+            } catch (e) {
+                console.warn("Firebase não configurado ou erro de permissão.", e);
+            }
+        };
 
         let state = {
             username: 'utilizador',
@@ -159,56 +163,34 @@
             posts: []
         };
 
-        // Função de inicialização
-        const init = async () => {
-            document.body.classList.add('is-loading');
-            try {
-                await signInAnonymously(auth);
-                const urlParams = new URLSearchParams(window.location.search);
-                const profileId = urlParams.get('id');
-
-                if (profileId) {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', profileId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        state = docSnap.data();
-                        document.body.classList.add('public-view');
-                    }
-                } else {
-                    const saved = localStorage.getItem('lp_cloud_v5');
-                    if (saved) state = JSON.parse(saved);
-                    syncInputs();
-                }
-            } catch (e) {
-                console.error("Erro no carregamento:", e);
-            }
-            updateUI();
-            document.body.classList.remove('is-loading');
-        };
-
-        // Expor funções ao contexto Global (window) para os botões HTML
         window.updateState = () => {
             state.username = document.getElementById('input-username').value || 'utilizador';
             state.displayName = document.getElementById('input-name').value || 'O Teu Nome';
             state.bio = document.getElementById('input-bio').value || '';
-            updateUI();
+            window.updateUI();
+            localStorage.setItem('lp_cloud_v5', JSON.stringify(state));
+        };
+
+        window.setTheme = (themeClass) => {
+            state.theme = themeClass;
+            window.updateUI();
             localStorage.setItem('lp_cloud_v5', JSON.stringify(state));
         };
 
         window.addLink = () => {
             const t = document.getElementById('link-title');
             const u = document.getElementById('link-url');
-            if (!t.value || !u.value) return;
-            let url = u.value.startsWith('http') ? u.value : 'https://' + u.value;
+            if (!t.value) return;
+            let url = u.value.includes('://') ? u.value : 'https://' + u.value;
             state.links.push({ id: Date.now(), title: t.value, url });
             t.value = ''; u.value = '';
-            updateUI();
+            window.updateUI();
             localStorage.setItem('lp_cloud_v5', JSON.stringify(state));
         };
 
         window.removeLink = (id) => {
             state.links = state.links.filter(l => l.id !== id);
-            updateUI();
+            window.updateUI();
             localStorage.setItem('lp_cloud_v5', JSON.stringify(state));
         };
 
@@ -220,126 +202,134 @@
                 if (type === 'profile') {
                     state.photo = e.target.result;
                     document.getElementById('edit-avatar').src = e.target.result;
-                } else {
-                    document.getElementById('post-preview-img').src = e.target.result;
-                    document.getElementById('post-preview-img').classList.remove('hidden');
                 }
-                updateUI();
+                window.updateUI();
+                localStorage.setItem('lp_cloud_v5', JSON.stringify(state));
             };
             reader.readAsDataURL(file);
         };
-
-        window.addPost = () => {
-            const img = document.getElementById('post-preview-img').src;
-            const desc = document.getElementById('post-desc').value;
-            if (!img || img.includes('index.html')) return;
-            state.posts.unshift({ id: Date.now(), image: img, description: desc });
-            document.getElementById('post-preview-img').classList.add('hidden');
-            document.getElementById('post-preview-img').src = '';
-            document.getElementById('post-desc').value = '';
-            updateUI();
-            localStorage.setItem('lp_cloud_v5', JSON.stringify(state));
-        };
-
-        window.publishToCloud = async () => {
-            document.body.classList.add('is-loading');
-            const shortId = Math.random().toString(36).substring(2, 9);
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', shortId);
-                await setDoc(docRef, state);
-                const finalUrl = `${window.location.origin}${window.location.pathname}?id=${shortId}`;
-                document.getElementById('share-url-input').value = finalUrl;
-                document.body.classList.add('modal-active');
-            } catch (e) { 
-                console.error(e);
-                alert("Erro ao publicar na nuvem."); 
-            }
-            document.body.classList.remove('is-loading');
-        };
-
-        window.updateUI = () => {
-            const renderTarget = document.getElementById('render-target');
-            if (!renderTarget) return;
-
-            const list = document.getElementById('links-list');
-            if (list) {
-                list.innerHTML = state.links.map(l => `
-                    <div class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl animate-slide">
-                        <span class="flex-1 text-xs font-bold truncate">${l.title}</span>
-                        <button onclick="removeLink(${l.id})" class="text-red-400 p-1 font-bold text-[10px]">Remover</button>
-                    </div>
-                `).join('');
-            }
-
-            const textColor = 'text-white';
-            const cardStyle = 'bg-white/10 backdrop-blur-md border-white/20 text-white shadow-lg';
-
-            renderTarget.className = `w-full h-full ${state.theme} p-8 flex flex-col items-center`;
-            renderTarget.innerHTML = `
-                <div class="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl mb-5 overflow-hidden flex-shrink-0">
-                    <img src="${state.photo || 'https://ui-avatars.com/api/?name='+state.displayName}" class="w-full h-full object-cover">
-                </div>
-                <h1 class="text-2xl font-black ${textColor}">@${state.username}</h1>
-                <p class="text-xs font-medium opacity-80 mt-2 mb-10 text-center ${textColor} max-w-xs">${state.bio}</p>
-
-                <div class="w-full space-y-4 max-w-sm mb-16">
-                    ${state.links.map(l => `
-                        <a href="${l.url}" target="_blank" class="block w-full py-4 ${cardStyle} border rounded-2xl text-center font-bold text-sm">
-                            ${l.title}
-                        </a>
-                    `).join('')}
-                </div>
-
-                ${state.posts.length > 0 ? `
-                <div class="w-full max-w-sm space-y-6 pb-32">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/40">Galeria</h3>
-                    ${state.posts.map(p => `
-                        <div class="bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 mb-6">
-                            <img src="${p.image}" class="w-full h-56 object-cover">
-                            <div class="p-5">
-                                <p class="text-sm font-semibold text-slate-700 leading-tight">${p.description}</p>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                ` : ''}
-            `;
-        };
-
-        window.copyShareUrl = () => {
-            const input = document.getElementById('share-url-input');
-            input.select();
-            document.execCommand('copy');
-            alert("Link ultra curto copiado!");
-        };
-
-        window.closeShareModal = () => document.body.classList.remove('modal-active');
 
         window.setDevice = (mode) => {
             const frame = document.getElementById('device-frame');
             const btnM = document.getElementById('btn-m');
             const btnD = document.getElementById('btn-d');
-            
             if (mode === 'mobile') {
                 frame.className = 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden';
                 btnM.classList.add('bg-indigo-600', 'text-white');
                 btnD.classList.remove('bg-indigo-600', 'text-white');
             } else {
-                frame.className = 'preview-container bg-white shadow-2xl overflow-hidden w-full h-full border-none rounded-none';
+                frame.className = 'preview-container w-full h-full bg-white shadow-2xl overflow-hidden rounded-none border-none';
                 btnD.classList.add('bg-indigo-600', 'text-white');
                 btnM.classList.remove('bg-indigo-600', 'text-white');
             }
         };
 
-        function syncInputs() {
+        window.publishToCloud = async () => {
+            if (!db || !currentUser) {
+                alert("Erro: Não autenticado ou Firebase não configurado corretamente.");
+                return;
+            }
+            document.body.classList.add('is-loading');
+            const shortId = Math.random().toString(36).substring(2, 10);
+            try {
+                // Regra 1: Caminho estrito de permissões
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', shortId);
+                await setDoc(docRef, {
+                    ...state,
+                    updatedAt: new Date().toISOString(),
+                    owner: currentUser.uid
+                });
+                
+                const finalUrl = `${window.location.origin}${window.location.pathname}?id=${shortId}`;
+                document.getElementById('share-url-input').value = finalUrl;
+                document.body.classList.add('modal-active');
+            } catch (e) {
+                console.error("Erro ao publicar:", e);
+                alert("Falha na publicação: Verifique as permissões do Firestore.");
+            }
+            document.body.classList.remove('is-loading');
+        };
+
+        window.updateUI = () => {
+            const render = document.getElementById('render-target');
+            if (!render) return;
+
+            const list = document.getElementById('links-list');
+            if (list) {
+                list.innerHTML = state.links.map(l => `
+                    <div class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl">
+                        <span class="flex-1 text-xs font-bold truncate">${l.title}</span>
+                        <button onclick="removeLink(${l.id})" class="text-red-500 text-[10px] font-bold">REMOVER</button>
+                    </div>
+                `).join('');
+            }
+
+            const isDark = state.theme.includes('slate-900') || state.theme.includes('indigo-600');
+            const textClass = isDark ? 'text-white' : 'text-slate-900';
+            const btnClass = isDark ? 'bg-white/10 border-white/20 text-white' : 'bg-slate-100 border-slate-200 text-slate-900';
+
+            render.className = `w-full h-full ${state.theme} p-8 flex flex-col items-center`;
+            render.innerHTML = `
+                <div class="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl mb-4 overflow-hidden flex-shrink-0">
+                    <img src="${state.photo || 'https://ui-avatars.com/api/?name='+state.displayName}" class="w-full h-full object-cover">
+                </div>
+                <h2 class="text-xl font-black ${textClass} text-center">@${state.username}</h2>
+                <p class="text-xs mt-2 mb-8 opacity-70 ${textClass} text-center max-w-[250px]">${state.bio}</p>
+                
+                <div class="w-full space-y-3 max-w-sm">
+                    ${state.links.map(l => `
+                        <a href="${l.url}" target="_blank" class="block w-full py-4 px-6 border backdrop-blur-md rounded-2xl text-center font-bold text-sm ${btnClass} hover:scale-[1.02] transition-transform">
+                            ${l.title}
+                        </a>
+                    `).join('')}
+                </div>
+            `;
+        };
+
+        window.copyShareUrl = () => {
+            const el = document.getElementById('share-url-input');
+            el.select();
+            document.execCommand('copy');
+            alert("Link copiado para a área de transferência!");
+        };
+
+        window.closeShareModal = () => document.body.classList.remove('modal-active');
+
+        const run = async () => {
+            document.body.classList.add('is-loading');
+            
+            const saved = localStorage.getItem('lp_cloud_v5');
+            if (saved) state = JSON.parse(saved);
+            
+            await setupFirebase();
+
+            const params = new URLSearchParams(window.location.search);
+            const pid = params.get('id');
+            
+            if (pid && db && currentUser) {
+                try {
+                    const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'profiles', pid));
+                    if (snap.exists()) {
+                        state = snap.data();
+                        document.getElementById('editor-panel').style.display = 'none';
+                        document.getElementById('controls-ui').style.display = 'none';
+                        window.setDevice('desktop');
+                    }
+                } catch (e) {
+                    console.error("Erro ao carregar perfil:", e);
+                }
+            }
+
             document.getElementById('input-username').value = state.username;
             document.getElementById('input-name').value = state.displayName;
             document.getElementById('input-bio').value = state.bio;
             if (state.photo) document.getElementById('edit-avatar').src = state.photo;
-        }
+            
+            window.updateUI();
+            document.body.classList.remove('is-loading');
+        };
 
-        // Iniciar aplicação
-        init();
+        run();
     </script>
 </body>
 </html>
