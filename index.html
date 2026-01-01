@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkPlus Cloud - Links Curtos</title>
+    <title>LinkPlus - Editor Corrigido</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Biblioteca para encurtar os dados no link -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.3s ease; }
@@ -18,7 +20,7 @@
         .animate-slide { animation: slideUp 0.4s ease-out forwards; }
         
         .preview-container { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .mode-mobile { width: 375px; height: 750px; border-radius: 40px; border: 12px solid #1e293b; position: relative; }
+        .mode-mobile { width: 375px; height: 700px; border-radius: 40px; border: 12px solid #1e293b; position: relative; }
         
         .public-view #editor-panel { display: none; }
         .public-view #preview-panel { width: 100%; height: 100vh; padding: 0; background: white; }
@@ -29,24 +31,15 @@
         #exit-public { display: none; }
         #share-modal { display: none; }
         .modal-active #share-modal { display: flex; }
-        
-        .loading-overlay { display: none; }
-        .is-loading .loading-overlay { display: flex; }
     </style>
 </head>
 <body id="main-body" class="bg-[#f8fafc] text-slate-900 overflow-hidden">
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay fixed inset-0 z-[200] bg-white/80 backdrop-blur-md items-center justify-center flex-col">
-        <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-bold text-slate-600">A processar na nuvem...</p>
-    </div>
-
     <!-- Modal de Partilha -->
     <div id="share-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
         <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl animate-slide">
-            <h3 class="text-xl font-black mb-2">Link Ultra Curto! 🚀</h3>
-            <p class="text-slate-500 text-sm mb-6">Este link carrega todo o teu perfil, incluindo fotos e posts.</p>
+            <h3 class="text-xl font-black mb-2">Perfil Pronto! 🚀</h3>
+            <p class="text-slate-500 text-sm mb-6">Copia o link abaixo para partilhares o teu perfil completo.</p>
             
             <div class="relative mb-6">
                 <input type="text" id="share-url-input" readonly class="w-full bg-slate-50 border border-slate-200 p-4 pr-12 rounded-2xl text-sm font-bold text-indigo-600 focus:outline-none">
@@ -58,8 +51,8 @@
         </div>
     </div>
 
-    <!-- Botão Flutuante para Sair -->
-    <button id="exit-public" onclick="window.location.search = ''" class="fixed bottom-6 right-6 z-50 bg-white text-slate-900 px-6 py-3 rounded-full shadow-2xl font-bold text-sm border border-slate-200">
+    <!-- Botão Flutuante para Sair do modo público -->
+    <button id="exit-public" onclick="window.location.href = window.location.pathname" class="fixed bottom-6 right-6 z-50 bg-white text-slate-900 px-6 py-3 rounded-full shadow-2xl font-bold text-sm border border-slate-200">
         ← Voltar ao Editor
     </button>
 
@@ -71,12 +64,12 @@
                 
                 <header class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
+                        <div class="bg-indigo-600 p-2 rounded-xl text-white shadow-lg">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                         </div>
                         <h1 class="text-xl font-extrabold tracking-tight italic">LinkPlus<span class="text-indigo-600">.</span></h1>
                     </div>
-                    <button onclick="publishToCloud()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-lg flex items-center gap-2">
+                    <button onclick="publishProfile()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 shadow-lg flex items-center gap-2">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                         Publicar
                     </button>
@@ -93,11 +86,11 @@
                                     <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleImage(this, 'profile')">
                                 </div>
                                 <div class="flex-1 space-y-2">
-                                    <input type="text" id="input-username" oninput="updateUI()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold" placeholder="username">
-                                    <input type="text" id="input-name" oninput="updateUI()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm" placeholder="Nome Exibido">
+                                    <input type="text" id="input-username" oninput="updateState()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold" placeholder="username">
+                                    <input type="text" id="input-name" oninput="updateState()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm" placeholder="Nome Exibido">
                                 </div>
                             </div>
-                            <textarea id="input-bio" oninput="updateUI()" class="w-full p-3 bg-white border border-slate-200 rounded-lg text-sm resize-none h-20" placeholder="A tua biografia..."></textarea>
+                            <textarea id="input-bio" oninput="updateState()" class="w-full p-3 bg-white border border-slate-200 rounded-lg text-sm resize-none h-20" placeholder="A tua biografia..."></textarea>
                         </div>
                     </section>
 
@@ -107,7 +100,7 @@
                         <div id="links-list" class="space-y-2 mb-3"></div>
                         <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 space-y-2">
                             <input type="text" id="link-title" placeholder="Título do Link" class="w-full px-3 py-2 rounded-lg border-none text-sm font-bold">
-                            <input type="text" id="link-url" placeholder="URL (https://...)" class="w-full px-3 py-2 rounded-lg border-none text-sm">
+                            <input type="text" id="link-url" placeholder="URL (ex: google.com)" class="w-full px-3 py-2 rounded-lg border-none text-sm">
                             <button onclick="addLink()" class="w-full py-2.5 bg-indigo-600 text-white rounded-lg font-bold text-xs uppercase tracking-wider">Adicionar Link</button>
                         </div>
                     </section>
@@ -130,10 +123,10 @@
                     <section class="pb-10">
                         <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Temas</h2>
                         <div class="grid grid-cols-4 gap-2">
-                            <button onclick="setTheme('bg-slate-900')" class="h-10 rounded-xl bg-slate-900"></button>
-                            <button onclick="setTheme('bg-indigo-600')" class="h-10 rounded-xl bg-indigo-600"></button>
-                            <button onclick="setTheme('bg-rose-500')" class="h-10 rounded-xl bg-rose-500"></button>
-                            <button onclick="setTheme('bg-gradient-to-br from-indigo-600 to-purple-700')" class="h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700"></button>
+                            <button onclick="setTheme('bg-slate-900')" class="h-10 rounded-xl bg-slate-900 border border-white/20"></button>
+                            <button onclick="setTheme('bg-indigo-600')" class="h-10 rounded-xl bg-indigo-600 border border-white/20"></button>
+                            <button onclick="setTheme('bg-rose-500')" class="h-10 rounded-xl bg-rose-500 border border-white/20"></button>
+                            <button onclick="setTheme('bg-gradient-to-br from-indigo-600 to-purple-700')" class="h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 border border-white/20"></button>
                         </div>
                     </section>
                 </div>
@@ -155,151 +148,68 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, doc, setDoc, getDoc, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // Configuração Firebase (Injetada pelo ambiente)
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'linkplus-cloud';
-
+    <script>
+        // Estado Global
         let state = {
             username: 'utilizador',
             displayName: 'O Teu Nome',
-            bio: 'Bem-vindo ao meu perfil!',
+            bio: 'Olá! Este é o meu perfil.',
             photo: null,
             theme: 'bg-gradient-to-br from-indigo-600 to-purple-700',
             links: [],
             posts: []
         };
 
-        // --- INICIALIZAÇÃO ---
-        window.onload = async () => {
-            document.body.classList.add('is-loading');
-            await signInAnonymously(auth);
-            
+        // Inicialização
+        window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const profileId = urlParams.get('id');
+            const dataParam = urlParams.get('p');
 
-            if (profileId) {
-                // MODO PÚBLICO: Carregar da Nuvem
+            if (dataParam) {
                 try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', profileId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        state = docSnap.data();
-                        document.body.classList.add('public-view');
-                    } else {
-                        alert("Perfil não encontrado.");
-                    }
-                } catch (e) { console.error(e); }
+                    // Descomprimir dados do link
+                    const decompressed = LZString.decompressFromEncodedURIComponent(dataParam);
+                    state = JSON.parse(decompressed);
+                    document.body.classList.add('public-view');
+                } catch (e) {
+                    console.error("Erro ao carregar perfil público", e);
+                }
             } else {
-                // MODO EDITOR: Carregar Local
-                const local = localStorage.getItem('linkplus_v4');
-                if (local) state = JSON.parse(local);
+                // Carregar dados guardados localmente
+                const saved = localStorage.getItem('linkplus_state');
+                if (saved) state = JSON.parse(saved);
                 
-                // Preencher campos do editor
+                // Sincronizar inputs do editor
                 document.getElementById('input-username').value = state.username;
                 document.getElementById('input-name').value = state.displayName;
                 document.getElementById('input-bio').value = state.bio;
                 if (state.photo) document.getElementById('edit-avatar').src = state.photo;
             }
-            
-            document.body.classList.remove('is-loading');
             updateUI();
         };
 
-        // --- LÓGICA DE PUBLICAÇÃO ---
-        window.publishToCloud = async () => {
-            document.body.classList.add('is-loading');
-            
-            // Gerar ID curto (8-10 caracteres)
-            const shortId = Math.random().toString(36).substring(2, 10);
-            
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', shortId);
-                await setDoc(docRef, state);
-                
-                const finalUrl = `${window.location.origin}${window.location.pathname}?id=${shortId}`;
-                document.getElementById('share-url-input').value = finalUrl;
-                document.body.classList.add('modal-active');
-            } catch (e) {
-                alert("Erro ao publicar. Tenta novamente.");
-                console.error(e);
-            }
-            
-            document.body.classList.remove('is-loading');
-        };
-
-        // --- FUNÇÕES DE EDIÇÃO ---
-        window.handleImage = (input, type) => {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if (type === 'profile') {
-                    state.photo = e.target.result;
-                    document.getElementById('edit-avatar').src = e.target.result;
-                } else {
-                    document.getElementById('post-preview-img').src = e.target.result;
-                    document.getElementById('post-preview-img').classList.remove('hidden');
-                }
-                updateUI();
-                saveLocal();
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.addLink = () => {
-            const t = document.getElementById('link-title');
-            const u = document.getElementById('link-url');
-            if (!t.value || !u.value) return;
-            let url = u.value.startsWith('http') ? u.value : 'https://' + u.value;
-            state.links.push({ id: Date.now(), title: t.value, url });
-            t.value = ''; u.value = '';
+        // Atualiza o estado com base nos inputs
+        function updateState() {
+            state.username = document.getElementById('input-username').value || 'utilizador';
+            state.displayName = document.getElementById('input-name').value || 'O Teu Nome';
+            state.bio = document.getElementById('input-bio').value || '';
             updateUI();
             saveLocal();
-        };
+        }
 
-        window.removeLink = (id) => {
-            state.links = state.links.filter(l => l.id !== id);
-            updateUI();
-            saveLocal();
-        };
+        // Renderiza a interface
+        function updateUI() {
+            const renderTarget = document.getElementById('render-target');
+            if (!renderTarget) return;
 
-        window.addPost = () => {
-            const img = document.getElementById('post-preview-img').src;
-            const desc = document.getElementById('post-desc').value;
-            if (!img || img.includes('index.html')) return;
-            state.posts.unshift({ id: Date.now(), image: img, description: desc });
-            document.getElementById('post-preview-img').classList.add('hidden');
-            document.getElementById('post-preview-img').src = '';
-            document.getElementById('post-desc').value = '';
-            updateUI();
-            saveLocal();
-        };
+            const isLight = state.theme.includes('slate-50') || state.theme.includes('white');
+            const textColor = isLight ? 'text-slate-900' : 'text-white';
+            const cardStyle = isLight ? 'bg-white border-slate-200 text-slate-900 shadow-sm' : 'bg-white/10 backdrop-blur-md border-white/20 text-white shadow-lg';
 
-        window.setTheme = (t) => {
-            state.theme = t;
-            updateUI();
-            saveLocal();
-        };
-
-        window.updateUI = () => {
-            if (!document.body.classList.contains('public-view')) {
-                state.username = document.getElementById('input-username').value;
-                state.displayName = document.getElementById('input-name').value;
-                state.bio = document.getElementById('input-bio').value;
-            }
-
-            // Editor List
-            const list = document.getElementById('links-list');
-            if (list) {
-                list.innerHTML = state.links.map(l => `
+            // Atualiza Lista de Links no Editor
+            const listContainer = document.getElementById('links-list');
+            if (listContainer) {
+                listContainer.innerHTML = state.links.map(l => `
                     <div class="flex items-center gap-2 p-3 bg-slate-50 border rounded-xl animate-slide">
                         <span class="flex-1 text-xs font-bold truncate">${l.title}</span>
                         <button onclick="removeLink(${l.id})" class="text-red-400 p-1 hover:bg-red-50 rounded">
@@ -309,14 +219,10 @@
                 `).join('');
             }
 
-            // Preview Render
-            const isLight = state.theme.includes('slate-50') || state.theme.includes('white');
-            const textColor = isLight ? 'text-slate-900' : 'text-white';
-            const cardStyle = isLight ? 'bg-white border-slate-200 text-slate-900 shadow-sm' : 'bg-white/10 backdrop-blur-md border-white/20 text-white shadow-lg';
-
-            document.getElementById('render-target').className = `w-full h-full ${state.theme} p-8 flex flex-col items-center`;
-            document.getElementById('render-target').innerHTML = `
-                <div class="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl mb-5 overflow-hidden bg-white/10 flex-shrink-0 animate-slide">
+            // Renderiza o Perfil (Preview)
+            renderTarget.className = `w-full h-full ${state.theme} p-8 flex flex-col items-center`;
+            renderTarget.innerHTML = `
+                <div class="w-24 h-24 rounded-full border-4 border-white/20 shadow-xl mb-5 overflow-hidden bg-white/10 flex-shrink-0">
                     <img src="${state.photo || 'https://ui-avatars.com/api/?name='+state.displayName+'&background=6366f1&color=fff'}" class="w-full h-full object-cover">
                 </div>
                 <h1 class="text-2xl font-black ${textColor}">@${state.username}</h1>
@@ -324,7 +230,7 @@
 
                 <div class="w-full space-y-4 max-w-sm mb-16">
                     ${state.links.map(l => `
-                        <a href="${l.url}" target="_blank" class="block w-full py-4.5 ${cardStyle} border rounded-2xl text-center font-bold text-sm hover:scale-[1.02] active:scale-95 transition-all">
+                        <a href="${l.url}" target="_blank" class="block w-full py-4 ${cardStyle} border rounded-2xl text-center font-bold text-sm hover:scale-[1.02] active:scale-95 transition-all">
                             ${l.title}
                         </a>
                     `).join('')}
@@ -344,24 +250,125 @@
                 </div>
                 ` : ''}
             `;
-        };
-
-        function saveLocal() {
-            localStorage.setItem('linkplus_v4', JSON.stringify(state));
         }
 
-        window.copyShareUrl = () => {
+        // Ações do Editor
+        function addLink() {
+            const titleInput = document.getElementById('link-title');
+            const urlInput = document.getElementById('link-url');
+            
+            if (!titleInput.value || !urlInput.value) return;
+
+            let finalUrl = urlInput.value;
+            if (!finalUrl.startsWith('http')) finalUrl = 'https://' + finalUrl;
+
+            state.links.push({
+                id: Date.now(),
+                title: titleInput.value,
+                url: finalUrl
+            });
+
+            titleInput.value = '';
+            urlInput.value = '';
+            updateUI();
+            saveLocal();
+        }
+
+        function removeLink(id) {
+            state.links = state.links.filter(l => l.id !== id);
+            updateUI();
+            saveLocal();
+        }
+
+        function handleImage(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base64 = e.target.result;
+                if (type === 'profile') {
+                    state.photo = base64;
+                    document.getElementById('edit-avatar').src = base64;
+                } else {
+                    document.getElementById('post-preview-img').src = base64;
+                    document.getElementById('post-preview-img').classList.remove('hidden');
+                }
+                updateUI();
+                saveLocal();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function addPost() {
+            const img = document.getElementById('post-preview-img').src;
+            const desc = document.getElementById('post-desc').value;
+
+            if (!img || img.includes('index.html')) return;
+
+            state.posts.unshift({
+                id: Date.now(),
+                image: img,
+                description: desc || ''
+            });
+
+            // Limpar campos
+            document.getElementById('post-preview-img').classList.add('hidden');
+            document.getElementById('post-preview-img').src = '';
+            document.getElementById('post-desc').value = '';
+            
+            updateUI();
+            saveLocal();
+        }
+
+        function setTheme(t) {
+            state.theme = t;
+            updateUI();
+            saveLocal();
+        }
+
+        function saveLocal() {
+            localStorage.setItem('linkplus_state', JSON.stringify(state));
+        }
+
+        // Publicação e Partilha
+        function publishProfile() {
+            // Comprimir os dados para o link ser menor (embora ainda contenha as imagens em Base64)
+            const json = JSON.stringify(state);
+            const compressed = LZString.compressToEncodedURIComponent(json);
+            
+            const shareUrl = window.location.origin + window.location.pathname + "?p=" + compressed;
+            
+            document.getElementById('share-url-input').value = shareUrl;
+            document.body.classList.add('modal-active');
+        }
+
+        function copyShareUrl() {
             const input = document.getElementById('share-url-input');
             input.select();
             document.execCommand('copy');
-            alert("Link copiado! Agora tem apenas alguns caracteres e carrega tudo.");
-        };
+            alert("Link copiado com sucesso!");
+        }
 
-        window.closeShareModal = () => document.body.classList.remove('modal-active');
-        window.setDevice = (mode) => {
+        function closeShareModal() {
+            document.body.classList.remove('modal-active');
+        }
+
+        function setDevice(mode) {
             const frame = document.getElementById('device-frame');
-            frame.className = mode === 'mobile' ? 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden' : 'preview-container bg-white shadow-2xl overflow-hidden w-full h-full border-none rounded-none';
-        };
+            const btnM = document.getElementById('btn-m');
+            const btnD = document.getElementById('btn-d');
+
+            if (mode === 'mobile') {
+                frame.className = 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden';
+                btnM.classList.add('bg-indigo-600', 'text-white');
+                btnD.classList.remove('bg-indigo-600', 'text-white');
+            } else {
+                frame.className = 'preview-container bg-white shadow-2xl overflow-hidden w-full h-full border-none rounded-none';
+                btnD.classList.add('bg-indigo-600', 'text-white');
+                btnM.classList.remove('bg-indigo-600', 'text-white');
+            }
+        }
     </script>
 </body>
 </html>
