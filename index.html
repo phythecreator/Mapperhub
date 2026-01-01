@@ -1,311 +1,348 @@
-
-<html lang="pt-PT">
+<!DOCTYPE html>
+<html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketplace | Vendas Online</title>
+    <title>LinkPlus - Editor Profissional</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .hidden { display: none !important; }
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #4c1d95;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Animações */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .animate-slide { animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        /* Simulador */
+        .preview-container {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .mode-mobile { width: 375px; height: 667px; border-radius: 40px; border: 12px solid #1e293b; }
+        .mode-desktop { width: 100%; height: 100%; border-radius: 12px; border: 1px solid #e2e8f0; }
+        
+        .device-btn.active {
+            background-color: #4f46e5;
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 min-h-screen">
+<body class="bg-[#f8fafc] text-slate-900 overflow-hidden">
 
-    <!-- Ecrã de carregamento -->
-    <div id="loading-screen" class="fixed inset-0 bg-white z-[200] flex items-center justify-center">
-        <div class="loader"></div>
-    </div>
+    <div class="h-screen flex flex-col md:flex-row">
+        
+        <!-- PAINEL DE EDIÇÃO (ESQUERDA) -->
+        <div class="w-full md:w-[450px] lg:w-[500px] h-full overflow-y-auto bg-white border-r border-slate-200 z-10 shadow-xl">
+            <div class="p-6 md:p-8 space-y-8">
+                
+                <!-- Header -->
+                <header class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="bg-indigo-600 p-2 rounded-xl text-white">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        </div>
+                        <h1 class="text-xl font-extrabold tracking-tight italic">LinkPlus<span class="text-indigo-600">.</span></h1>
+                    </div>
+                    <button onclick="copyLink()" class="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 transition-all group">
+                        <span id="display-link" class="text-xs font-bold text-slate-600">linkplus.me/user</span>
+                        <div id="copy-icon" class="text-indigo-600">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                        </div>
+                    </button>
+                </header>
 
-    <!-- Modal para Ajuda / Sobre -->
-    <div id="info-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[300] hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl">
-            <h3 id="modal-title" class="text-2xl font-black mb-4 text-slate-900">Ajuda</h3>
-            <p id="modal-content" class="text-slate-600 mb-8 leading-relaxed">Conteúdo informativo.</p>
-            <button onclick="closeInfoModal()" class="w-full bg-[#4c1d95] text-white font-bold py-3 rounded-xl hover:bg-[#3d167a] transition-all">
-                Entendido
-            </button>
+                <!-- Seletor de Modo (Mobile) -->
+                <div class="flex bg-slate-100 p-1 rounded-2xl md:hidden">
+                    <button onclick="setPreviewMode('edit')" id="btn-edit" class="flex-1 py-2 text-xs font-bold rounded-xl active-tab bg-white shadow-sm">Editar</button>
+                    <button onclick="setPreviewMode('preview')" id="btn-preview" class="flex-1 py-2 text-xs font-bold rounded-xl">Ver Site</button>
+                </div>
+
+                <div id="edit-fields" class="space-y-8">
+                    <!-- Perfil -->
+                    <section>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Configuração de Perfil</h2>
+                        <div class="bg-slate-50 rounded-[2.5rem] p-6 space-y-6 border border-slate-100">
+                            <div class="flex items-center gap-5">
+                                <div class="relative group cursor-pointer" onclick="document.getElementById('profile-upload').click()">
+                                    <div class="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg bg-slate-200">
+                                        <img id="profile-img-edit" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <svg class="text-white" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                    </div>
+                                    <input type="file" id="profile-upload" class="hidden" accept="image/*" onchange="handleImage(this, 'profile')">
+                                </div>
+                                <div class="flex-1 space-y-3">
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400 font-bold text-sm">@</span>
+                                        <input type="text" id="input-username" oninput="updateUI()" class="w-full pl-8 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl outline-none focus:ring-2 ring-indigo-500/20 font-bold text-sm" value="utilizador">
+                                    </div>
+                                    <input type="text" id="input-name" oninput="updateUI()" class="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl outline-none focus:ring-2 ring-indigo-500/20 text-sm font-semibold" value="O Teu Nome">
+                                </div>
+                            </div>
+                            <textarea id="input-bio" oninput="updateUI()" class="w-full px-4 py-3 bg-white border border-slate-100 rounded-xl outline-none focus:ring-2 ring-indigo-500/20 text-sm resize-none h-24" placeholder="Escreve aqui a tua bio...">Bem-vindo ao meu LinkPlus!</textarea>
+                        </div>
+                    </section>
+
+                    <!-- Links -->
+                    <section>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Meus Links</h2>
+                        <div class="space-y-3">
+                            <div class="bg-indigo-50/50 p-4 rounded-3xl border border-indigo-100/50 space-y-3">
+                                <input type="text" id="link-title" placeholder="Título (ex: Instagram)" class="w-full px-4 py-3 rounded-xl border-none outline-none font-bold text-sm shadow-sm">
+                                <input type="text" id="link-url" placeholder="URL (ex: instagram.com/teunome)" class="w-full px-4 py-3 rounded-xl border-none outline-none text-sm shadow-sm">
+                                <button onclick="addLink()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 active:scale-95">ADICIONAR LINK</button>
+                            </div>
+                            <div id="links-list" class="space-y-2"></div>
+                        </div>
+                    </section>
+
+                    <!-- Posts -->
+                    <section>
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Feed de Momentos</h2>
+                        <div class="bg-slate-50 p-5 rounded-[2.5rem] border border-slate-100 space-y-4">
+                            <div onclick="document.getElementById('post-upload').click()" class="w-full h-32 bg-white rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-300 hover:bg-indigo-50/30 transition-all overflow-hidden relative">
+                                <img id="post-preview-img" src="" class="absolute inset-0 w-full h-full object-cover hidden">
+                                <div id="post-placeholder" class="text-center">
+                                    <svg class="mx-auto text-slate-300 mb-2" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase">Escolher da Galeria</span>
+                                </div>
+                                <input type="file" id="post-upload" class="hidden" accept="image/*" onchange="handleImage(this, 'post')">
+                            </div>
+                            <textarea id="post-desc" placeholder="Legenda do post..." class="w-full p-4 rounded-xl bg-white border border-slate-100 outline-none text-sm resize-none" rows="2"></textarea>
+                            <button onclick="addPost()" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-xs hover:bg-black transition-all">PUBLICAR NO FEED</button>
+                        </div>
+                    </section>
+
+                    <!-- Temas -->
+                    <section class="pb-10">
+                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Estilo Visual</h2>
+                        <div class="grid grid-cols-4 gap-3">
+                            <button onclick="setTheme('bg-slate-900')" class="h-10 rounded-lg bg-slate-900 border-2 border-transparent"></button>
+                            <button onclick="setTheme('bg-indigo-600')" class="h-10 rounded-lg bg-indigo-600 border-2 border-transparent"></button>
+                            <button onclick="setTheme('bg-rose-500')" class="h-10 rounded-lg bg-rose-500 border-2 border-transparent"></button>
+                            <button onclick="setTheme('bg-gradient-to-br from-indigo-600 to-purple-700')" class="h-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-700 border-2 border-indigo-600"></button>
+                            <button onclick="setTheme('bg-emerald-600')" class="h-10 rounded-lg bg-emerald-600 border-2 border-transparent"></button>
+                            <button onclick="setTheme('bg-gradient-to-tr from-orange-400 to-rose-500')" class="h-10 rounded-lg bg-gradient-to-tr from-orange-400 to-rose-500 border-2 border-transparent"></button>
+                            <button onclick="setTheme('bg-[#f1f5f9]')" class="h-10 rounded-lg bg-[#f1f5f9] border-2 border-transparent shadow-inner"></button>
+                            <button onclick="setTheme('bg-black')" class="h-10 rounded-lg bg-black border-2 border-transparent"></button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISUALIZAÇÃO (DIREITA) -->
+        <div id="preview-panel" class="flex-1 bg-slate-100 relative overflow-hidden flex flex-col items-center">
+            
+            <!-- Controlo de Dispositivos -->
+            <div class="absolute top-6 left-1/2 -translate-x-1/2 bg-white p-1.5 rounded-2xl shadow-xl border border-slate-200 flex gap-1 z-20">
+                <button onclick="setDevice('mobile')" id="dev-mobile" class="device-btn active px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    Telemóvel
+                </button>
+                <button onclick="setDevice('desktop')" id="dev-desktop" class="device-btn px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    PC
+                </button>
+            </div>
+
+            <!-- Frame do Simulador -->
+            <div class="flex-1 flex items-center justify-center w-full p-8 pt-20">
+                <div id="device-frame" class="preview-container mode-mobile bg-white shadow-2xl overflow-hidden relative">
+                    <div id="mobile-content" class="w-full h-full flex flex-col items-center overflow-y-auto no-scrollbar">
+                        <!-- O conteúdo do LinkPlus será injetado aqui -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- VISTA 1: AUTENTICAÇÃO -->
-    <div id="view-auth" class="hidden min-h-screen bg-[#e9ecef] flex flex-col">
-        <header class="bg-white h-16 px-6 flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-2">
-                <div class="bg-[#4c1d95] p-1.5 rounded-lg">
-                    <svg class="text-white w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                </div>
-                <span class="text-[#1f2937] text-xl font-bold">Marketplace</span>
-            </div>
-            <div class="flex items-center gap-6">
-                <button onclick="showHelp()" class="text-gray-500 hover:text-gray-800 text-sm font-medium">Ajuda</button>
-                <button onclick="showAbout()" class="text-gray-500 hover:text-gray-800 text-sm font-medium">Sobre</button>
-                <button onclick="handleLogin()" class="bg-[#4c1d95] text-white px-5 py-2 rounded-lg text-sm font-bold hover:bg-[#3d167a] transition-colors">Entrar / Registar</button>
-            </div>
-        </header>
-
-        <main class="flex-1 flex items-center justify-center p-4">
-            <div class="bg-white w-full max-w-[600px] rounded-3xl shadow-2xl border border-gray-100 p-12 relative">
-                <div class="flex justify-center mb-8">
-                    <div class="bg-[#4c1d95] p-4 rounded-2xl transform rotate-45 shadow-lg">
-                        <svg class="text-white w-8 h-8 transform -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </div>
-                </div>
-                <div class="text-center mb-10">
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">Bem-vindo(a)!</h2>
-                    <p class="text-gray-500 text-lg">Crie a sua conta ou entre para começar a vender e comprar.</p>
-                </div>
-                <div class="space-y-6 max-w-md mx-auto">
-                    <div class="flex items-center">
-                        <label class="w-24 text-gray-700 font-bold">Endereço:</label>
-                        <input type="email" placeholder="Email" class="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400">
-                    </div>
-                    <div class="flex items-center">
-                        <label class="w-24 text-gray-700 font-bold">Requerido:</label>
-                        <input type="text" placeholder="O seu nome" class="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400">
-                    </div>
-                    <div class="flex items-center">
-                        <label class="w-24 text-gray-700 font-bold">Password:</label>
-                        <input type="password" placeholder="••••••••" class="flex-1 bg-white border border-gray-200 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400">
-                    </div>
-                    <div class="flex items-center justify-between text-sm py-2 px-2">
-                        <label class="flex items-center gap-2 text-blue-600 cursor-pointer font-medium"><input type="checkbox" class="rounded"> Lembrar-me</label>
-                        <a href="#" class="text-blue-500 hover:underline font-medium">Registe-se aqui?</a>
-                    </div>
-                    <button onclick="handleLogin()" class="w-full bg-[#1d82d1] hover:bg-[#1669aa] text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.01]">Entrar na Conta</button>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- VISTA 2: APLICAÇÃO -->
-    <div id="view-app" class="hidden">
-        <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between py-4">
-                <div class="flex items-center gap-3 cursor-pointer" onclick="showView('home')">
-                    <div class="bg-[#4c1d95] p-2 rounded-lg">
-                        <svg class="text-white w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                    </div>
-                    <h1 class="text-xl font-black text-slate-800">Marketplace</h1>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button onclick="showHelp()" class="hidden md:block text-slate-500 hover:text-slate-800 font-medium px-2">Ajuda</button>
-                    <button onclick="showView('create')" class="bg-[#4c1d95] text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        Publicar Item
-                    </button>
-                    <button onclick="handleLogout()" class="p-2.5 text-slate-400 hover:text-red-500" title="Sair da conta">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                    </button>
-                </div>
-            </div>
-        </nav>
-
-        <main class="max-w-7xl mx-auto px-6 py-10">
-            <div id="page-home">
-                <div class="mb-10">
-                    <h2 class="text-4xl font-black text-slate-900">Novidades</h2>
-                    <p class="text-slate-500 mt-2 text-lg">Os produtos mais recentes da comunidade.</p>
-                </div>
-                <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
-            </div>
-
-            <div id="page-create" class="hidden max-w-2xl mx-auto">
-                <button onclick="showView('home')" class="mb-6 font-bold text-slate-500 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    Voltar
-                </button>
-                <div class="bg-white p-10 rounded-[32px] shadow-xl border border-slate-100">
-                    <h2 class="text-3xl font-black mb-8">Novo Anúncio</h2>
-                    <form id="create-product-form" class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Nome do Produto</label>
-                            <input required id="p-name" type="text" placeholder="Ex: Bicicleta de Montanha" class="w-full bg-slate-50 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-purple-200">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Preço (€)</label>
-                            <input required id="p-price" type="number" step="0.01" placeholder="0.00" class="w-full bg-slate-50 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-purple-200">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">URL da Imagem</label>
-                            <input id="p-image" type="url" placeholder="https://exemplo.com/imagem.jpg" class="w-full bg-slate-50 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-purple-200">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Descrição</label>
-                            <textarea required id="p-desc" rows="4" placeholder="Descreva o seu produto em detalhe..." class="w-full bg-slate-50 border-none p-4 rounded-xl outline-none focus:ring-2 focus:ring-purple-200"></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-[#4c1d95] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-[#3d167a] transition-all">
-                            Publicar Agora
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Scripts Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, signInWithCustomToken, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = JSON.parse(window.__firebase_config || '{}');
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = window.__app_id || 'vendas-app-default';
-
-        const views = {
-            loading: document.getElementById('loading-screen'),
-            auth: document.getElementById('view-auth'),
-            app: document.getElementById('view-app'),
-            modal: document.getElementById('info-modal')
-        };
-        const pages = {
-            home: document.getElementById('page-home'),
-            create: document.getElementById('page-create')
+    <script>
+        let state = {
+            username: 'utilizador',
+            displayName: 'O Teu Nome',
+            bio: 'Bem-vindo ao meu LinkPlus!',
+            photo: null,
+            theme: 'bg-gradient-to-br from-indigo-600 to-purple-700',
+            links: [],
+            posts: [],
+            device: 'mobile'
         };
 
-        let unsubscribeProducts = null;
-
-        // Funções da Modal
-        window.showHelp = () => {
-            document.getElementById('modal-title').innerText = "Ajuda ao Utilizador";
-            document.getElementById('modal-content').innerText = "Para publicar um item, deve primeiro entrar na conta. Pode navegar pelos produtos na página inicial ou usar o botão 'Publicar' para criar o seu próprio anúncio.";
-            views.modal.classList.remove('hidden');
-        };
-
-        window.showAbout = () => {
-            document.getElementById('modal-title').innerText = "Sobre o Marketplace";
-            document.getElementById('modal-content').innerText = "Esta plataforma foi desenvolvida para facilitar a compra e venda de artigos usados na comunidade de forma segura e rápida.";
-            views.modal.classList.remove('hidden');
-        };
-
-        window.closeInfoModal = () => {
-            views.modal.classList.add('hidden');
-        };
-
-        window.showView = (pageName) => {
-            Object.values(pages).forEach(p => p.classList.add('hidden'));
-            pages[pageName].classList.remove('hidden');
-        };
-
-        // Autenticação robusta (Mandatória para evitar erros de permissão)
-        const initAuth = async () => {
-            try {
-                if (typeof window.__initial_auth_token !== 'undefined' && window.__initial_auth_token) {
-                    await signInWithCustomToken(auth, window.__initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+        // --- Lógica de Imagem ---
+        function handleImage(input, type) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (type === 'profile') {
+                        state.photo = e.target.result;
+                        document.getElementById('profile-img-edit').src = e.target.result;
+                    } else {
+                        document.getElementById('post-preview-img').src = e.target.result;
+                        document.getElementById('post-preview-img').classList.remove('hidden');
+                        document.getElementById('post-placeholder').classList.add('hidden');
+                    }
+                    updateUI();
                 }
-            } catch (err) {
-                console.error("Erro na autenticação inicial:", err);
+                reader.readAsDataURL(file);
             }
-        };
-
-        window.handleLogin = async () => {
-            await initAuth();
-        };
-
-        window.handleLogout = () => {
-            if (unsubscribeProducts) {
-                unsubscribeProducts();
-                unsubscribeProducts = null;
-            }
-            signOut(auth);
-        };
-
-        // Listener de estado de autenticação
-        onAuthStateChanged(auth, (user) => {
-            views.loading.classList.add('hidden');
-            if (user) {
-                views.auth.classList.add('hidden');
-                views.app.classList.remove('hidden');
-                // IMPORTANTE: Só inicia a leitura de dados APÓS a confirmação do utilizador
-                initProductsListener(user);
-            } else {
-                views.app.classList.add('hidden');
-                views.auth.classList.remove('hidden');
-            }
-        });
-
-        // Monitorização de Produtos com proteção de auth
-        function initProductsListener(user) {
-            if (!user) return;
-            
-            // Limpa listener anterior se existir
-            if (unsubscribeProducts) unsubscribeProducts();
-
-            const q = collection(db, 'artifacts', appId, 'public', 'data', 'products');
-            
-            // onSnapshot com tratamento de erro obrigatório
-            unsubscribeProducts = onSnapshot(q, (snapshot) => {
-                const grid = document.getElementById('products-grid');
-                grid.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    grid.innerHTML = '<p class="col-span-full text-center text-slate-400 py-10">Ainda não há produtos publicados.</p>';
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const p = doc.data();
-                    const card = document.createElement('div');
-                    card.className = "bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden hover:shadow-xl transition-all group cursor-pointer";
-                    card.innerHTML = `
-                        <div class="aspect-square bg-slate-100 relative overflow-hidden">
-                            <img src="${p.imageUrl || 'https://via.placeholder.com/400?text=Sem+Imagem'}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
-                        </div>
-                        <div class="p-5">
-                            <h3 class="font-bold truncate text-slate-800">${p.name}</h3>
-                            <p class="text-xl font-black text-[#4c1d95] mt-1">${p.price.toLocaleString('pt-PT', {style:'currency', currency:'EUR'})}</p>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
-            }, (error) => {
-                console.error("Erro ao carregar produtos:", error);
-                // O erro "Insufficient permissions" costuma acontecer se tentarmos ler antes da auth estar pronta
-            });
         }
 
-        // Submissão de Produto
-        document.getElementById('create-product-form').onsubmit = async (e) => {
-            e.preventDefault();
-            if (!auth.currentUser) return;
+        // --- Gestão de Conteúdo ---
+        function addLink() {
+            const title = document.getElementById('link-title').value;
+            const url = document.getElementById('link-url').value;
+            if (!title || !url) return;
+            state.links.push({ id: Date.now(), title, url });
+            document.getElementById('link-title').value = '';
+            document.getElementById('link-url').value = '';
+            updateUI();
+        }
 
-            const data = {
-                name: document.getElementById('p-name').value,
-                price: parseFloat(document.getElementById('p-price').value),
-                imageUrl: document.getElementById('p-image').value,
-                description: document.getElementById('p-desc').value,
-                sellerId: auth.currentUser.uid,
-                createdAt: new Date().toISOString()
-            };
-            
-            try {
-                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'products'), data);
-                e.target.reset();
-                showView('home');
-            } catch (err) {
-                console.error("Erro ao guardar:", err);
+        function removeLink(id) {
+            state.links = state.links.filter(l => l.id !== id);
+            updateUI();
+        }
+
+        function addPost() {
+            const img = document.getElementById('post-preview-img').src;
+            const desc = document.getElementById('post-desc').value;
+            if (!img || img.startsWith('window')) return;
+            state.posts.unshift({
+                id: Date.now(),
+                image: img,
+                description: desc,
+                date: new Date().toLocaleDateString('pt-PT')
+            });
+            document.getElementById('post-preview-img').src = '';
+            document.getElementById('post-preview-img').classList.add('hidden');
+            document.getElementById('post-placeholder').classList.remove('hidden');
+            document.getElementById('post-desc').value = '';
+            updateUI();
+        }
+
+        // --- Controlos de Visualização ---
+        function setDevice(mode) {
+            state.device = mode;
+            const frame = document.getElementById('device-frame');
+            const btnMobile = document.getElementById('dev-mobile');
+            const btnDesktop = document.getElementById('dev-desktop');
+
+            if (mode === 'mobile') {
+                frame.className = 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden relative';
+                btnMobile.classList.add('active');
+                btnDesktop.classList.remove('active');
+            } else {
+                frame.className = 'preview-container mode-desktop bg-white shadow-2xl overflow-hidden relative max-w-5xl mx-auto';
+                btnDesktop.classList.add('active');
+                btnMobile.classList.remove('active');
             }
-        };
+        }
 
-        // Inicia a tentativa de login silencioso ao carregar
-        initAuth();
+        function setPreviewMode(mode) {
+            const editor = document.getElementById('edit-fields');
+            const preview = document.getElementById('preview-panel');
+            if (mode === 'preview') {
+                preview.classList.remove('hidden');
+                document.getElementById('btn-preview').classList.add('bg-white', 'shadow-sm');
+                document.getElementById('btn-edit').classList.remove('bg-white', 'shadow-sm');
+            } else {
+                preview.classList.add('hidden');
+                document.getElementById('btn-edit').classList.add('bg-white', 'shadow-sm');
+                document.getElementById('btn-preview').classList.remove('bg-white', 'shadow-sm');
+            }
+        }
 
+        function setTheme(t) {
+            state.theme = t;
+            updateUI();
+        }
+
+        // --- Renderização ---
+        function updateUI() {
+            state.username = document.getElementById('input-username').value;
+            state.displayName = document.getElementById('input-name').value;
+            state.bio = document.getElementById('input-bio').value;
+            document.getElementById('display-link').innerText = `linkplus.me/${state.username}`;
+
+            // Cores do Tema
+            const isLight = state.theme.includes('#f1f5f9') || state.theme.includes('gray-100');
+            const textColor = isLight ? 'text-slate-900' : 'text-white';
+            const cardBg = isLight ? 'bg-white' : 'bg-white/10 backdrop-blur-md border border-white/20';
+            const postText = isLight ? 'text-slate-700' : 'text-white/90';
+
+            // Render Links Editor
+            document.getElementById('links-list').innerHTML = state.links.map(l => `
+                <div class="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-2xl animate-slide shadow-sm">
+                    <div class="p-2 bg-slate-50 rounded-lg text-slate-400"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+                    <div class="flex-1 truncate"><p class="text-xs font-bold">${l.title}</p></div>
+                    <button onclick="removeLink(${l.id})" class="p-2 text-slate-300 hover:text-red-500 transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            `).join('');
+
+            // Render Mobile Content
+            const mobileContent = document.getElementById('mobile-content');
+            mobileContent.className = `w-full h-full ${state.theme} flex flex-col items-center p-8 pt-12 overflow-y-auto no-scrollbar`;
+            
+            mobileContent.innerHTML = `
+                <div class="w-24 h-24 rounded-full border-4 border-white/30 shadow-2xl mb-5 overflow-hidden bg-white/20 flex-shrink-0">
+                    <img src="${state.photo || 'https://ui-avatars.com/api/?name='+state.displayName+'&background=6366f1&color=fff'}" class="w-full h-full object-cover">
+                </div>
+                <h3 class="text-xl font-extrabold ${textColor}">@${state.username}</h3>
+                <p class="text-xs font-medium mt-1 mb-8 text-center opacity-80 ${textColor} px-4 leading-relaxed">${state.bio}</p>
+
+                <div class="w-full space-y-3 mb-12 max-w-sm">
+                    ${state.links.map(l => `
+                        <a href="${l.url}" target="_blank" class="block w-full py-4 ${cardBg} rounded-2xl text-center font-bold text-xs hover:scale-[1.02] active:scale-95 transition-all shadow-lg ${textColor}">
+                            ${l.title}
+                        </a>
+                    `).join('')}
+                </div>
+
+                <div class="w-full space-y-6 max-w-sm pb-10">
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.2em] ${isLight ? 'text-slate-400' : 'text-white/40'}">Momentos</h4>
+                    ${state.posts.map(p => `
+                        <div class="bg-white rounded-[2rem] overflow-hidden shadow-2xl animate-slide">
+                            <img src="${p.image}" class="w-full h-52 object-cover">
+                            <div class="p-5 space-y-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] font-black bg-indigo-50 text-indigo-500 px-2 py-1 rounded-md uppercase">${p.date}</span>
+                                </div>
+                                <p class="text-xs font-semibold text-slate-700 leading-relaxed">${p.description}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                    ${state.posts.length === 0 ? '<div class="text-center py-10 opacity-20"><svg class="mx-auto mb-2" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"/><path d="M8 10h.01"/><path d="M16 10h.01"/><path d="M12 16a2 2 0 0 1-2-2"/></svg><p class="text-[10px] font-bold">Sem posts ainda</p></div>' : ''}
+                </div>
+            `;
+        }
+
+        function copyLink() {
+            const text = `linkplus.me/${state.username}`;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            const btn = document.getElementById('copy-icon');
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-green-500"><polyline points="20 6 9 17 4 12"/></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+            }, 2000);
+        }
+
+        updateUI();
     </script>
 </body>
 </html>
