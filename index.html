@@ -1,318 +1,544 @@
-<!DOCTYPE html>
-<html lang="pt-pt">
+
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkPlus - Link Curto</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FNAF 3D: Ultra Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Reset e Estilo Base */
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Courier New', monospace; user-select: none; -webkit-user-select: none; touch-action: none; }
         
-        .preview-container { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .mode-mobile { width: 375px; height: 700px; border-radius: 40px; border: 12px solid #1e293b; position: relative; }
-        
-        #share-modal { display: none; }
-        .modal-active #share-modal { display: flex; }
-        
-        .loading-screen { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 200; align-items: center; justify-content: center; flex-direction: column; }
-        .is-loading .loading-screen { display: flex; }
+        /* UI Container */
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
 
-        .theme-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 2px solid white; transition: transform 0.2s; }
-        .theme-dot:hover { transform: scale(1.1); }
+        /* Efeitos Visuais */
+        #static-noise { position: absolute; width: 100%; height: 100%; background: url('https://media.giphy.com/media/oEI9uWU0WMrQm6IBUT/giphy.gif'); opacity: 0.05; pointer-events: none; mix-blend-mode: screen; }
+        #vignette { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, transparent 50%, black 100%); pointer-events: none; }
+
+        /* HUD */
+        #top-hud { position: absolute; top: 20px; right: 20px; text-align: right; color: #fff; text-shadow: 2px 2px 0 #000; }
+        .hud-text { font-size: 24px; font-weight: bold; }
+        .hud-sub { font-size: 16px; color: #aaa; }
+
+        #power-ui { position: absolute; bottom: 20px; left: 160px; color: #fff; font-weight: bold; }
+        #battery-bar { width: 150px; height: 20px; border: 2px solid #fff; background: #222; margin-top: 5px; }
+        #battery-fill { width: 100%; height: 100%; background: #0f0; transition: width 0.5s, background 0.3s; }
+
+        /* Controlos Mobile */
+        #joystick-zone { position: absolute; bottom: 30px; left: 30px; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; pointer-events: auto; }
+        #joystick-stick { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: rgba(0, 255, 0, 0.5); border-radius: 50%; pointer-events: none; transition: 0.1s; }
+        
+        #look-zone { position: absolute; top: 0; right: 0; width: 50%; height: 80%; pointer-events: auto; } /* Área para rodar a câmara */
+
+        /* Botões de Ação */
+        .action-container { position: absolute; bottom: 40px; right: 30px; display: flex; flex-direction: column; gap: 15px; pointer-events: auto; }
+        .big-btn { width: 80px; height: 80px; border-radius: 50%; border: 3px solid #fff; background: rgba(0, 0, 0, 0.7); color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 10px rgba(0,0,0,0.5); transition: 0.2s; }
+        .big-btn:active { transform: scale(0.95); }
+        .btn-on { background: #0f0; color: #000; box-shadow: 0 0 20px #0f0; border-color: #0f0; }
+        .btn-danger { background: #f00; color: #fff; box-shadow: 0 0 20px #f00; border-color: #f00; }
+
+        /* Botão Tablet */
+        #tablet-toggle { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 200px; height: 50px; background: rgba(0,0,0,0.8); border: 2px solid #0f0; color: #0f0; font-size: 18px; font-weight: bold; border-radius: 10px 10px 0 0; cursor: pointer; pointer-events: auto; z-index: 50; }
+
+        /* Interface do Monitor (Câmaras) */
+        #monitor-ui { position: absolute; bottom: -100%; left: 0; width: 100%; height: 92%; background: #111; border-top: 5px solid #444; transition: bottom 0.3s ease-in-out; pointer-events: auto; z-index: 40; display: flex; flex-direction: column; }
+        #monitor-ui.open { bottom: 0; }
+        
+        #cam-view { flex-grow: 1; background: #000; position: relative; margin: 10px; border: 2px solid #333; overflow: hidden; }
+        #cam-overlay-text { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 24px; text-shadow: 2px 2px #000; z-index: 5; display: flex; align-items: center; gap: 10px; }
+        #rec-dot { width: 15px; height: 15px; background: red; border-radius: 50%; animation: blink 1s infinite; }
+        
+        #cam-buttons { height: 150px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; background: #050505; }
+        .cam-btn { background: #222; color: #888; border: 1px solid #444; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .cam-btn.active { background: #0f0; color: #000; border-color: #0f0; }
+
+        /* Ecrã de Game Over */
+        #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; display: none; z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        #game-over h1 { color: red; font-size: 60px; margin: 0; text-transform: uppercase; animation: shake 0.5s infinite; }
+
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes shake { 0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, -1px); } 100% { transform: translate(1px, -1px); } }
+
+        /* Instruções PC */
+        #pc-controls { position: absolute; top: 10px; left: 10px; color: rgba(255,255,255,0.5); font-size: 12px; }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 overflow-hidden">
+<body>
 
-    <div class="loading-screen">
-        <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-bold text-slate-600">A criar link curto...</p>
-    </div>
+    <div id="ui-layer">
+        <div id="static-noise"></div>
+        <div id="vignette"></div>
 
-    <!-- Modal de Partilha -->
-    <div id="share-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-8 shadow-2xl">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                </div>
-                <h3 class="text-2xl font-black">Link Otimizado!</h3>
-                <p class="text-slate-500 text-sm mt-2">Este link é compatível com o WhatsApp e redes sociais.</p>
+        <div id="pc-controls">PC: WASD para andar, RATO para olhar</div>
+
+        <div id="top-hud">
+            <div class="hud-text" id="clock">12:00 AM</div>
+            <div class="hud-sub">NOITE 1</div>
+        </div>
+
+        <div id="power-ui">
+            ENERGIA: <span id="power-val">100</span>%
+            <div id="battery-bar"><div id="battery-fill"></div></div>
+        </div>
+
+        <!-- Joystick Esquerdo (Movimento) -->
+        <div id="joystick-zone"><div id="joystick-stick"></div></div>
+        <!-- Zona de Toque Direito (Olhar) -->
+        <div id="look-zone"></div>
+
+        <div class="action-container">
+            <button class="big-btn" id="btn-light">LUZ</button>
+            <button class="big-btn" id="btn-door">PORTA</button>
+        </div>
+
+        <button id="tablet-toggle">ABRIR MONITOR</button>
+
+        <div id="monitor-ui">
+            <div id="cam-view">
+                <div id="static-overlay" style="width:100%; height:100%; background:url('https://media.giphy.com/media/oEI9uWU0WMrQm6IBUT/giphy.gif'); opacity:0.1; position:absolute; pointer-events:none;"></div>
+                <div id="cam-overlay-text"><div id="rec-dot"></div> <span id="cam-name">CAM 01</span></div>
             </div>
-            
-            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl mb-6">
-                <p id="share-url-display" class="text-[11px] font-mono text-indigo-600 break-all line-clamp-3"></p>
-            </div>
-
-            <div class="flex flex-col gap-3">
-                <button onclick="copyShareUrl()" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
-                    Copiar para o WhatsApp
-                </button>
-                <button onclick="closeShareModal()" class="w-full py-3 text-slate-400 font-bold text-sm">Voltar ao editor</button>
+            <div id="cam-buttons">
+                <!-- Botões gerados via JS -->
             </div>
         </div>
     </div>
 
-    <div class="h-screen flex flex-col md:flex-row">
-        <!-- Editor -->
-        <div id="editor-panel" class="w-full md:w-[450px] h-full overflow-y-auto bg-white border-r border-slate-200 z-10 no-scrollbar">
-            <div class="p-8 space-y-10">
-                <header class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white font-black italic">L</div>
-                        <h1 class="text-xl font-extrabold tracking-tight">LinkPlus<span class="text-indigo-600">.</span></h1>
-                    </div>
-                    <button onclick="publishToLink()" class="bg-slate-900 text-white px-6 py-3 rounded-2xl text-xs font-bold hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200">
-                        Gerar Link
-                    </button>
-                </header>
-
-                <div class="space-y-8">
-                    <!-- Aparência -->
-                    <section class="bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-                        <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Personalização</h2>
-                        
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-16 h-16 bg-white rounded-2xl border-2 border-slate-200 flex items-center justify-center overflow-hidden">
-                                <img id="edit-avatar" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-1">
-                                <p class="text-xs font-bold text-slate-600 mb-1">Foto de Perfil</p>
-                                <p class="text-[10px] text-slate-400">A foto será baseada no teu nome para o link ser curto.</p>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-5 gap-2">
-                            <div onclick="setTheme('bg-slate-900')" class="theme-dot bg-slate-900"></div>
-                            <div onclick="setTheme('bg-gradient-to-br from-indigo-600 to-purple-700')" class="theme-dot bg-gradient-to-br from-indigo-600 to-purple-700"></div>
-                            <div onclick="setTheme('bg-gradient-to-br from-rose-500 to-orange-400')" class="theme-dot bg-gradient-to-br from-rose-500 to-orange-400"></div>
-                            <div onclick="setTheme('bg-gradient-to-br from-emerald-400 to-cyan-500')" class="theme-dot bg-gradient-to-br from-emerald-400 to-cyan-500"></div>
-                            <div onclick="setTheme('bg-white')" class="theme-dot bg-white border-slate-200"></div>
-                        </div>
-                    </section>
-
-                    <!-- Info -->
-                    <section class="space-y-4">
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-bold text-slate-400 ml-2">NOME NO PERFIL</label>
-                            <input type="text" id="input-name" oninput="updateState()" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-2 ring-indigo-500/20 transition-all" placeholder="O Teu Nome">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="text-[10px] font-bold text-slate-400 ml-2">BIOGRAFIA CURTA</label>
-                            <textarea id="input-bio" oninput="updateState()" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm h-24 no-scrollbar resize-none" placeholder="O que fazes?"></textarea>
-                        </div>
-                    </section>
-
-                    <!-- Links -->
-                    <section>
-                        <div class="flex items-center justify-between mb-4">
-                            <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Teus Links</h2>
-                        </div>
-                        <div id="links-list" class="space-y-3 mb-6"></div>
-                        
-                        <div class="p-6 border-2 border-dashed border-slate-200 rounded-[2rem] space-y-3">
-                            <input type="text" id="link-title" placeholder="Título (ex: Instagram)" class="w-full px-4 py-3 bg-transparent border-b border-slate-100 text-sm font-bold focus:outline-none">
-                            <input type="text" id="link-url" placeholder="link.com/teuuser" class="w-full px-4 py-3 bg-transparent border-b border-slate-100 text-sm focus:outline-none">
-                            <button onclick="addLink()" class="w-full py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-[10px] uppercase tracking-wider hover:bg-indigo-100 transition-colors">
-                                + Adicionar Link
-                            </button>
-                        </div>
-                    </section>
-                </div>
-            </div>
-        </div>
-
-        <!-- Preview -->
-        <div id="preview-panel" class="flex-1 bg-slate-50 flex flex-col items-center relative overflow-hidden">
-            <div id="controls-ui" class="absolute top-8 flex bg-white p-1.5 rounded-2xl shadow-2xl z-20 border border-slate-100">
-                <button onclick="setDevice('mobile')" id="btn-m" class="px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl bg-indigo-600 text-white transition-all">Mobile</button>
-                <button onclick="setDevice('desktop')" id="btn-d" class="px-6 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all">Desktop</button>
-            </div>
-            
-            <div class="flex-1 flex items-center justify-center w-full p-6 pt-24">
-                <div id="device-frame" class="preview-container mode-mobile bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] overflow-hidden">
-                    <div id="render-target" class="w-full h-full overflow-y-auto no-scrollbar"></div>
-                </div>
-            </div>
-        </div>
+    <div id="game-over">
+        <h1>GAME OVER</h1>
+        <p style="color:white; font-size:20px;">Foste apanhado.</p>
+        <button onclick="location.reload()" style="padding:10px 30px; background:#333; color:#fff; border:1px solid #fff; margin-top:20px;">TENTAR DE NOVO</button>
     </div>
 
     <script>
-        // Estado otimizado (sem foto base64 para o link ser pequeno)
-        let state = {
-            n: 'Utilizador', // name
-            b: 'Bem-vindo!', // bio
-            t: 'bg-gradient-to-br from-indigo-600 to-purple-700', // theme
-            l: [] // links [{t, u}]
-        };
+        // --- MOTOR 3D (THREE.JS) ---
+        let scene, camera, renderer, clock;
+        let wallMaterial, floorMaterial;
+        let animatronics = [];
+        let player = { speed: 4.0, dir: new THREE.Vector3(), rot: 0 };
+        
+        // Estado do Jogo
+        let gameActive = true;
+        let power = 100;
+        let isTabletOpen = false;
+        let isLightOn = false;
+        let isDoorClosed = false;
+        let currentCam = 0;
+        let time = 0; // Segundos
 
-        window.updateState = () => {
-            state.n = document.getElementById('input-name').value || 'Utilizador';
-            state.b = document.getElementById('input-bio').value || '';
-            window.updateUI();
-            saveLocal();
-        };
+        // Inputs
+        let keys = { w:false, a:false, s:false, d:false };
+        let joystick = { active: false, x: 0, y: 0, originX: 0, originY: 0 };
+        let touchLook = { active: false, prevX: 0 };
 
-        window.setTheme = (themeClass) => {
-            state.t = themeClass;
-            window.updateUI();
-            saveLocal();
-        };
+        // Referências DOM
+        const elStick = document.getElementById('joystick-stick');
+        const elMonitor = document.getElementById('monitor-ui');
+        const elTabletBtn = document.getElementById('tablet-toggle');
 
-        window.addLink = () => {
-            const t = document.getElementById('link-title');
-            const u = document.getElementById('link-url');
-            if (!t.value || !u.value) return;
+        // Configuração Câmaras
+        const CAMERAS = [
+            { id: 0, name: "PALCO SHOW", pos: [0, 5, -18], look: [0, 0, -25] },
+            { id: 1, name: "JANTAR", pos: [8, 5, -5], look: [-5, 0, -10] },
+            { id: 2, name: "CORREDOR OESTE", pos: [-6, 4, 5], look: [-6, 0, 15] },
+            { id: 3, name: "ENSEADA PIRATA", pos: [-12, 4, -15], look: [-15, 0, -20] },
+            { id: 4, name: "COZINHA (AUDIO)", pos: [12, 4, -15], look: [15, 0, -15] } // Estática
+        ];
+
+        function init() {
+            // Cena
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.08);
+
+            // Câmara
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 1.7, 13); // Posição inicial no escritório
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Otimização
+            renderer.shadowMap.enabled = true;
+            document.body.appendChild(renderer.domElement);
+
+            clock = new THREE.Clock();
+
+            // Construir Mundo
+            createMaterials();
+            buildMap();
+            spawnAnimatronics();
+            setupLights();
+
+            // Eventos
+            setupInputs();
+            generateCamButtons();
+
+            // Iniciar Loop
+            animate();
             
-            let url = u.value.includes('://') ? u.value : 'https://' + u.value;
-            state.l.push({ t: t.value, u: url });
-            t.value = ''; u.value = '';
-            window.updateUI();
-            saveLocal();
-        };
+            // Loop de Lógica (1s)
+            setInterval(gameLogic, 1000);
+            // Loop de IA (5s)
+            setInterval(aiLogic, 5000);
+        }
 
-        window.removeLink = (index) => {
-            state.l.splice(index, 1);
-            window.updateUI();
-            saveLocal();
-        };
+        function createMaterials() {
+            // Criar texturas proceduralmente para não depender de imagens externas que podem falhar
+            const canvasCheck = document.createElement('canvas');
+            canvasCheck.width = 128; canvasCheck.height = 128;
+            const ctx = canvasCheck.getContext('2d');
+            ctx.fillStyle = '#111'; ctx.fillRect(0,0,128,128);
+            ctx.fillStyle = '#222'; 
+            for(let i=0; i<4; i++) for(let j=0; j<4; j++) if((i+j)%2==0) ctx.fillRect(i*32, j*32, 32, 32);
+            const texCheck = new THREE.CanvasTexture(canvasCheck);
+            texCheck.magFilter = THREE.NearestFilter;
+            texCheck.wrapS = texCheck.wrapT = THREE.RepeatWrapping;
+            texCheck.repeat.set(10, 10);
 
-        window.setDevice = (mode) => {
-            const frame = document.getElementById('device-frame');
-            const btnM = document.getElementById('btn-m');
-            const btnD = document.getElementById('btn-d');
-            if (mode === 'mobile') {
-                frame.className = 'preview-container mode-mobile bg-white shadow-2xl overflow-hidden';
-                btnM.classList.add('bg-indigo-600', 'text-white');
-                btnD.classList.remove('bg-indigo-600', 'text-white');
-            } else {
-                frame.className = 'preview-container w-full h-full bg-white shadow-2xl overflow-hidden rounded-none border-none';
-                btnD.classList.add('bg-indigo-600', 'text-white');
-                btnM.classList.remove('bg-indigo-600', 'text-white');
-            }
-        };
+            floorMaterial = new THREE.MeshStandardMaterial({ map: texCheck, roughness: 0.5 });
+            wallMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
+        }
 
-        window.publishToLink = () => {
-            document.body.classList.add('is-loading');
+        function buildMap() {
+            // Chão
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            // Teto
+            const ceil = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), wallMaterial);
+            ceil.rotation.x = Math.PI / 2;
+            ceil.position.y = 5;
+            scene.add(ceil);
+
+            // Paredes (Função Auxiliar)
+            const addWall = (x, z, w, d) => {
+                const wall = new THREE.Mesh(new THREE.BoxGeometry(w, 5, d), wallMaterial);
+                wall.position.set(x, 2.5, z);
+                wall.castShadow = true;
+                wall.receiveShadow = true;
+                scene.add(wall);
+            };
+
+            // Layout
+            addWall(0, 15, 12, 1); // Traseira do Escritório
+            addWall(-6, 10, 1, 10); // Esq Escritório
+            addWall(6, 10, 1, 10); // Dir Escritório
             
-            try {
-                // Codificar dados mínimos para manter o link curto
-                const jsonStr = JSON.stringify(state);
-                // Usamos btoa para uma base64 simples
-                const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+            addWall(-10, 0, 1, 40); // Corredor Oeste
+            addWall(10, 0, 1, 40); // Corredor Este
+            addWall(0, -25, 40, 1); // Fundo Palco
+
+            // Mesa
+            const desk = new THREE.Mesh(new THREE.BoxGeometry(4, 1, 1.5), new THREE.MeshStandardMaterial({color: 0x111}));
+            desk.position.set(0, 0.5, 13);
+            scene.add(desk);
+
+            // Palco
+            const stage = new THREE.Mesh(new THREE.BoxGeometry(10, 1, 5), new THREE.MeshStandardMaterial({color: 0x220000}));
+            stage.position.set(0, 0.5, -20);
+            scene.add(stage);
+        }
+
+        function spawnAnimatronics() {
+            // Criar Freddy, Bonnie, Chica
+            const createBot = (color, x, z, name) => {
+                const grp = new THREE.Group();
                 
-                const finalUrl = `${window.location.origin}${window.location.pathname}?p=${encoded}`;
-                document.getElementById('share-url-display').innerText = finalUrl;
+                // Corpo Simples mas Eficaz
+                const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.4 });
+                const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2.5, 1), mat);
+                body.position.y = 1.25;
                 
-                setTimeout(() => {
-                    document.body.classList.remove('is-loading');
-                    document.body.classList.add('modal-active');
-                }, 600);
-            } catch (e) {
-                alert("Erro ao criar link. Tenta reduzir o texto.");
-                document.body.classList.remove('is-loading');
-            }
-        };
+                const head = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.8), mat);
+                head.position.y = 2.8;
 
-        window.updateUI = () => {
-            const render = document.getElementById('render-target');
-            const list = document.getElementById('links-list');
-            
-            // Atualizar lista no editor
-            list.innerHTML = state.l.map((link, i) => `
-                <div class="group flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-indigo-200 transition-all">
-                    <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-[10px] font-bold shadow-sm">${i+1}</div>
-                    <div class="flex-1 overflow-hidden">
-                        <p class="text-xs font-black truncate">${link.t}</p>
-                        <p class="text-[9px] text-slate-400 truncate">${link.u}</p>
-                    </div>
-                    <button onclick="removeLink(${i})" class="text-slate-300 hover:text-red-500 transition-colors px-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>
-            `).join('');
+                // Olhos Brilhantes (Importante para ver no escuro)
+                const eyeGeo = new THREE.SphereGeometry(0.1);
+                const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const eyeL = new THREE.Mesh(eyeGeo, eyeMat); eyeL.position.set(-0.2, 2.9, 0.45);
+                const eyeR = new THREE.Mesh(eyeGeo, eyeMat); eyeR.position.set(0.2, 2.9, 0.45);
 
-            // Avatar dinâmico
-            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(state.n)}&background=6366f1&color=fff&bold=true`;
-            document.getElementById('edit-avatar').src = avatarUrl;
-
-            // Render Preview
-            const isDark = state.t.includes('slate-900') || state.t.includes('indigo-600') || state.t.includes('rose-500');
-            const textClass = isDark ? 'text-white' : 'text-slate-900';
-            const subTextClass = isDark ? 'text-white/60' : 'text-slate-500';
-            const btnClass = isDark ? 'bg-white/10 border-white/20 text-white hover:bg-white/20' : 'bg-white border-slate-200 text-slate-900 shadow-sm hover:border-indigo-200';
-
-            render.className = `w-full h-full ${state.t} p-8 flex flex-col items-center transition-all duration-700`;
-            render.innerHTML = `
-                <div class="mt-8 flex flex-col items-center w-full">
-                    <div class="w-24 h-24 rounded-[2.5rem] bg-white p-1 shadow-2xl mb-6 rotate-3">
-                        <img src="${avatarUrl}" class="w-full h-full object-cover rounded-[2.2rem]">
-                    </div>
-                    <h2 class="text-2xl font-black ${textClass} tracking-tight">@${state.n.toLowerCase().replace(/\s/g, '')}</h2>
-                    <p class="text-sm font-medium mt-3 ${subTextClass} text-center max-w-[240px] leading-relaxed">${state.b}</p>
-                </div>
+                grp.add(body, head, eyeL, eyeR);
+                grp.position.set(x, 0, z);
                 
-                <div class="w-full space-y-4 mt-12 max-w-xs">
-                    ${state.l.map(link => `
-                        <a href="${link.u}" target="_blank" class="block w-full py-5 px-6 border backdrop-blur-xl rounded-[1.5rem] text-center font-bold text-sm ${btnClass} transition-all active:scale-95">
-                            ${link.t}
-                        </a>
-                    `).join('')}
-                </div>
+                scene.add(grp);
+                animatronics.push({ mesh: grp, name: name, startPos: {x,z} });
+            };
 
-                <div class="mt-auto pt-12 pb-4">
-                    <p class="text-[10px] font-bold ${subTextClass} tracking-widest uppercase opacity-40 italic">LinkPlus.</p>
-                </div>
-            `;
-        };
+            createBot(0x5c3a21, 0, -20, "Freddy"); // Castanho
+            createBot(0x6a329f, 3, -20, "Bonnie"); // Roxo
+            createBot(0xdebd37, -3, -20, "Chica"); // Amarelo
+        }
 
-        const saveLocal = () => localStorage.setItem('lp_v6_data', JSON.stringify(state));
+        let hallwayLight;
+        function setupLights() {
+            // Luz Ambiente fraca
+            scene.add(new THREE.AmbientLight(0xffffff, 0.05));
 
-        window.copyShareUrl = () => {
-            const text = document.getElementById('share-url-display').innerText;
-            const temp = document.createElement('textarea');
-            temp.value = text;
-            document.body.appendChild(temp);
-            temp.select();
-            document.execCommand('copy');
-            document.body.removeChild(temp);
-            alert("Copiado! Agora cola no WhatsApp.");
-        };
+            // Luz do Escritório (Acolhedora)
+            const officeL = new THREE.PointLight(0xffaa77, 0.5, 10);
+            officeL.position.set(0, 4, 13);
+            scene.add(officeL);
 
-        window.closeShareModal = () => document.body.classList.remove('modal-active');
+            // Luz do Palco
+            const stageL = new THREE.SpotLight(0xffffff, 1, 20, 0.5, 0.5);
+            stageL.position.set(0, 8, -10);
+            stageL.target.position.set(0, 0, -20);
+            scene.add(stageL); scene.add(stageL.target);
 
-        const init = () => {
-            const params = new URLSearchParams(window.location.search);
-            const p = params.get('p');
+            // Luz Tática do Jogador (Lanterna para ver caminho)
+            const playerLight = new THREE.SpotLight(0xffffff, 0.8, 15, 0.6, 0.5);
+            playerLight.position.set(0,0,0);
+            camera.add(playerLight); // Prende à câmara
+            playerLight.target.position.set(0, 0, -1);
+            camera.add(playerLight.target);
+            scene.add(camera);
+
+            // Luz do Corredor (Ativada pelo botão)
+            hallwayLight = new THREE.PointLight(0xffffff, 0, 15);
+            hallwayLight.position.set(0, 3, 8);
+            scene.add(hallwayLight);
+        }
+
+        function setupInputs() {
+            // --- PC (Teclado) ---
+            document.addEventListener('keydown', e => {
+                if(e.key.toLowerCase() === 'w') keys.w = true;
+                if(e.key.toLowerCase() === 'a') keys.a = true;
+                if(e.key.toLowerCase() === 's') keys.s = true;
+                if(e.key.toLowerCase() === 'd') keys.d = true;
+            });
+            document.addEventListener('keyup', e => {
+                if(e.key.toLowerCase() === 'w') keys.w = false;
+                if(e.key.toLowerCase() === 'a') keys.a = false;
+                if(e.key.toLowerCase() === 's') keys.s = false;
+                if(e.key.toLowerCase() === 'd') keys.d = false;
+            });
+
+            // --- Mobile (Joystick) ---
+            const joyZone = document.getElementById('joystick-zone');
             
-            if (p) {
-                try {
-                    const decoded = JSON.parse(decodeURIComponent(escape(atob(p))));
-                    state = decoded;
-                    document.getElementById('editor-panel').style.display = 'none';
-                    document.getElementById('controls-ui').style.display = 'none';
-                    window.setDevice('desktop');
-                } catch (e) {
-                    console.error("Link inválido");
+            joyZone.addEventListener('touchstart', e => {
+                e.preventDefault();
+                joystick.active = true;
+                joystick.originX = e.touches[0].clientX;
+                joystick.originY = e.touches[0].clientY;
+            }, {passive: false});
+
+            window.addEventListener('touchmove', e => {
+                if(joystick.active) {
+                    const dx = e.touches[0].clientX - joystick.originX;
+                    const dy = e.touches[0].clientY - joystick.originY;
+                    const dist = Math.min(Math.sqrt(dx*dx + dy*dy), 40); // Limite raio 40px
+                    const angle = Math.atan2(dy, dx);
+                    
+                    joystick.x = (Math.cos(angle) * dist) / 40;
+                    joystick.y = (Math.sin(angle) * dist) / 40;
+
+                    elStick.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px)`;
                 }
-            } else {
-                const saved = localStorage.getItem('lp_v6_data');
-                if (saved) {
-                    state = JSON.parse(saved);
-                    document.getElementById('input-name').value = state.n;
-                    document.getElementById('input-bio').value = state.b;
+            }, {passive: false});
+
+            const endJoystick = () => {
+                joystick.active = false;
+                joystick.x = 0; joystick.y = 0;
+                elStick.style.transform = `translate(0px, 0px)`;
+            };
+            window.addEventListener('touchend', endJoystick);
+            window.addEventListener('touchcancel', endJoystick);
+
+            // --- Mobile (Look/Olhar) ---
+            const lookZone = document.getElementById('look-zone');
+            lookZone.addEventListener('touchstart', e => {
+                touchLook.active = true;
+                touchLook.prevX = e.touches[0].clientX;
+            });
+            lookZone.addEventListener('touchmove', e => {
+                if(touchLook.active) {
+                    const deltaX = e.touches[0].clientX - touchLook.prevX;
+                    player.rot -= deltaX * 0.005; // Sensibilidade
+                    touchLook.prevX = e.touches[0].clientX;
+                }
+            });
+            lookZone.addEventListener('touchend', () => touchLook.active = false);
+
+            // --- UI Botões ---
+            document.getElementById('btn-door').addEventListener('click', () => {
+                isDoorClosed = !isDoorClosed;
+                document.getElementById('btn-door').className = isDoorClosed ? 'big-btn btn-danger' : 'big-btn';
+            });
+
+            const btnLight = document.getElementById('btn-light');
+            const toggleLight = (state) => {
+                isLightOn = state;
+                btnLight.className = state ? 'big-btn btn-on' : 'big-btn';
+                hallwayLight.intensity = state ? 2 : 0;
+            };
+            btnLight.addEventListener('mousedown', () => toggleLight(true));
+            btnLight.addEventListener('mouseup', () => toggleLight(false));
+            btnLight.addEventListener('touchstart', (e) => { e.preventDefault(); toggleLight(true); });
+            btnLight.addEventListener('touchend', (e) => { e.preventDefault(); toggleLight(false); });
+
+            // Tablet
+            elTabletBtn.addEventListener('click', toggleTablet);
+        }
+
+        function toggleTablet() {
+            isTabletOpen = !isTabletOpen;
+            elMonitor.className = isTabletOpen ? 'open' : '';
+            elTabletBtn.innerText = isTabletOpen ? "FECHAR MONITOR" : "ABRIR MONITOR";
+        }
+
+        function generateCamButtons() {
+            const container = document.getElementById('cam-buttons');
+            CAMERAS.forEach((cam, idx) => {
+                const btn = document.createElement('div');
+                btn.className = 'cam-btn';
+                btn.innerText = `CAM ${idx+1}`;
+                if(idx === 0) btn.classList.add('active');
+                
+                btn.onclick = () => {
+                    currentCam = idx;
+                    document.getElementById('cam-name').innerText = cam.name;
+                    document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function gameLogic() {
+            if(!gameActive) return;
+
+            // Relógio
+            time++;
+            if(time % 60 === 0) { // Cada 60s reais = 1 hora
+                const h = 12 + (time/60);
+                document.getElementById('clock').innerText = `${h > 12 ? h-12 : h}:00 AM`;
+                if(h === 6) { alert("6 AM - SOBREVIVESTE!"); location.reload(); }
+            }
+
+            // Energia
+            let drain = 0.1;
+            if(isDoorClosed) drain += 0.5;
+            if(isLightOn) drain += 0.5;
+            if(isTabletOpen) drain += 0.3;
+
+            power -= drain;
+            if(power <= 0) {
+                power = 0;
+                isDoorClosed = false; isLightOn = false; isTabletOpen = false;
+                hallwayLight.intensity = 0;
+                elMonitor.className = '';
+                document.getElementById('btn-door').className = 'big-btn'; // Reset visual
+                // Fim da energia... Freddy vem aí
+            }
+            
+            document.getElementById('power-val').innerText = Math.floor(power);
+            document.getElementById('battery-fill').style.width = `${power}%`;
+            if(power < 20) document.getElementById('battery-fill').style.background = 'red';
+        }
+
+        function aiLogic() {
+            if(!gameActive || power <= 0) return;
+
+            animatronics.forEach(anim => {
+                if(Math.random() > 0.5) {
+                    // IA Simples: Aproximar do jogador
+                    anim.mesh.position.z += Math.random() * 4;
+                    anim.mesh.position.x += (Math.random() - 0.5) * 2;
+                    
+                    // Se chegou ao escritório
+                    if(anim.mesh.position.z > 8) {
+                        if(isDoorClosed) {
+                            // Bloqueado
+                            anim.mesh.position.z = anim.startPos.z; // Volta para o palco
+                        } else {
+                            gameOver();
+                        }
+                    }
+                }
+            });
+        }
+
+        function gameOver() {
+            gameActive = false;
+            document.getElementById('game-over').style.display = 'flex';
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+
+            if(!isTabletOpen && gameActive) {
+                // Rotação (Look)
+                camera.rotation.y = player.rot;
+
+                // Movimento
+                let moveX = 0, moveZ = 0;
+                
+                // Teclado
+                if(keys.w) moveZ = -1;
+                if(keys.s) moveZ = 1;
+                if(keys.a) moveX = -1;
+                if(keys.d) moveX = 1;
+
+                // Joystick (Soma ao teclado)
+                if(joystick.active) {
+                    moveX += joystick.x;
+                    moveZ += joystick.y;
+                }
+
+                if(moveX !== 0 || moveZ !== 0) {
+                    // Converter input local para coordenadas globais baseado na rotação da câmara
+                    const speed = player.speed * delta;
+                    
+                    const angle = camera.rotation.y;
+                    const dx = moveX * Math.cos(angle) + moveZ * Math.sin(angle);
+                    const dz = moveZ * Math.cos(angle) - moveX * Math.sin(angle);
+
+                    camera.position.x += dx * speed;
+                    camera.position.z += dz * speed;
+
+                    // Colisões Simples (Limites do Mapa)
+                    camera.position.x = Math.max(-13, Math.min(13, camera.position.x));
+                    camera.position.z = Math.max(-23, Math.min(13, camera.position.z));
                 }
             }
-            window.updateUI();
-        };
 
+            // Renderização
+            if(isTabletOpen) {
+                // Guardar pos original
+                const originalPos = camera.position.clone();
+                const originalRot = camera.rotation.clone();
+
+                // Mover para câmara de segurança
+                const camData = CAMERAS[currentCam];
+                camera.position.set(camData.pos[0], camData.pos[1], camData.pos[2]);
+                camera.lookAt(camData.look[0], camData.look[1], camData.look[2]);
+
+                renderer.render(scene, camera);
+
+                // Restaurar
+                camera.position.copy(originalPos);
+                camera.rotation.copy(originalRot);
+            } else {
+                renderer.render(scene, camera);
+            }
+        }
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Iniciar
         window.onload = init;
+
     </script>
 </body>
 </html>
